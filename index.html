@@ -51,6 +51,10 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .err { color: #ff9a8a; font-weight: 700; font-size: 14px; min-height: 18px; text-align: center; line-height: 1.4; }
 .okMsg { font-size: 13px; color: #7dffb0; margin: 6px 0 8px; min-height: 16px; }
 .okMsg.warn { color: #ffb37a; }
+.picks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pick { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; padding: 9px 12px; border-radius: 9px; border: 2px solid #4a3696; background: #2a1c60; color: #e6dcff; cursor: pointer; }
+.pick input { width: 18px; height: 18px; margin: 0; accent-color: #58d8c0; }
+.pick.on { border-color: #58d8c0; }
 .note { color: #c9b8ff; font-size: 13px; line-height: 1.5; }
 .foot { text-align: center; margin-top: 18px; }
 .foot a { color: #8a78c8; font-size: 13px; }
@@ -299,6 +303,9 @@ body.land #pStage { flex: 1; }
       <textarea id="hBank" class="inp ta" rows="10" style="margin-top:8px"></textarea>
       <div id="hBankMsg" class="okMsg"></div>
       <div class="btnRow" style="margin-bottom:10px"><input id="hQName" class="inp" maxlength="40" placeholder="Quiz name, e.g. Water cycle" style="flex:1;width:auto;min-width:0"><button type="button" id="hSave" class="ghostBtn">Save to bank</button></div>
+      <span class="lab">Mix in more saved quizzes</span>
+      <div class="note">Tick any saved quizzes to add their questions to this game, along with the questions above.</div>
+      <div id="hPicks" class="picks"></div>
       <div class="btnRow"><button type="button" id="hCopy" class="ghostBtn">Copy AI prompt</button><button type="button" id="hSample" class="ghostBtn">Load sample questions</button></div>
       <textarea id="hPromptBox" class="inp ta" readonly></textarea>
     </div>
@@ -915,7 +922,8 @@ function randomPw(){ return pick(['palm', 'coco', 'surf', 'wave', 'reef', 'mango
 
 function hostInit(){
   var saved = load(HOST_KEY) || {};
-  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', bank: saved.bank || SAMPLE_BANK };
+  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', bank: saved.bank || SAMPLE_BANK,
+    picks: Array.isArray(saved.picks) ? saved.picks : [] };
   $('hPw').value = hst.cfg.pw;
   $('hMins').value = hst.cfg.mins;
   $('hBank').value = hst.cfg.bank;
@@ -985,11 +993,21 @@ function setViewSeg(v){
   var b = $('hView').getElementsByTagName('button');
   for (var i = 0; i < b.length; i++) b[i].className = b[i].getAttribute('data-v') === v ? 'on' : '';
 }
+/* questions for the game: the box above plus any ticked saved quizzes, without repeats */
 function checkBank(){
-  var r = parseQuestions($('hBank').value), el = $('hBankMsg');
+  var r = parseQuestions($('hBank').value), el = $('hBankMsg'), own = r.questions.length;
+  var list = savedQuizzes(), seen = {}, mixed = 0, extra = 0, i, j;
+  for (i = 0; i < r.questions.length; i++) seen[r.questions[i].q] = 1;
+  for (i = 0; i < list.length; i++){
+    if (hst.cfg.picks.indexOf(list[i].name) < 0) continue;
+    var qs = parseQuestions(list[i].text).questions;
+    mixed++;
+    for (j = 0; j < qs.length; j++) if (!seen[qs[j].q]){ seen[qs[j].q] = 1; r.questions.push(qs[j]); extra++; }
+  }
   el.className = 'okMsg' + (r.problems.length ? ' warn' : '');
-  el.textContent = !$('hBank').value.replace(/\s/g, '') ? 'Paste or type questions above.' :
-    r.questions.length + ' questions ready.' + (r.problems.length ? ' Could not read ' + r.problems.length + ': ' + r.problems.slice(0, 2).join(' | ') : '');
+  el.textContent = (!$('hBank').value.replace(/\s/g, '') && !mixed) ? 'Paste or type questions above.' :
+    r.questions.length + ' questions ready' + (mixed ? ' (' + own + ' above + ' + extra + ' from ' + mixed + ' saved ' + (mixed === 1 ? 'quiz' : 'quizzes') + ').' : '.') +
+    (r.problems.length ? ' Could not read ' + r.problems.length + ': ' + r.problems.slice(0, 2).join(' | ') : '');
   return r;
 }
 /* ---------- saved quiz bank (kept in this browser) ---------- */
@@ -1009,6 +1027,25 @@ function fillSaved(sel){
     h += '<option value="' + i + '"' + (list[i].name === sel ? ' selected' : '') + '>' + esc(list[i].name) + ' (' + list[i].n + ' questions)</option>';
   }
   $('hSaved').innerHTML = h;
+  var names = list.map(function(e){ return e.name; }), p = '';
+  hst.cfg.picks = hst.cfg.picks.filter(function(n){ return names.indexOf(n) >= 0; });
+  for (i = 0; i < list.length; i++){
+    var on = hst.cfg.picks.indexOf(list[i].name) >= 0;
+    p += '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox" data-n="' + esc(list[i].name) + '"' + (on ? ' checked' : '') + '>' +
+      esc(list[i].name) + ' (' + list[i].n + ')</label>';
+  }
+  $('hPicks').innerHTML = p || '<div class="note">Saved quizzes will show up here.</div>';
+  var boxes = $('hPicks').getElementsByTagName('input');
+  for (i = 0; i < boxes.length; i++){
+    boxes[i].onchange = function(){
+      var n = this.getAttribute('data-n'), k = hst.cfg.picks.indexOf(n);
+      if (this.checked && k < 0) hst.cfg.picks.push(n);
+      if (!this.checked && k >= 0) hst.cfg.picks.splice(k, 1);
+      this.parentNode.className = 'pick' + (this.checked ? ' on' : '');
+      checkBank();
+    };
+  }
+  checkBank();
 }
 function saveQuiz(name, loud){
   var text = $('hBank').value, r = parseQuestions(text), list = savedQuizzes(), i;
@@ -1033,7 +1070,11 @@ function saveQuiz(name, loud){
     while (list.some(function(e){ return e.name === name; })) name = base + ' ' + k++;
   }
   var entry = { name: name, text: text, n: r.questions.length };
-  if (editing) i = ei;
+  if (editing){
+    i = ei;
+    var pk = hst.cfg.picks.indexOf(list[ei].name);
+    if (pk >= 0) hst.cfg.picks[pk] = name;
+  }
   else for (i = 0; i < list.length; i++) if (list[i].name === name) break;
   list[i] = entry;
   store(BANKS_KEY, list);
