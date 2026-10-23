@@ -90,6 +90,8 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   padding: calc(env(safe-area-inset-top) + 6px) 10px 7px; font-size: 9px; color: #f8d878; background: #120a30; border-bottom: 3px solid #000; }
 #pBalls { display: flex; gap: 3px; min-width: 62px; }
 .bi { width: 15px; height: 15px; border-radius: 50%; background: #f87800; border: 2px solid #000; }
+.bi.k1 { background: conic-gradient(#e83020 0 25%, #fcfcfc 0 50%, #2060e0 0 75%, #f8d800 0); }
+.bi.k2 { background: #f8d030; }
 #pStage { flex-shrink: 0; display: flex; justify-content: center; align-items: center; background: #000; }
 #pCanvas { display: block; image-rendering: pixelated; }
 #pad { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px calc(env(safe-area-inset-bottom) + 14px);
@@ -284,16 +286,18 @@ body.land #pStage { flex: 1; }
       <input id="hPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20">
       <div class="row2">
         <div><label class="lab" for="hMins">Game length (minutes)</label><input id="hMins" class="inp" type="number" min="1" max="60"></div>
-        <div><label class="lab" for="hPer">Class baskets before the hoop moves</label><input id="hPer" class="inp" type="number" min="1" max="50"></div>
       </div>
       <span class="lab">Main screen shows</span>
       <div class="seg" id="hView"><button type="button" data-v="all">EVERYONE</button><button type="button" data-v="top">TOP 5</button><button type="button" data-v="rand">RANDOM 5</button></div>
     </div>
     <div class="card">
-      <label class="lab first" for="hBank">Review questions</label>
+      <label class="lab first" for="hSaved">Saved quiz bank</label>
+      <div class="btnRow"><select id="hSaved" class="inp" style="flex:1;width:auto;min-width:0"></select><button type="button" id="hDel" class="ghostBtn">Delete</button></div>
+      <label class="lab" for="hBank">Review questions</label>
       <div class="note">Same format as Checks for Understanding: Question: ... on one line, then A: x, B: y, C: z, D: w, Answer: B</div>
       <textarea id="hBank" class="inp ta" rows="10" style="margin-top:8px"></textarea>
       <div id="hBankMsg" class="okMsg"></div>
+      <div class="btnRow" style="margin-bottom:10px"><input id="hQName" class="inp" maxlength="40" placeholder="Quiz name, e.g. Water cycle" style="flex:1;width:auto;min-width:0"><button type="button" id="hSave" class="ghostBtn">Save to bank</button></div>
       <div class="btnRow"><button type="button" id="hCopy" class="ghostBtn">Copy AI prompt</button><button type="button" id="hSample" class="ghostBtn">Load sample questions</button></div>
       <textarea id="hPromptBox" class="inp ta" readonly></textarea>
     </div>
@@ -360,7 +364,7 @@ var W = 256, H = 144, FLOOR = 132;
 var BR = 4, BALL_G = 230, ANG = 60 * Math.PI / 180, RIM_W = 19;
 var RUN = 80, GRAV = 520, JUMP_V = 230;
 var PREFIX = 'mrt-palmhoops-';
-var HOST_KEY = 'palmHoopsHost_v1', ME_KEY = 'palmHoopsMe_v1';
+var HOST_KEY = 'palmHoopsHost_v1', ME_KEY = 'palmHoopsMe_v1', BANKS_KEY = 'palmHoopsBanks_v1';
 var FLOOR_PLAT = { x1: 0, x2: W, y: FLOOR, floor: true, id: 'floor' };
 var PLATFORM = { x1: 100, x2: 156, y: 90, id: 'plat' };
 var PLATS = [FLOOR_PLAT, PLATFORM];
@@ -605,22 +609,32 @@ var BIRDS = (function(){
   }
   return out;
 })();
-var BALL_IMG = (function(){
+/* three ball styles: make a basket and your next ball switches to the next style */
+var BALL_STYLES = [
+  { n: 'CLASSIC', base: '#f07818', edge: '#b04808', seam: '#3a1a08' },
+  { n: 'BEACH BALL', wedges: ['#e83020', '#fcfcfc', '#2060e0', '#f8d800'], edge: '#000' },
+  { n: 'GOLD', base: '#f8d030', edge: '#b08008', seam: '#5a3a00' }
+];
+var BALL_IMGS = BALL_STYLES.map(function(st){
   var c = document.createElement('canvas'); c.width = 9; c.height = 9;
   var x = c.getContext('2d');
   for (var j = 0; j < 9; j++){
     for (var i = 0; i < 9; i++){
-      var dx = i - 4, dy = j - 4, d = dx * dx + dy * dy;
+      var dx = i - 4, dy = j - 4, d = dx * dx + dy * dy, col;
       if (d > 20) continue;
-      var col = '#f07818';
-      if (i === 4 || j === 4 || (Math.abs(Math.abs(dx) - 3) < 0.5 && Math.abs(dy) < 3)) col = '#3a1a08';
-      else if (d > 13) col = '#b04808';
+      if (st.wedges){
+        col = d <= 1 ? '#fcfcfc' : st.wedges[Math.floor((Math.atan2(dy, dx) + Math.PI) / (Math.PI / 2)) % 4];
+      } else {
+        col = st.base;
+        if (i === 4 || j === 4 || (Math.abs(Math.abs(dx) - 3) < 0.5 && Math.abs(dy) < 3)) col = st.seam;
+        else if (d > 13) col = st.edge;
+      }
       x.fillStyle = col; x.fillRect(i, j, 1, 1);
     }
   }
   x.fillStyle = 'rgba(255,255,255,.55)'; x.fillRect(2, 2, 2, 1);
   return c;
-})();
+});
 
 var AV_CACHE = {};
 function avatarImg(look, legs, arms, face){
@@ -760,10 +774,10 @@ function drawPalm(c, g, active, t, netT){
   c.fillRect(Math.round(rl), yy, RIM_W + 1, 2);
 }
 
-function drawBall(c, x, y, rot){
+function drawBall(c, x, y, rot, k){
   c.save(); c.translate(Math.round(x), Math.round(y));
   if (rot) c.rotate(Math.round(rot / (Math.PI / 2)) * Math.PI / 2);
-  c.drawImage(BALL_IMG, -4, -4);
+  c.drawImage(BALL_IMGS[k] || BALL_IMGS[0], -4, -4);
   c.restore();
 }
 function drawMeter(c, x, y, p){
@@ -835,16 +849,21 @@ function vText(v, s, gx, gy, col, size){
   gameXf(v);
 }
 function nameSize(v){ return Math.max(8, Math.round(v.S * 2.6)); }
-function drawScene(v, t, active, netT){
+/* every hoop is live; netH is the hoop whose net is still wobbling from a basket */
+function drawScene(v, t, netH, netT){
   gameXf(v);
   var c = v.c;
   c.drawImage(BG, 0, 0);
   drawPlatform(c);
-  for (var i = 0; i < 3; i++) drawPalm(c, hoopGeo(i, t), i === active, t, i === active ? netT : 0);
+  for (var i = 0; i < 3; i++) drawPalm(c, hoopGeo(i, t), true, t, i === netH ? netT : 0);
 }
-function drawActiveLabel(v, t, active){
-  var g = hoopGeo(active, t), col = Math.floor(t * 3) % 2 ? '#f8d800' : '#fcfcfc';
-  vText(v, HOOPS[active].pts + ' PTS', (g.rl + g.rr) / 2, g.y + 19, col, nameSize(v));
+function hoopGeos(t){ return [hoopGeo(0, t), hoopGeo(1, t), hoopGeo(2, t)]; }
+function drawHoopLabels(v, t){
+  var col = Math.floor(t * 3) % 2 ? '#f8d800' : '#fcfcfc';
+  for (var i = 0; i < 3; i++){
+    var g = hoopGeo(i, t);
+    vText(v, HOOPS[i].pts + ' PTS', (g.rl + g.rr) / 2, g.y + 19, col, nameSize(v));
+  }
 }
 function drawPops(v, pops){
   for (var i = 0; i < pops.length; i++){
@@ -885,7 +904,7 @@ function stepPoops(poops, splats, dt, hitFn){
    ============================ HOST ============================
 ============================================================ */
 var hst = {
-  peer: null, peerId: '', players: {}, phase: 'setup', hoop: 0, since: 0, endAt: 0, startPerf: performance.now(),
+  peer: null, peerId: '', players: {}, phase: 'setup', netH: -1, endAt: 0, startPerf: performance.now(),
   bank: [], cfg: null, birds: [], poops: [], splats: [], parts: [], pops: [], netT: 0, birdT: 3,
   randPick: [], randT: 0, lastCast: 0, lastBoard: 0, lastSec: -1, view: null, endArm: 0, report: null, repFrom: 'scrHOver'
 };
@@ -895,10 +914,9 @@ function randomPw(){ return pick(['palm', 'coco', 'surf', 'wave', 'reef', 'mango
 
 function hostInit(){
   var saved = load(HOST_KEY) || {};
-  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, per: saved.per || 5, view: saved.view || 'top', bank: saved.bank || SAMPLE_BANK };
+  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', bank: saved.bank || SAMPLE_BANK };
   $('hPw').value = hst.cfg.pw;
   $('hMins').value = hst.cfg.mins;
-  $('hPer').value = hst.cfg.per;
   $('hBank').value = hst.cfg.bank;
   setViewSeg(hst.cfg.view);
   var segBtns = $('hView').getElementsByTagName('button');
@@ -909,6 +927,18 @@ function hostInit(){
   checkBank();
   $('hSample').onclick = function(){ $('hBank').value = SAMPLE_BANK; checkBank(); };
   $('hCopy').onclick = copyPrompt;
+  $('hSave').onclick = function(){ saveQuiz($('hQName').value, true); };
+  $('hSaved').onchange = function(){
+    var b = savedQuizzes()[this.value];
+    if (!b) return;
+    $('hBank').value = b.text; $('hQName').value = b.name; checkBank();
+  };
+  $('hDel').onclick = function(){
+    var list = savedQuizzes(), b = list[$('hSaved').value];
+    if (!b || !confirm('Delete the saved quiz "' + b.name + '"?')) return;
+    list.splice($('hSaved').value, 1); store(BANKS_KEY, list); fillSaved('');
+  };
+  fillSaved('');
   $('hOpen').onclick = hostOpen;
   $('hBack').onclick = function(){ hst.phase = 'setup'; showScreen('scrHSetup'); };
   $('hStart').onclick = hostStartGame;
@@ -952,6 +982,37 @@ function checkBank(){
     r.questions.length + ' questions ready.' + (r.problems.length ? ' Could not read ' + r.problems.length + ': ' + r.problems.slice(0, 2).join(' | ') : '');
   return r;
 }
+/* ---------- saved quiz bank (kept in this browser) ---------- */
+function savedQuizzes(){ var l = load(BANKS_KEY); return Array.isArray(l) ? l : []; }
+function fillSaved(sel){
+  var list = savedQuizzes(), h = '<option value="">' + (list.length ? 'Choose a saved quiz (' + list.length + ')' : 'No saved quizzes yet') + '</option>';
+  for (var i = 0; i < list.length; i++){
+    h += '<option value="' + i + '"' + (list[i].name === sel ? ' selected' : '') + '>' + esc(list[i].name) + ' (' + list[i].n + ' questions)</option>';
+  }
+  $('hSaved').innerHTML = h;
+}
+function saveQuiz(name, loud){
+  var text = $('hBank').value, r = parseQuestions(text), list = savedQuizzes(), i;
+  if (!r.questions.length){ if (loud) $('hBankMsg').textContent = 'Add some questions before saving.'; return; }
+  name = String(name || '').replace(/^\s+|\s+$/g, '').slice(0, 40);
+  if (!loud){
+    // automatic save when a game opens: never overwrite a different quiz that has the same name
+    for (i = 0; i < list.length; i++) if (list[i].name === name && list[i].text !== text) name = '';
+  }
+  if (!name){
+    for (i = 0; i < list.length; i++) if (list[i].text === text) return;
+    var base = r.questions[0].q.slice(0, 30) + (r.questions[0].q.length > 30 ? '...' : ''), k = 2;
+    name = base;
+    while (list.some(function(e){ return e.name === name; })) name = base + ' ' + k++;
+  }
+  var entry = { name: name, text: text, n: r.questions.length };
+  for (i = 0; i < list.length; i++) if (list[i].name === name) break;
+  list[i] = entry;
+  store(BANKS_KEY, list);
+  $('hQName').value = name;
+  fillSaved(name);
+  if (loud){ var btn = $('hSave'); btn.textContent = 'Saved!'; setTimeout(function(){ btn.textContent = 'Save to bank'; }, 1500); }
+}
 function copyPrompt(){
   var btn = $('hCopy');
   function fallback(){
@@ -969,14 +1030,14 @@ function copyPrompt(){
 function hostOpen(){
   var pw = cleanPw($('hPw').value);
   var mins = clamp(parseInt($('hMins').value, 10) || 10, 1, 60);
-  var per = clamp(parseInt($('hPer').value, 10) || 5, 1, 50);
   var r = checkBank();
   $('hPw').value = pw;
   if (pw.length < 3){ $('hErr').textContent = 'Make the password at least 3 letters or numbers.'; return; }
   if (r.questions.length < 3){ $('hErr').textContent = 'Add at least 3 questions in the format shown.'; return; }
-  hst.cfg.pw = pw; hst.cfg.mins = mins; hst.cfg.per = per; hst.cfg.bank = $('hBank').value;
+  hst.cfg.pw = pw; hst.cfg.mins = mins; hst.cfg.bank = $('hBank').value;
   hst.bank = r.questions;
   store(HOST_KEY, hst.cfg);
+  saveQuiz($('hQName').value, false);
   $('hErr').textContent = 'Opening the game...';
   ac();
   var wantId = PREFIX + pw;
@@ -1091,7 +1152,7 @@ function ranked(){
 function statusFor(p, arr, i){
   var rk = i + 1;
   while (rk > 1 && arr[rk - 2].score === p.score) rk--;
-  return { t: 'g', ph: hst.phase, h: hst.hoop, l: Math.ceil(hostLeft()), nx: hst.cfg.per - hst.since, sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
+  return { t: 'g', ph: hst.phase, l: Math.ceil(hostLeft()), sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
 }
 function hostBroadcast(){
   var arr = ranked();
@@ -1123,22 +1184,15 @@ function hostData(conn, d){
     p.st = d;
     if (d.bx == null){ p.bxr = null; } else if (p.bxr == null){ p.bxr = d.bx; p.byr = d.by; }
   } else if (d.t === 'bk'){
-    if (hst.phase === 'play' && d.h === hst.hoop){
-      var pts = HOOPS[hst.hoop].pts, g = hoopGeo(hst.hoop, gameTimeMs() / 1000);
-      p.score += pts; hst.since++;
-      hst.netT = 0.5;
-      addPop(hst.pops, (g.rl + g.rr) / 2, g.y - 10, '+' + pts + ' ' + p.name, '#fcfc78');
+    var hi = d.h | 0;
+    if (hst.phase === 'play' && hi >= 0 && hi < 3){
+      var pts = HOOPS[hi].pts + (d.j ? 1 : 0), g = hoopGeo(hi, gameTimeMs() / 1000);
+      p.score += pts;
+      hst.netH = hi; hst.netT = 0.5;
+      addPop(hst.pops, (g.rl + g.rr) / 2, g.y - 10, '+' + pts + ' ' + p.name + (d.j ? ' JUMP SHOT' : ''), '#fcfc78');
       burst(hst.parts, (g.rl + g.rr) / 2, g.y + 4, 16, ['#f8d800', '#fcfcfc', SHIRTS[p.look.shirt]], 60, 40, 0.8);
       sfx.swish();
-      hostSend(p, { t: 'ok', p: pts });
-      if (hst.since >= hst.cfg.per){
-        hst.since = 0;
-        hst.hoop = (hst.hoop + 1) % 3;
-        var ng = hoopGeo(hst.hoop, gameTimeMs() / 1000);
-        addPop(hst.pops, W / 2, H / 2 - 10, 'HOOP MOVES: ' + HOOPS[hst.hoop].name, '#58f8d0', true);
-        burst(hst.parts, (ng.rl + ng.rr) / 2, ng.y, 20, ['#58f8d0', '#fcfcfc'], 70);
-        sfx.bonus();
-      }
+      hostSend(p, { t: 'ok', p: pts, j: d.j ? 1 : 0 });
       hostBroadcast();
     } else hostSend(p, { t: 'ok', p: 0 });
   } else if (d.t === 'ans'){
@@ -1152,7 +1206,7 @@ function hostStartGame(){
   var real = 0;
   for (var rk in hst.players){ if (!hst.players[rk].local && hst.players[rk].on) real++; }
   if (!real) addTeacher(); else removeTeacher();
-  hst.phase = 'play'; hst.hoop = 0; hst.since = 0;
+  hst.phase = 'play'; hst.netH = -1; hst.netT = 0;
   hst.startPerf = performance.now(); hst.endAt = Date.now() + hst.cfg.mins * 60000;
   hst.pops = []; hst.parts = []; hst.birds = []; hst.poops = []; hst.splats = []; hst.randT = 0; hst.lastSec = -1;
   for (var k in hst.players){
@@ -1252,8 +1306,7 @@ function hostBoard(){
   var left = hostLeft();
   $('hTimer').textContent = fmt(left);
   $('hTimer').className = 'pix' + (left <= 30 ? ' low' : '');
-  var togo = hst.cfg.per - hst.since;
-  $('hHoop').innerHTML = HOOPS[hst.hoop].name + ' HOOP ' + HOOPS[hst.hoop].pts + ' PTS<br>moves in ' + togo + (togo === 1 ? ' basket' : ' baskets');
+  $('hHoop').innerHTML = 'ANY HOOP: 2 / 3 / 5 PTS<br>JUMP SHOT +1';
   hst.lastBoard = performance.now();
 }
 function hostUpdate(dt, now){
@@ -1287,7 +1340,7 @@ function hostUpdate(dt, now){
 }
 function hostDraw(now){
   var v = hst.view, c = v.c, t = gameTimeMs() / 1000, i;
-  drawScene(v, t, hst.hoop, hst.netT);
+  drawScene(v, t, hst.netH, hst.netT);
   drawBirds(c, hst.birds);
   drawPoops(c, hst.poops, hst.splats);
   var vis = visiblePlayers();
@@ -1296,13 +1349,13 @@ function hostDraw(now){
     if (s.q){ drawAvatar(c, p.look, p.rx, p.ry, 1, 0, false, 0, 0.35); continue; }
     var spin = s.s > 0 ? -s.f * (1 - s.s / 30) * Math.PI * 2 : 0;
     if (!(s.iv && Math.floor(t * 14) % 2)) drawAvatar(c, p.look, p.rx, p.ry, s.f, s.w, s.hb === 2, spin);
-    if (s.hb === 1) drawBall(c, p.rx + s.f * 6, p.ry - BR - Math.abs(Math.sin(t * 7 + p.seed)) * 8, 0);
-    else if (s.hb === 2) drawBall(c, p.rx + s.f * 2, p.ry - 17, 0);
+    if (s.hb === 1) drawBall(c, p.rx + s.f * 6, p.ry - BR - Math.abs(Math.sin(t * 7 + p.seed)) * 8, 0, s.k);
+    else if (s.hb === 2) drawBall(c, p.rx + s.f * 2, p.ry - 17, 0, s.k);
     if (s.m >= 0) drawMeter(c, p.rx, p.ry, s.m / 100);
-    if (p.bxr != null && s.bx != null) drawBall(c, p.bxr, p.byr, t * 6);
+    if (p.bxr != null && s.bx != null) drawBall(c, p.bxr, p.byr, t * 6, s.fk);
   }
   drawParts(c, hst.parts);
-  drawActiveLabel(v, t, hst.hoop);
+  drawHoopLabels(v, t);
   var ns = nameSize(v);
   for (i = 0; i < vis.length; i++){
     var q = vis[i];
@@ -1329,10 +1382,10 @@ function hostFrame(dt, now){
 var me = null;
 var stu = {
   peer: null, conn: null, joined: false, pw: '', mode: 'join', lastMode: 'wait', connTimer: null, retryT: null,
-  G: { ph: 'lobby', h: 0, l: 0, nx: 0, sc: 0, rk: 0, n: 0 }, lAt: 0, syncOff: 0,
-  bank: [], deck: [], lastQ: -1, correct: 0, balls: 0,
+  G: { ph: 'lobby', l: 0, sc: 0, rk: 0, n: 0 }, lAt: 0, syncOff: 0,
+  bank: [], deck: [], lastQ: -1, correct: 0, balls: 0, ballK: 0,
   hero: null, flight: null, meter: null, birds: [], poops: [], splats: [], parts: [], pops: [],
-  birdT: 5, outT: 0, outShown: false, rimSnd: 0, netT: 0, lastSend: 0, lastHud: 0,
+  birdT: 5, outT: 0, outShown: false, rimSnd: 0, netT: 0, netH: -1, lastSend: 0, lastHud: 0,
   input: { l: false, r: false, u: false, d: false, a: false, b: false }, view: null
 };
 
@@ -1473,10 +1526,7 @@ function stuData(d){
   } else if (d.t === 'g'){
     applyG(d);
   } else if (d.t === 'ok'){
-    if (stu.hero && !stu.local){
-      if (d.p > 0) addPop(stu.pops, stu.hero.x, stu.hero.y - 28, '+' + d.p + ' PTS', '#fcfc78');
-      else addPop(stu.pops, stu.hero.x, stu.hero.y - 28, 'HOOP MOVED', '#f8a0a0');
-    }
+    if (stu.hero && !stu.local && d.p > 0) addPop(stu.pops, stu.hero.x, stu.hero.y - 28, '+' + d.p + ' PTS', '#fcfc78');
   } else if (d.t === 'over'){
     showOver(d);
   } else if (d.t === 'lobby'){
@@ -1485,16 +1535,14 @@ function stuData(d){
 }
 function applyG(g){
   if (!g) return;
-  var prevHoop = stu.G.h;
   stu.G = g; stu.lAt = performance.now();
   if (typeof g.gt === 'number') stu.syncOff = g.gt - performance.now();
-  if (g.h !== prevHoop && stu.mode === 'play' && stu.hero && !stu.local) addPop(stu.pops, W / 2, 30, 'NEW HOOP: ' + HOOPS[g.h].name, '#58f8d0', true);
   stuHud(true);
 }
 function syncT(){ return (performance.now() + stu.syncOff) / 1000; }
 function timeLeft(){ return Math.max(0, stu.G.l - (performance.now() - stu.lAt) / 1000); }
 function resetRun(){
-  stu.balls = 0; stu.correct = 0; stu.deck = []; stu.lastQ = -1;
+  stu.balls = 0; stu.ballK = 0; stu.correct = 0; stu.deck = []; stu.lastQ = -1;
   stu.hero = null; stu.flight = null; stu.meter = null;
   stu.birds = []; stu.poops = []; stu.splats = []; stu.parts = []; stu.pops = [];
 }
@@ -1673,16 +1721,13 @@ function pressShoot(){
   if (!p) return;
   if (stu.flight){ addPop(stu.pops, p.x, p.y - 22, 'WAIT FOR IT', '#fcfcfc'); return; }
   if (stu.balls <= 0) return;
-  var g = hoopGeo(stu.G.h, syncT()), dx = (g.rl + g.rr) / 2 - p.x;
-  if (Math.abs(dx) < 14){ addPop(stu.pops, p.x, p.y - 22, 'TOO CLOSE', '#fcfcfc'); return; }
   stu.meter = { p: 0, dir: 1 };
-  p.face = dx > 0 ? 1 : -1;
 }
 function releaseShoot(){
   if (!stu.meter || !stu.hero || stu.balls <= 0 || stu.flight) { stu.meter = null; return; }
   var p = stu.hero, v = 165 + stu.meter.p * 105;
   stu.flight = { x: p.x + p.face * 2, y: p.y - 17, vx: p.face * v * Math.cos(ANG), vy: -v * Math.sin(ANG), rot: 0,
-    scored: false, live: true, age: 0, rest: 0 };
+    scored: false, live: true, age: 0, rest: 0, jump: !p.ground, k: stu.ballK };
   stu.balls--; stu.meter = null;
   sfx.dribble();
   stuHud(true);
@@ -1702,31 +1747,37 @@ function birdBonk(b, bd){
     tone(900, 0.3, 'triangle', 0.04, -600);
   }
 }
-function stepBall(b, h, g){
-  var py = b.y, i;
+function stepBall(b, h, gs){
+  var py = b.y, i, n, g;
   b.vy += BALL_G * h; b.x += b.vx * h; b.y += b.vy * h; b.rot += b.vx * h / BR;
-  if (!b.scored && py < g.y && b.y >= g.y && b.x > g.rl && b.x < g.rr){
+  for (n = 0; n < gs.length; n++){
+    g = gs[n];
+    if (b.scored || !(py < g.y && b.y >= g.y && b.x > g.rl && b.x < g.rr)) continue;
     b.scored = true; b.vx *= 0.3;
-    stu.balls++; stu.netT = 0.5;
-    addPop(stu.pops, (g.rl + g.rr) / 2, g.y - 12, pick(['SWISH!', 'BUCKET!', 'NOTHIN NET!']) + ' +1 BALL', '#58f878');
+    stu.balls++; stu.netH = g.i; stu.netT = 0.5;
+    stu.ballK = (stu.ballK + 1) % BALL_STYLES.length;
+    addPop(stu.pops, (g.rl + g.rr) / 2, g.y - 12, (b.jump ? 'JUMP SHOT!' : pick(['SWISH!', 'BUCKET!', 'NOTHIN NET!'])) + ' +1 BALL', '#58f878');
     burst(stu.parts, (g.rl + g.rr) / 2, g.y + 4, 14, ['#f8d800', '#fcfcfc', '#58f878'], 60, 40, 0.8);
     sfx.swish();
-    stuSendMsg({ t: 'bk', h: g.i });
+    stuSendMsg({ t: 'bk', h: g.i, j: b.jump ? 1 : 0 });
     stuHud(true);
   }
   if (b.live) for (i = 0; i < stu.birds.length; i++) birdBonk(b, stu.birds[i]);
-  var posts = [g.rl, g.rr];
-  for (i = 0; i < 2; i++){
-    var px = posts[i], dx = b.x - px, dy = b.y - g.y, d = hyp(dx, dy);
-    if (d < BR + 1 && d > 0){
-      var nx = dx / d, ny = dy / d, vn = b.vx * nx + b.vy * ny;
-      b.x = px + nx * (BR + 1); b.y = g.y + ny * (BR + 1);
-      if (vn < 0){ b.vx -= 1.55 * vn * nx; b.vy -= 1.55 * vn * ny; if (stu.rimSnd <= 0){ sfx.rim(); stu.rimSnd = 0.15; } }
+  for (n = 0; n < gs.length; n++){
+    g = gs[n];
+    var posts = [g.rl, g.rr];
+    for (i = 0; i < 2; i++){
+      var px = posts[i], dx = b.x - px, dy = b.y - g.y, d = hyp(dx, dy);
+      if (d < BR + 1 && d > 0){
+        var nx = dx / d, ny = dy / d, vn = b.vx * nx + b.vy * ny;
+        b.x = px + nx * (BR + 1); b.y = g.y + ny * (BR + 1);
+        if (vn < 0){ b.vx -= 1.55 * vn * nx; b.vy -= 1.55 * vn * ny; if (stu.rimSnd <= 0){ sfx.rim(); stu.rimSnd = 0.15; } }
+      }
     }
-  }
-  if (b.y > g.y - 20 - BR && b.y < g.y + 6 + BR){
-    if (g.side > 0 && b.x + BR > g.bx && b.x < g.bx + 2 && b.vx > 0){ b.x = g.bx - BR; b.vx = -b.vx * 0.55; sfx.board(); }
-    if (g.side < 0 && b.x - BR < g.bx + 3 && b.x > g.bx + 1 && b.vx < 0){ b.x = g.bx + 3 + BR; b.vx = -b.vx * 0.55; sfx.board(); }
+    if (b.y > g.y - 20 - BR && b.y < g.y + 6 + BR){
+      if (g.side > 0 && b.x + BR > g.bx && b.x < g.bx + 2 && b.vx > 0){ b.x = g.bx - BR; b.vx = -b.vx * 0.55; sfx.board(); }
+      if (g.side < 0 && b.x - BR < g.bx + 3 && b.x > g.bx + 1 && b.vx < 0){ b.x = g.bx + 3 + BR; b.vx = -b.vx * 0.55; sfx.board(); }
+    }
   }
   if (b.x < BR){ b.x = BR; b.vx = Math.abs(b.vx) * 0.5; }
   if (b.x > W - BR){ b.x = W - BR; b.vx = -Math.abs(b.vx) * 0.5; }
@@ -1744,10 +1795,11 @@ function stepBall(b, h, g){
   b.rest = (b.vy === 0 && b.vx === 0) ? b.rest + h : 0;
 }
 function stuUpdate(dt){
-  var p = stu.hero, t = syncT(), g = hoopGeo(stu.G.h, t), i;
+  var p = stu.hero, t = syncT(), gs = hoopGeos(t), i;
   stu.rimSnd -= dt; stu.netT = Math.max(0, stu.netT - dt);
   var holding = stu.balls > 0 && !stu.flight;
   var mv = (stu.meter && p.ground) ? 0 : (stu.input.l ? -1 : (stu.input.r ? 1 : 0));
+  if (stu.meter && p.ground && (stu.input.l || stu.input.r)) p.face = stu.input.l ? -1 : 1;
   p.jumpHeld = stu.input.a || stu.input.u;
   stepHero(p, dt, mv);
   if (stu.meter){
@@ -1765,7 +1817,7 @@ function stuUpdate(dt){
   if (stu.flight){
     var b = stu.flight;
     b.age += dt;
-    for (i = 0; i < 3; i++) stepBall(b, dt / 3, g);
+    for (i = 0; i < 3; i++) stepBall(b, dt / 3, gs);
     if (b.rest > 0.25 || b.age > 6 || (b.scored && !b.live)){
       burst(stu.parts, b.x, b.y, 6, ['#fcfcfc', '#f07818'], 30, 0, 0.3);
       stu.flight = null;
@@ -1821,9 +1873,9 @@ function stuUpdate(dt){
 }
 function stuDraw(){
   var v = stu.view, t = syncT();
-  drawScene(v, t, stu.G.h, stu.netT);
+  drawScene(v, t, stu.netH, stu.netT);
   drawLocalLayer(v, t);
-  drawActiveLabel(v, t, stu.G.h);
+  drawHoopLabels(v, t);
   drawPops(v, stu.pops);
 }
 function drawLocalLayer(v, t){
@@ -1835,11 +1887,11 @@ function drawLocalLayer(v, t){
   var spin = p.flipT > 0 ? -p.face * (1 - p.flipT / 0.3) * Math.PI * 2 : 0;
   if (!(p.inv > 0 && Math.floor(p.inv * 14) % 2)) drawAvatar(c, me.look, p.x, p.y, p.face, legFrame(!p.ground, p.vx, p.anim), over, spin);
   if (holding){
-    if (over) drawBall(c, p.x + p.face * 2, p.y - 17, 0);
-    else drawBall(c, p.x + p.face * 6, p.y - BR - Math.abs(Math.sin(p.dp)) * 8, p.dp * p.face);
+    if (over) drawBall(c, p.x + p.face * 2, p.y - 17, 0, stu.ballK);
+    else drawBall(c, p.x + p.face * 6, p.y - BR - Math.abs(Math.sin(p.dp)) * 8, p.dp * p.face, stu.ballK);
   }
   if (stu.meter) drawMeter(c, p.x, p.y, stu.meter.p);
-  if (stu.flight) drawBall(c, stu.flight.x, stu.flight.y, stu.flight.rot);
+  if (stu.flight) drawBall(c, stu.flight.x, stu.flight.y, stu.flight.rot, stu.flight.k);
   drawParts(c, stu.parts);
   vText(v, me.name, p.x, Math.min(H - 5, p.y + 6), '#fcfcfc', nameSize(v));
   if (stu.local) drawPops(v, stu.pops);
@@ -1849,8 +1901,8 @@ function stuSend(now){
   stu.lastSend = now;
   var p = stu.hero, holding = stu.balls > 0 && !stu.flight, over = holding && (!!stu.meter || !p.ground);
   var m = { t: 'st', x: Math.round(p.x), y: Math.round(p.y), f: p.face, w: legFrame(!p.ground, p.vx, p.anim), hb: holding ? (over ? 2 : 1) : 0,
-    m: stu.meter ? Math.round(stu.meter.p * 100) : -1, iv: p.inv > 0 ? 1 : 0, s: p.flipT > 0 ? Math.round(p.flipT * 100) : 0 };
-  if (stu.flight){ m.bx = Math.round(stu.flight.x); m.by = Math.round(stu.flight.y); }
+    m: stu.meter ? Math.round(stu.meter.p * 100) : -1, iv: p.inv > 0 ? 1 : 0, s: p.flipT > 0 ? Math.round(p.flipT * 100) : 0, k: stu.ballK };
+  if (stu.flight){ m.bx = Math.round(stu.flight.x); m.by = Math.round(stu.flight.y); m.fk = stu.flight.k; }
   stuSendMsg(m);
 }
 function stuHud(force){
@@ -1858,9 +1910,9 @@ function stuHud(force){
   if (!force && now - stu.lastHud < 250) return;
   stu.lastHud = now;
   var h = '';
-  for (var i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi"></span>';
+  for (var i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi k' + stu.ballK + '"></span>';
   $('pBalls').innerHTML = h;
-  $('pHoop').textContent = HOOPS[stu.G.h].name + ' HOOP';
+  $('pHoop').textContent = BALL_STYLES[stu.ballK].n;
   $('pTime').textContent = fmt(timeLeft());
   $('pScore').textContent = stu.G.sc + ' PTS #' + (stu.G.rk || '-');
   $('qScore').textContent = stu.G.sc + ' PTS  #' + (stu.G.rk || '-');
