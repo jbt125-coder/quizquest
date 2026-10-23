@@ -292,7 +292,8 @@ body.land #pStage { flex: 1; }
     </div>
     <div class="card">
       <label class="lab first" for="hSaved">Saved quiz bank</label>
-      <div class="btnRow"><select id="hSaved" class="inp" style="flex:1;width:auto;min-width:0"></select><button type="button" id="hDel" class="ghostBtn">Delete</button></div>
+      <div class="btnRow"><select id="hSaved" class="inp" style="flex:1;width:auto;min-width:0"></select><button type="button" id="hEdit" class="ghostBtn">Edit</button><button type="button" id="hDel" class="ghostBtn">Delete</button></div>
+      <div id="hEditMsg" class="okMsg" style="display:none"></div>
       <label class="lab" for="hBank">Review questions</label>
       <div class="note">Same format as Checks for Understanding: Question: ... on one line, then A: x, B: y, C: z, D: w, Answer: B</div>
       <textarea id="hBank" class="inp ta" rows="10" style="margin-top:8px"></textarea>
@@ -929,14 +930,23 @@ function hostInit(){
   $('hCopy').onclick = copyPrompt;
   $('hSave').onclick = function(){ saveQuiz($('hQName').value, true); };
   $('hSaved').onchange = function(){
+    setEditing(-1);
     var b = savedQuizzes()[this.value];
     if (!b) return;
     $('hBank').value = b.text; $('hQName').value = b.name; checkBank();
   };
+  $('hEdit').onclick = function(){
+    if (editIdx >= 0){ setEditing(-1); return; }
+    var i = parseInt($('hSaved').value, 10), b = savedQuizzes()[i];
+    if (!b){ $('hBankMsg').textContent = 'Pick a saved quiz to edit first.'; return; }
+    $('hBank').value = b.text; $('hQName').value = b.name; checkBank();
+    setEditing(i);
+    $('hQName').focus();
+  };
   $('hDel').onclick = function(){
     var list = savedQuizzes(), b = list[$('hSaved').value];
     if (!b || !confirm('Delete the saved quiz "' + b.name + '"?')) return;
-    list.splice($('hSaved').value, 1); store(BANKS_KEY, list); fillSaved('');
+    list.splice($('hSaved').value, 1); store(BANKS_KEY, list); setEditing(-1); fillSaved('');
   };
   fillSaved('');
   $('hOpen').onclick = hostOpen;
@@ -983,6 +993,15 @@ function checkBank(){
   return r;
 }
 /* ---------- saved quiz bank (kept in this browser) ---------- */
+var editIdx = -1;
+function setEditing(i){
+  editIdx = i;
+  var b = savedQuizzes()[i], msg = $('hEditMsg');
+  msg.style.display = b ? 'block' : 'none';
+  msg.textContent = b ? 'Editing "' + b.name + '". Change the name or questions, then click Save changes.' : '';
+  $('hEdit').textContent = b ? 'Cancel edit' : 'Edit';
+  $('hSave').textContent = b ? 'Save changes' : 'Save to bank';
+}
 function savedQuizzes(){ var l = load(BANKS_KEY); return Array.isArray(l) ? l : []; }
 function fillSaved(sel){
   var list = savedQuizzes(), h = '<option value="">' + (list.length ? 'Choose a saved quiz (' + list.length + ')' : 'No saved quizzes yet') + '</option>';
@@ -995,23 +1014,32 @@ function saveQuiz(name, loud){
   var text = $('hBank').value, r = parseQuestions(text), list = savedQuizzes(), i;
   if (!r.questions.length){ if (loud) $('hBankMsg').textContent = 'Add some questions before saving.'; return; }
   name = String(name || '').replace(/^\s+|\s+$/g, '').slice(0, 40);
-  if (!loud){
+  var ei = editIdx, editing = loud && ei >= 0 && !!list[ei];
+  if (editing){
+    // editing a saved quiz: update it in place, allowing a new name
+    if (!name){ $('hBankMsg').textContent = 'Give the quiz a name.'; return; }
+    for (i = 0; i < list.length; i++){
+      if (i !== ei && list[i].name === name){ $('hBankMsg').textContent = 'Another saved quiz is already called "' + name + '".'; return; }
+    }
+    setEditing(-1);
+  } else if (!loud){
     // automatic save when a game opens: never overwrite a different quiz that has the same name
     for (i = 0; i < list.length; i++) if (list[i].name === name && list[i].text !== text) name = '';
   }
-  if (!name){
+  if (!name && !editing){
     for (i = 0; i < list.length; i++) if (list[i].text === text) return;
     var base = r.questions[0].q.slice(0, 30) + (r.questions[0].q.length > 30 ? '...' : ''), k = 2;
     name = base;
     while (list.some(function(e){ return e.name === name; })) name = base + ' ' + k++;
   }
   var entry = { name: name, text: text, n: r.questions.length };
-  for (i = 0; i < list.length; i++) if (list[i].name === name) break;
+  if (editing) i = ei;
+  else for (i = 0; i < list.length; i++) if (list[i].name === name) break;
   list[i] = entry;
   store(BANKS_KEY, list);
   $('hQName').value = name;
   fillSaved(name);
-  if (loud){ var btn = $('hSave'); btn.textContent = 'Saved!'; setTimeout(function(){ btn.textContent = 'Save to bank'; }, 1500); }
+  if (loud){ var btn = $('hSave'); btn.textContent = 'Saved!'; setTimeout(function(){ btn.textContent = editIdx >= 0 ? 'Save changes' : 'Save to bank'; }, 1500); }
 }
 function copyPrompt(){
   var btn = $('hCopy');
