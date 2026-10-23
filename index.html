@@ -1384,14 +1384,40 @@ function hostUpdate(dt, now){
   var sec = Math.ceil(left);
   if (sec !== hst.lastSec){ if (sec <= 10) sfx.tick(); hst.lastSec = sec; }
   hst.netT = Math.max(0, hst.netT - dt);
+  // when the teacher is playing, the court only shows the teacher's own (interactive) birds
   hst.birdT -= dt;
-  if (hst.birdT <= 0){ spawnBird(hst.birds); hst.birdT = rand(4, 8); }
+  if (stu.local) hst.birds = [];
+  else if (hst.birdT <= 0){ spawnBird(hst.birds); hst.birdT = rand(4, 8); }
+  var shown = visiblePlayers();
   for (i = hst.birds.length - 1; i >= 0; i--){
     var bd = hst.birds[i];
-    bd.f += dt * 7; bd.x += bd.dir * bd.sp * dt; bd.bob += dt * 3; bd.y = bd.y0 + Math.sin(bd.bob) * 4;
-    bd.poopT -= dt;
-    if (bd.poopT <= 0){ hst.poops.push({ x: bd.x, y: bd.y + 6, vy: 20 }); bd.poopT = rand(3, 6); }
-    if (bd.x < -20 || bd.x > W + 20) hst.birds.splice(i, 1);
+    bd.f += dt * (bd.mode === 'fly' ? 7 : 16); bd.t += dt;
+    if (bd.mode === 'fly'){
+      bd.x += bd.dir * bd.sp * dt; bd.bob += dt * 3; bd.y = bd.y0 + Math.sin(bd.bob) * 4;
+      bd.poopT -= dt;
+      if (bd.poopT <= 0){ hst.poops.push({ x: bd.x, y: bd.y + 6, vy: 20 }); bd.poopT = rand(3, 6); }
+      // a player's ball on the big screen hits the bird: it squawks and dives at that player
+      for (var n = 0; n < shown.length; n++){
+        var sp = shown[n];
+        if (sp.bxr == null || sp.st.bx == null || hyp(sp.bxr - bd.x, sp.byr - (bd.y + 3)) > 8) continue;
+        bd.mode = 'dive'; bd.t = 0; bd.tgt = sp.pid; bd.vx = bd.dir * bd.sp; bd.vy = 0;
+        addPop(hst.pops, bd.x, bd.y - 8, 'SQUAWK!', '#f86060');
+        burst(hst.parts, bd.x, bd.y + 3, 10, [bd.k.col, '#fcfcfc'], 45, 40, 0.8);
+        tone(900, 0.3, 'triangle', 0.04, -600);
+        break;
+      }
+    } else if (bd.mode === 'dive'){
+      var tp = hst.players[bd.tgt];
+      if (!tp || tp.rx == null || bd.t > 3){ bd.mode = 'flee'; }
+      else {
+        var ddx = tp.rx - bd.x, ddy = (tp.ry - 6) - (bd.y + 3), dd = hyp(ddx, ddy) || 1;
+        bd.vx += (ddx / dd * 90 - bd.vx) * dt * 2.5; bd.vy += (ddy / dd * 90 - bd.vy) * dt * 2.5;
+        bd.x += bd.vx * dt; bd.y += bd.vy * dt;
+        if (Math.abs(bd.vx) > 5) bd.dir = sgn(bd.vx);
+        if (dd < 6){ addPop(hst.pops, tp.rx, tp.ry - 24, 'PECK!', '#f86060'); bd.mode = 'flee'; }
+      }
+    } else { bd.x += bd.dir * 70 * dt; bd.y -= 60 * dt; }
+    if (bd.x < -20 || bd.x > W + 20 || bd.y < -20) hst.birds.splice(i, 1);
   }
   stepPoops(hst.poops, hst.splats, dt, null);
   stepFx(hst.parts, hst.pops, dt);
