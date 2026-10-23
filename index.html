@@ -145,7 +145,15 @@ body.land #pStage { flex: 1; }
 #hJoinMini b { color: #f87800; }
 .tinyBtn { font-family: "Press Start 2P", monospace; font-size: 8px; padding: 8px; border-radius: 7px; border: 2px solid #4a3696; background: #2a1c60; color: #e6dcff; white-space: nowrap; }
 .tinyBtn.warn { background: #d82800; border-color: #000; color: #fff; }
-#hBox { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+#hBox { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; position: relative; }
+#hQuizOv { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  background: rgba(27,16,64,.9); padding: 12px 14px calc(env(safe-area-inset-bottom) + 14px); }
+.keyHint { text-align: center; font-size: 12px; color: #c9b8ff; margin: 0 auto 10px; max-width: 520px; line-height: 1.5; }
+#hBox #pad { position: absolute; left: 0; right: 0; bottom: 0; display: none; background: transparent; border: none; min-height: 0; pointer-events: none;
+  padding: 0 calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 12px); }
+#hBox #pad > * { pointer-events: auto; opacity: .8; }
+#hBox #dpad { transform: scale(.8); transform-origin: bottom left; }
+#hBox #abWrap { transform: scale(.8); transform-origin: bottom right; }
 #hStage { position: relative; }
 #hCanvas { display: block; image-rendering: pixelated; }
 #hBoard { position: absolute; left: 50%; top: 3%; transform: translateX(-50%); width: 38%; background: rgba(18,10,48,.62);
@@ -318,7 +326,8 @@ body.land #pStage { flex: 1; }
   <div id="hTop"><span id="hHoop" class="pix"></span><span id="hTimer" class="pix"></span><span id="hJoinMini"></span>
     <button type="button" id="hViewBtn" class="tinyBtn"></button><button type="button" id="hEnd" class="tinyBtn">END</button></div>
   <div id="hBox"><div id="hStage"><canvas id="hCanvas"></canvas>
-    <div id="hBoard"><div class="pix bT">TOP 5</div><div id="hBoardList"></div></div></div></div>
+    <div id="hBoard"><div class="pix bT">TOP 5</div><div id="hBoardList"></div></div></div>
+    <div id="hQuizOv"><div class="keyHint" id="hKeyHint">Teacher player. Keyboard: 1 to 4 (or A to D) answers, Enter goes on.<br>On the court: arrows move, Up jumps, Down drops, hold and let go of Space to shoot.</div></div></div>
 </div>
 
 <!-- ================= HOST: final ================= -->
@@ -1014,6 +1023,7 @@ function refreshLobby(){
   grid.innerHTML = '';
   for (k in hst.players){
     var p = hst.players[k];
+    if (p.local) continue;
     var card = document.createElement('div');
     card.className = 'pCard' + (p.on ? '' : ' off');
     card.appendChild(thumbCanvas(p.look, 5));
@@ -1028,6 +1038,46 @@ function refreshLobby(){
   }
   $('hCount').textContent = n;
   $('hLobRep').style.display = hst.report ? '' : 'none';
+}
+/* ---------- teacher plays when the game starts with nobody joined ---------- */
+var LOCAL_CONN = { pid: null, open: true, send: function(m){ stuData(m); } };
+var localReady = false;
+function isTouch(){ return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0); }
+function setupLocal(){
+  if (localReady) return;
+  localReady = true;
+  me = { pid: 'teacher', name: 'TEACHER', look: { shirt: 1, skin: 0, hat: 1, hc: 0 } };
+  stu.conn = { open: true, send: function(m){ hostData(LOCAL_CONN, m); } };
+  var wrap = $('scrQuiz').getElementsByTagName('div')[0];
+  $('hQuizOv').appendChild(wrap);
+  $('qConn').style.display = 'none';
+  $('hBox').appendChild($('pad'));
+  $('qNext').onclick = quizNext;
+  if (isTouch()) $('hKeyHint').textContent = 'Teacher player. Tap an answer. On the court: D-pad moves, A jumps, hold and let go of B to shoot.';
+  bindPad();
+}
+function localShow(which){
+  $('hQuizOv').style.display = which === 'quiz' ? 'block' : 'none';
+  $('pad').style.display = (which === 'play' && isTouch()) ? 'flex' : 'none';
+}
+function addTeacher(){
+  setupLocal();
+  stu.local = true;
+  resetRun();
+  if (!hst.players.teacher) hostData(LOCAL_CONN, { t: 'hi', pid: 'teacher', n: me.name, l: me.look });
+  hst.players.teacher.local = true;
+  hst.players.teacher.on = true;
+}
+function removeTeacher(){
+  if (hst.players.teacher) delete hst.players.teacher;
+  if (stu.local){ stu.local = false; stu.mode = 'none'; resetRun(); localShow('none'); }
+}
+function drawTeacherWaiting(v, t){
+  var p = hst.players.teacher, x = stu.hero ? stu.hero.x : W / 2;
+  if (!p) return;
+  drawAvatar(v.c, p.look, x, FLOOR, 1, 0, false, 0, 0.35);
+  vText(v, '?', x, FLOOR - 20, '#f8d878', nameSize(v));
+  vText(v, p.name, x, FLOOR + 6, '#b8b0d8', nameSize(v));
 }
 function hostSend(p, msg){ if (p && p.conn && p.conn.open){ try { p.conn.send(msg); } catch (e) {} } }
 function gameTimeMs(){ return Math.round(performance.now() - hst.startPerf); }
@@ -1099,6 +1149,9 @@ function hostData(conn, d){
 }
 function hostStartGame(){
   ac();
+  var real = 0;
+  for (var rk in hst.players){ if (!hst.players[rk].local && hst.players[rk].on) real++; }
+  if (!real) addTeacher(); else removeTeacher();
   hst.phase = 'play'; hst.hoop = 0; hst.since = 0;
   hst.startPerf = performance.now(); hst.endAt = Date.now() + hst.cfg.mins * 60000;
   hst.pops = []; hst.parts = []; hst.birds = []; hst.poops = []; hst.splats = []; hst.randT = 0; hst.lastSec = -1;
@@ -1117,6 +1170,7 @@ function hostStartGame(){
 function hostEndGame(){
   if (hst.phase !== 'play') return;
   hst.phase = 'over';
+  if (stu.local){ stu.meter = null; localShow('none'); }
   var arr = ranked(), top = [], i;
   for (i = 0; i < arr.length && i < 5; i++) top.push({ n: arr[i].name, s: arr[i].score });
   for (i = 0; i < arr.length; i++){
@@ -1174,7 +1228,7 @@ function hostResize(){
   $('hBoard').style.fontSize = Math.max(10, Math.round(hst.view.S * 4)) + 'px';
 }
 function visiblePlayers(){
-  var arr = ranked().filter(function(p){ return p.on && p.st; }), view = hst.cfg.view, i;
+  var arr = ranked().filter(function(p){ return p.on && p.st && !p.local; }), view = hst.cfg.view, i;
   if (view === 'all') return arr;
   if (view === 'top') return arr.slice(0, 5);
   var now = performance.now(), keep = [];
@@ -1204,7 +1258,7 @@ function hostBoard(){
 }
 function hostUpdate(dt, now){
   var left = hostLeft(), i;
-  if (left <= 0){ hostEndGame(); return; }
+  if (left <= 0){ hostEndGame(); if (stu.local){ stu.mode = 'over'; localShow('none'); } return; }
   var sec = Math.ceil(left);
   if (sec !== hst.lastSec){ if (sec <= 10) sfx.tick(); hst.lastSec = sec; }
   hst.netT = Math.max(0, hst.netT - dt);
@@ -1222,7 +1276,7 @@ function hostUpdate(dt, now){
   var k1 = Math.min(1, dt * 14), k2 = Math.min(1, dt * 18);
   for (var key in hst.players){
     var p = hst.players[key], s = p.st;
-    if (p.on && now - p.seen > 9000) p.on = false;
+    if (p.on && !p.local && now - p.seen > 9000) p.on = false;
     if (!s) continue;
     if (p.rx == null || Math.abs(s.x - p.rx) > 50){ p.rx = s.x; p.ry = s.y; }
     p.rx += (s.x - p.rx) * k1; p.ry += (s.y - p.ry) * k1;
@@ -1255,11 +1309,16 @@ function hostDraw(now){
     if (q.st.q){ vText(v, '?', q.rx, q.ry - 20, '#f8d878', ns); vText(v, q.name, q.rx, Math.min(H - 5, q.ry + 6), '#b8b0d8', ns); }
     else vText(v, q.name, q.rx, Math.min(H - 5, q.ry + 6), '#fcfcfc', ns);
   }
+  if (stu.local){
+    if (stu.mode === 'play' && stu.hero) drawLocalLayer(v, t);
+    else if (stu.mode === 'quiz') drawTeacherWaiting(v, t);
+  }
   drawPops(v, hst.pops);
 }
 function hostFrame(dt, now){
   if (hst.phase !== 'play') return;
   if (!hst.view.cw) hostResize();
+  if (stu.local && stu.mode === 'play' && stu.hero) stuUpdate(dt);
   hostUpdate(dt, now);
   if (hst.phase === 'play') hostDraw(now);
 }
@@ -1414,7 +1473,7 @@ function stuData(d){
   } else if (d.t === 'g'){
     applyG(d);
   } else if (d.t === 'ok'){
-    if (stu.hero){
+    if (stu.hero && !stu.local){
       if (d.p > 0) addPop(stu.pops, stu.hero.x, stu.hero.y - 28, '+' + d.p + ' PTS', '#fcfc78');
       else addPop(stu.pops, stu.hero.x, stu.hero.y - 28, 'HOOP MOVED', '#f8a0a0');
     }
@@ -1429,7 +1488,7 @@ function applyG(g){
   var prevHoop = stu.G.h;
   stu.G = g; stu.lAt = performance.now();
   if (typeof g.gt === 'number') stu.syncOff = g.gt - performance.now();
-  if (g.h !== prevHoop && stu.mode === 'play' && stu.hero) addPop(stu.pops, W / 2, 30, 'NEW HOOP: ' + HOOPS[g.h].name, '#58f8d0', true);
+  if (g.h !== prevHoop && stu.mode === 'play' && stu.hero && !stu.local) addPop(stu.pops, W / 2, 30, 'NEW HOOP: ' + HOOPS[g.h].name, '#58f8d0', true);
   stuHud(true);
 }
 function syncT(){ return (performance.now() + stu.syncOff) / 1000; }
@@ -1441,6 +1500,7 @@ function resetRun(){
 }
 function goWait(){
   stu.mode = 'wait';
+  if (stu.local){ localShow('none'); return; }
   paintThumb($('wPrev'), me.look);
   $('wName').textContent = me.name;
   $('wMsg').textContent = stu.G.ph === 'play' ? 'Getting you into the game...' : 'Waiting for your teacher to start the game.';
@@ -1448,6 +1508,7 @@ function goWait(){
 }
 function showOver(d){
   stu.mode = 'over';
+  if (stu.local){ localShow('none'); return; }
   $('oMine').innerHTML = 'YOUR SCORE ' + d.sc + '<br>PLACE ' + d.rk + ' OF ' + d.n;
   var ol = $('oTop'); ol.innerHTML = '';
   for (var i = 0; i < d.top.length; i++){
@@ -1472,7 +1533,8 @@ function drawIdx(){
 }
 function goQuiz(){
   stu.mode = 'quiz'; stu.correct = 0; stu.meter = null;
-  showScreen('scrQuiz');
+  if (stu.local){ localShow('quiz'); $('hQuizOv').scrollTop = 0; }
+  else showScreen('scrQuiz');
   stuSendMsg({ t: 'st', q: 1, x: stu.hero ? Math.round(stu.hero.x) : Math.round(rand(40, 216)), y: FLOOR, f: 1 });
   stuHud(true);
   showQuestion();
@@ -1546,8 +1608,8 @@ function goPlay(){
   stu.mode = 'play'; stu.balls = 3; stu.flight = null; stu.meter = null; stu.outT = 0; stu.outShown = false;
   if (!stu.hero) stu.hero = newHero();
   else { stu.hero.y = FLOOR; stu.hero.ground = 'floor'; stu.hero.vy = 0; stu.hero.inv = 0; }
-  showScreen('scrPlay');
-  stuResize();
+  if (stu.local) localShow('play');
+  else { showScreen('scrPlay'); stuResize(); }
   addPop(stu.pops, W / 2, 40, '3 BALLS! SHOOT!', '#fcfc78', true);
   sfx.bonus();
   stuHud(true);
@@ -1758,8 +1820,15 @@ function stuUpdate(dt){
   stepFx(stu.parts, stu.pops, dt);
 }
 function stuDraw(){
-  var v = stu.view, c = v.c, t = syncT(), p = stu.hero;
+  var v = stu.view, t = syncT();
   drawScene(v, t, stu.G.h, stu.netT);
+  drawLocalLayer(v, t);
+  drawActiveLabel(v, t, stu.G.h);
+  drawPops(v, stu.pops);
+}
+function drawLocalLayer(v, t){
+  var c = v.c, p = stu.hero;
+  gameXf(v);
   drawBirds(c, stu.birds);
   drawPoops(c, stu.poops, stu.splats);
   var holding = stu.balls > 0 && !stu.flight, over = holding && (!!stu.meter || !p.ground);
@@ -1772,9 +1841,8 @@ function stuDraw(){
   if (stu.meter) drawMeter(c, p.x, p.y, stu.meter.p);
   if (stu.flight) drawBall(c, stu.flight.x, stu.flight.y, stu.flight.rot);
   drawParts(c, stu.parts);
-  drawActiveLabel(v, t, stu.G.h);
   vText(v, me.name, p.x, Math.min(H - 5, p.y + 6), '#fcfcfc', nameSize(v));
-  drawPops(v, stu.pops);
+  if (stu.local) drawPops(v, stu.pops);
 }
 function stuSend(now){
   if (now - stu.lastSend < 80) return;
@@ -1870,6 +1938,17 @@ function bindPad(){
 
   var keyMap = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd' };
   document.addEventListener('keydown', function(e){
+    if (stu.mode === 'quiz' && !e.repeat){
+      var ql = String(e.key).toLowerCase(), qi = '1234'.indexOf(ql);
+      if (qi < 0) qi = 'abcd'.indexOf(ql);
+      if (ql.length === 1 && qi >= 0 && curQ && !curQ.done && qi < curQ.order.length){ e.preventDefault(); answerQ(qi); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && $('qNext').style.display !== 'none'){
+        e.preventDefault();
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+        quizNext();
+      }
+      return;
+    }
     if (stu.mode !== 'play' || e.repeat) return;
     var k = keyMap[e.key];
     if (k){ e.preventDefault(); touches['k' + k] = { l: k === 'l', r: k === 'r', u: k === 'u', d: k === 'd' }; evalDirs(); }
