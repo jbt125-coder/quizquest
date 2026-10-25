@@ -397,10 +397,8 @@ var HOOPS = [
   { name: 'MIDDLE', side: -1, bx: 12, base: 7, y: 62, pts: 3, ph: 2.1 },
   { name: 'HIGH', side: 1,  bx: 204, base: 211, y: 32, pts: 5, ph: 4.2 }
 ];
-/* make the lit hoops in order (LOW, MIDDLE, HIGH) to open the magic round: a glowing platform,
+/* make the lit hoops in order (LOW, MIDDLE, HIGH) to open the magic round: the middle platform flashes,
    unlimited jumps and a magic hoop high on the left to slam dunk on */
-var MAGIC_PLAT = { x1: 44, x2: 96, y: 60, id: 'magic' };
-var PLATS_MAGIC = [FLOOR_PLAT, PLATFORM, MAGIC_PLAT];
 var MAGIC_HOOP = { bx: 12, y: 26 };
 var MAGIC_SECS = 20, DUNK_PTS = 10;
 var MAGIC_COLS = ['#f878f8', '#78f8f8', '#f8f878', '#b078ff', '#fcfcfc'];
@@ -907,12 +905,13 @@ function magicGeo(t){
   var bx = MAGIC_HOOP.bx;
   return { i: 3, bx: bx, rl: bx + 4, rr: bx + 4 + RIM_W, y: MAGIC_HOOP.y + Math.round(Math.sin(t * 1.3)), side: -1 };
 }
+/* magic round: the middle platform's deck flashes magic colors */
 function drawMagicPlat(c, t){
-  var q = MAGIC_PLAT, w = q.x2 - q.x1, k;
+  var q = PLATFORM, w = q.x2 - q.x1, k, n = Math.floor(t * 8);
   c.fillStyle = 'rgba(200,120,255,' + (0.25 + 0.15 * Math.sin(t * 6)).toFixed(2) + ')'; c.fillRect(q.x1 - 3, q.y - 4, w + 6, 11);
   c.fillStyle = '#000'; c.fillRect(q.x1 - 1, q.y - 1, w + 2, 6);
-  c.fillStyle = '#9040e0'; c.fillRect(q.x1, q.y, w, 4);
-  c.fillStyle = MAGIC_COLS[Math.floor(t * 6) % MAGIC_COLS.length]; c.fillRect(q.x1, q.y, w, 1);
+  c.fillStyle = n % 2 ? '#9040e0' : '#30b8d8'; c.fillRect(q.x1, q.y, w, 4);
+  c.fillStyle = MAGIC_COLS[n % MAGIC_COLS.length]; c.fillRect(q.x1, q.y, w, 1);
   for (k = 0; k < 8; k++){
     c.fillStyle = MAGIC_COLS[k % MAGIC_COLS.length];
     c.fillRect(q.x1 + (k * 13 + Math.floor(t * 20)) % w, q.y - 2 - (k * 7 + Math.floor(t * 9)) % 10, 1, 1);
@@ -1892,8 +1891,7 @@ function stuResize(){
   fitView(stu.view, availW, availH);
   $('pStage').style.height = land ? '' : stu.view.ch + 'px';
 }
-function heroPlats(){ return stu.magic ? PLATS_MAGIC : PLATS; }
-function findPlat(id){ var L = heroPlats(); for (var i = 0; i < L.length; i++) if (L[i].id === id) return L[i]; return null; }
+function findPlat(id){ for (var i = 0; i < PLATS.length; i++) if (PLATS[i].id === id) return PLATS[i]; return null; }
 function stepHero(p, dt, mv){
   p.flipT = Math.max(0, p.flipT - dt); p.drop = Math.max(0, p.drop - dt);
   p.inv = Math.max(0, p.inv - dt); p.hurtT = Math.max(0, p.hurtT - dt);
@@ -1909,9 +1907,9 @@ function stepHero(p, dt, mv){
     if (!p.jumpHeld && p.vy < -120) p.vy = -120;
     var py = p.y; p.y += p.vy * dt;
     if (p.vy >= 0){
-      var best = null, L = heroPlats();
-      for (var i = 0; i < L.length; i++){
-        var q = L[i];
+      var best = null;
+      for (var i = 0; i < PLATS.length; i++){
+        var q = PLATS[i];
         if ((q.floor || p.drop <= 0) && py <= q.y + 0.5 && p.y >= q.y && p.x + 3 > q.x1 && p.x - 3 < q.x2 && (!best || q.y < best.y)) best = q;
       }
       if (best){ p.y = best.y; p.vy = 0; p.ground = best.id; p.air2 = true; }
@@ -2033,7 +2031,7 @@ function startMagic(){
   stu.meter = null;
   addCheer(stu.pops, W / 2, 50, 'MAGIC MODE!!');
   addPop(stu.pops, W / 2, 66, 'UNLIMITED JUMPS! SLAM DUNK IT!', '#e0b0ff');
-  burst(stu.parts, (MAGIC_PLAT.x1 + MAGIC_PLAT.x2) / 2, MAGIC_PLAT.y, 24, MAGIC_COLS, 70, 0, 1);
+  burst(stu.parts, (PLATFORM.x1 + PLATFORM.x2) / 2, PLATFORM.y, 24, MAGIC_COLS, 70, 0, 1);
   sfx.bonus();
 }
 function endMagic(text){
