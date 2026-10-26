@@ -217,6 +217,17 @@ body.land #pStage { flex: 1; }
 #oCard .ocPct { font-family: "Press Start 2P", monospace; font-size: 34px; color: #1f9a50; margin: 6px 0 8px; }
 #oCard .ocDate { font-size: 13px; color: #5a4a8a; margin-top: 6px; }
 #oTop { font-size: 10px; line-height: 2; margin: 0 auto 4px; }
+/* home run derby */
+.sk { width: 15px; height: 15px; border-radius: 50%; background: #3a2a70; border: 2px solid #000; }
+.sk.on { background: #f83800; }
+body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b0; }
+.batPick { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); width: 92%; max-width: 420px; z-index: 5; text-align: center;
+  background: rgba(18,10,48,.95); border: 3px solid #000; box-shadow: 0 0 0 3px #f8b800; border-radius: 14px; padding: 14px; }
+.bpT { color: #f8d878; font-size: 13px; margin-bottom: 4px; }
+.bpBtn { display: block; width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px; border: 3px solid #000; background: #d82800; color: #fff;
+  font-family: inherit; font-size: 15px; font-weight: 700; box-shadow: inset -4px -4px 0 #8a1800; cursor: pointer; }
+.bpBtn.go { background: #1f9a50; box-shadow: inset -4px -4px 0 #0e5a2a; }
+.bpBtn b { display: block; font-size: 13px; font-weight: 400; margin-bottom: 7px; }
 .topList { text-align: left; font-family: "Press Start 2P", monospace; font-size: 11px; line-height: 2.3; color: #fff; display: inline-block; margin: 10px auto; padding-left: 28px; }
 </style>
 </head>
@@ -225,7 +236,7 @@ body.land #pStage { flex: 1; }
 <!-- ================= STUDENT: join + customize ================= -->
 <div class="scr" id="scrJoin">
   <div class="wrap">
-    <h1 class="logo">PALM COURT<br>HOOPS</h1>
+    <h1 class="logo" id="jLogo">PALM COURT<br>HOOPS</h1>
     <div id="jSolo" class="sub pix" style="display:none;line-height:1.8"></div>
     <div class="card">
       <div class="seg" id="jLang" style="margin-bottom:14px"><button type="button" data-v="en">ENGLISH</button><button type="button" data-v="es">ESPA&Ntilde;OL</button></div>
@@ -294,6 +305,11 @@ body.land #pStage { flex: 1; }
       <div class="pb" id="btnA"><b>A</b><i data-l>JUMP</i></div>
     </div>
   </div>
+  <div id="batPick" class="batPick" style="display:none">
+    <div class="pix bpT" data-l>PICK YOUR BAT</div>
+    <button type="button" class="bpBtn" data-v="power"><b class="pix" data-l>POWER BAT</b><span data-l>Hits farther, but harder to time</span></button>
+    <button type="button" class="bpBtn go" data-v="contact"><b class="pix" data-l>CONTACT BAT</b><span data-l>Easier to time, shorter hits</span></button>
+  </div>
 </div>
 
 <!-- ================= STUDENT: game over ================= -->
@@ -318,7 +334,7 @@ body.land #pStage { flex: 1; }
 <!-- ================= STUDENT: halftime ================= -->
 <div class="scr" id="scrHalf">
   <div class="wrap">
-    <h1 class="logo sm" data-l>HALFTIME</h1>
+    <h1 class="logo sm" id="hfTitle" data-l>HALFTIME</h1>
     <div class="pix center" id="hfScore" style="font-size:11px;color:#f8d878;line-height:2"></div>
     <p class="note center" id="hfMsg">Study up for the second half! It starts when your teacher is ready.</p>
     <div class="studySheet" id="hfNotes"></div>
@@ -329,10 +345,13 @@ body.land #pStage { flex: 1; }
 <!-- ================= HOST: setup ================= -->
 <div class="scr" id="scrHSetup">
   <div class="wrap wide">
-    <h1 class="logo">PALM COURT HOOPS</h1>
+    <h1 class="logo" id="hLogo">PALM COURT HOOPS</h1>
     <div class="sub pix">Teacher setup</div>
     <div class="card">
-      <label class="lab first" for="hPw">Class password (make one up for this period)</label>
+      <span class="lab first">Game</span>
+      <div class="seg" id="hSport"><button type="button" data-v="hoops">BASKETBALL</button><button type="button" data-v="derby">HOME RUN DERBY</button></div>
+      <div class="note" id="hSportNote" style="margin-top:6px"></div>
+      <label class="lab" for="hPw">Class password (make one up for this period)</label>
       <input id="hPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20">
       <div class="row2">
         <div><label class="lab" for="hMins">Game length (minutes)</label><input id="hMins" class="inp" type="number" min="1" max="60"></div>
@@ -366,9 +385,9 @@ body.land #pStage { flex: 1; }
       <textarea id="hPromptBox" class="inp ta" readonly></textarea>
     </div>
     <div class="card">
-      <span class="lab first">Halftime study break</span>
+      <span class="lab first" id="hHalfLab">Halftime study break</span>
       <div class="seg" id="hHalf"><button type="button" data-v="off">OFF</button><button type="button" data-v="on">ON</button></div>
-      <div class="note" style="margin-top:6px">At the halfway point the game pauses and everyone reads the study sheet, on phones and the big screen, until you tap RESUME. At the end of the game students can save the sheet as a picture.</div>
+      <div class="note" id="hHalfNote" style="margin-top:6px">At the halfway point the game pauses and everyone reads the study sheet, on phones and the big screen, until you tap RESUME. At the end of the game students can save the sheet as a picture.</div>
       <label class="lab" for="hStudy">Study sheet</label>
       <div class="note">1. Copy everything in this box. It already has your questions in it. 2. Paste it into an AI chat. 3. Replace everything here with the AI's answer. Words wrapped in **double stars** show up highlighted. The study sheet is saved with the quiz when you click Save to bank.</div>
       <textarea id="hStudy" class="inp ta" rows="9" style="margin-top:8px"></textarea>
@@ -427,7 +446,7 @@ body.land #pStage { flex: 1; }
 <div class="scr" id="scrHHalf">
   <div class="halfBox">
     <div class="halfL">
-      <h1 class="logo">HALFTIME</h1>
+      <h1 class="logo" id="hhTitle">HALFTIME</h1>
       <div class="pix" id="hhTime" style="color:#58d8c0;font-size:10px;line-height:1.8;margin-bottom:12px"></div>
       <div class="card"><div class="pix" style="color:#f8d878;font-size:11px;margin-bottom:8px">TOP 5</div><div id="hhBoard" style="font-size:20px"></div></div>
       <button type="button" id="hResume" class="bigBtn go">RESUME</button>
@@ -600,6 +619,17 @@ var ES = {
   'BACK TO THE LOW HOOP': 'DE VUELTA AL ARO BAJO', 'REBOUND!': '¡REBOTE!', 'OUT OF BALLS!': '¡SIN BALONES!', '10 BUCKETS!': '¡10 CANASTAS!',
   'WATER BREAK: ANSWER 3 QUESTIONS': 'DESCANSO: CONTESTA 3 PREGUNTAS', 'STOMP! +1': '¡PISOTÓN! +1', 'SPLAT!': '¡PLAF!', 'OUCH!': '¡AY!',
   'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'STUDY NOTES': 'NOTAS DE ESTUDIO',
+  'Answer 3 right<br>to step up to bat': 'Contesta 3 bien<br>para pasar al bate', 'PLAY BALL!': '¡A JUGAR!', 'BACK TO THE PLATE': 'VOLVER AL PLATO',
+  'Correct! Batter up!': '¡Correcto! ¡Al bate!', 'SWING': 'BATEAR', 'BATTER UP!': '¡AL BATE!', 'BACK IN THE BOX!': '¡DE VUELTA AL BATE!',
+  'HOME RUN!': '¡JONRÓN!', 'STRIKES': 'STRIKES', 'FOUL BALL!': '¡FOUL!', 'SWING AND A MISS!': '¡ABANICÓ!', 'STRIKE LOOKING!': '¡STRIKE CANTADO!', 'TOO EARLY!': '¡MUY TEMPRANO!',
+  'TOO LATE!': '¡MUY TARDE!', 'CRACK! THE BAT BROKE!': '¡CRAC! ¡SE ROMPIÓ EL BATE!', "YOU'RE OUT!": '¡PONCHADO!', 'BASE HIT': 'HIT', 'OFF THE WALL!': '¡A LA PARED!',
+  'GOLDEN BAT!!': '¡¡BATE DE ORO!!', 'HOMERS COUNT DOUBLE!': '¡JONRONES DOBLES!', 'GOLDEN BAT FADED': 'SE ACABÓ EL BATE DE ORO', '10 HOMERS!': '¡10 JONRONES!',
+  'PICK YOUR BAT': 'ELIGE TU BATE', 'POWER BAT': 'BATE DE PODER', 'CONTACT BAT': 'BATE DE CONTACTO', 'POWER BAT!': '¡BATE DE PODER!', 'CONTACT BAT!': '¡BATE DE CONTACTO!',
+  'Hits farther, but harder to time': 'Batea más lejos, pero es más difícil', 'Easier to time, shorter hits': 'Más fácil de pegar, batazos más cortos',
+  '7TH INNING STRETCH': 'ESTIRÓN DE LA 7MA ENTRADA', 'START THE LAST INNINGS': 'EMPEZAR LAS ÚLTIMAS ENTRADAS', 'HOMERS': 'JONRONES',
+  'Stretch and study! The game starts again when your teacher is ready.': '¡Estírate y estudia! El juego sigue cuando tu maestro esté listo.',
+  'Read the study sheet, then start the last innings when you are ready.': 'Lee la hoja de estudio y empieza las últimas entradas cuando estés listo.',
+  'Take a stretch! The game starts again soon.': '¡Estírate! El juego sigue pronto.',
   'SHORT HAIR': 'PELO CORTO', 'CAP': 'GORRA', 'BACKWARDS CAP': 'GORRA AL REVÉS', 'BEANIE': 'GORRO', 'AFRO': 'AFRO', 'SPIKY HAIR': 'PELO PARADO',
   'HEADBAND': 'CINTA', 'CROWN': 'CORONA', 'BOW': 'MOÑO', 'MOHAWK': 'CRESTA', 'LONG HAIR': 'PELO LARGO', 'PONYTAIL': 'COLA DE CABALLO', 'PIGTAILS': 'DOS COLITAS'
 };
@@ -608,7 +638,10 @@ var ES_HOOP = { LOW: 'BAJO', MIDDLE: 'MEDIO', HIGH: 'ALTO' };
 var ES_PAT = [
   [/^Correct! (\d+) more to go\.$/, '¡Correcto! Te faltan $1.'],
   [/^NEXT: (LOW|MIDDLE|HIGH) HOOP$/, function(m, h){ return 'SIGUE: ARO ' + ES_HOOP[h]; }],
-  [/^NEXT: (\d+) PTS$/, 'SIGUE: $1 PTS'], [/^MAGIC (\d+)$/, 'MAGIA $1'], [/^PLACE (\d+) OF (\d+)$/, 'LUGAR $1 DE $2']
+  [/^NEXT: (\d+) PTS$/, 'SIGUE: $1 PTS'], [/^MAGIC (\d+)$/, 'MAGIA $1'], [/^PLACE (\d+) OF (\d+)$/, 'LUGAR $1 DE $2'],
+  [/^STRIKE (\d)!$/, '¡STRIKE $1!'], [/^GOLDEN (\d+)$/, 'ORO $1'], [/^\+(\d+) {2}(\d+) FT$/, '+$1  $2 PIES'], [/^LIGHTS! \+(\d+)$/, '¡LUCES! +$1'],
+  [/^SCOREBOARD! \+(\d+)$/, '¡MARCADOR! +$1'], [/^BLIMP! \+(\d+)$/, '¡DIRIGIBLE! +$1'],
+  [/^AIM: (LOW|MID|HIGH)$/, function(m, a){ return 'APUNTA: ' + { LOW: 'BAJO', MID: 'MEDIO', HIGH: 'ALTO' }[a]; }]
 ];
 var CHEERS_ES = ['¡BUEN TIRO!', '¡GENIAL!', '¡QUÉ BIEN!', '¡CRACK!', '¡CANASTA!', '¡ADENTRO!', '¡EN LLAMAS!', '¡BRAVO!', '¡INCREÍBLE!', '¡ESO ES!'];
 function L(t){
@@ -749,7 +782,20 @@ var sfx = {
   bonus: function(){ var n = [523, 659, 784, 1047, 1319]; for (var i = 0; i < n.length; i++) tone(n[i], 0.12, 'square', 0.05, 0, i * 0.08); },
   tick: function(){ tone(1000, 0.04, 'square', 0.03); },
   over: function(){ var n = [392, 330, 262, 196]; for (var i = 0; i < n.length; i++) tone(n[i], 0.2, 'square', 0.06, 0, i * 0.18); },
-  fanfare: function(){ var n = [523, 659, 784, 1047, 784, 1047, 1319]; for (var i = 0; i < n.length; i++) tone(n[i], 0.14, 'square', 0.06, 0, i * 0.11); }
+  fanfare: function(){ var n = [523, 659, 784, 1047, 784, 1047, 1319]; for (var i = 0; i < n.length; i++) tone(n[i], 0.14, 'square', 0.06, 0, i * 0.11); },
+  crack: function(){ hiss(0.1, 0.1, 1500); tone(1400, 0.05, 'square', 0.06, -900); tone(700, 0.08, 'triangle', 0.05, -300, 0.02); },
+  whiff: function(){ hiss(0.16, 0.035, 5000); },
+  mitt: function(){ tone(130, 0.07, 'square', 0.06, -50); hiss(0.05, 0.05, 900); },
+  ump: function(){ tone(330, 0.12, 'sawtooth', 0.035, 60); tone(392, 0.22, 'sawtooth', 0.035, -80, 0.12); },
+  glass: function(){ hiss(0.5, 0.08, 3000); tone(1600, 0.25, 'square', 0.04, -1300); },
+  snap: function(){ hiss(0.18, 0.1, 700); tone(180, 0.15, 'square', 0.06, -100); },
+  roar: function(){ hiss(1.6, 0.05, 400); hiss(1.1, 0.03, 1500); },
+  charge: function(){ var n = [392, 523, 659, 784, 659, 784], d = [0.12, 0.12, 0.12, 0.24, 0.12, 0.5], at = 0; for (var i = 0; i < n.length; i++){ tone(n[i], d[i], 'square', 0.05, 0, at); at += d[i]; } },
+  // Take Me Out to the Ball Game (1908), for the 7th inning stretch
+  ballgame: function(){
+    var n = [523, 1047, 880, 784, 659, 784, 587, 523, 1047, 880, 784, 659, 784], b = [2, 1, 1, 1, 1, 3, 3, 2, 1, 1, 1, 1, 5], at = 0;
+    for (var i = 0; i < n.length; i++){ tone(n[i], b[i] * 0.2, 'square', 0.05, 0, at); at += b[i] * 0.22; }
+  }
 };
 document.addEventListener('touchend', function(){ ac(); }, false);
 document.addEventListener('click', function(){ ac(); }, false);
@@ -1172,13 +1218,18 @@ function randomPw(){ return pick(['palm', 'coco', 'surf', 'wave', 'reef', 'mango
 function hostInit(){
   var saved = load(HOST_KEY) || {};
   hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', big: saved.big || 'me', period: saved.period || '', half: !!saved.half, studyNotes: saved.studyNotes || '', bank: saved.bank || SAMPLE_BANK,
-    picks: Array.isArray(saved.picks) ? saved.picks : [] };
+    picks: Array.isArray(saved.picks) ? saved.picks : [], sport: saved.sport === 'derby' ? 'derby' : 'hoops' };
   $('hPw').value = hst.cfg.pw;
   $('hMins').value = hst.cfg.mins;
   $('hPeriod').value = hst.cfg.period;
   $('hBank').value = hst.cfg.bank;
   setViewSeg(hst.cfg.view);
   setSeg('hBig', hst.cfg.big);
+  var spBtns = $('hSport').getElementsByTagName('button');
+  for (var sb = 0; sb < spBtns.length; sb++){
+    spBtns[sb].onclick = function(){ hst.cfg.sport = this.getAttribute('data-v'); sportSetup(); store(HOST_KEY, hst.cfg); };
+  }
+  sportSetup();
   var bigBtns = $('hBig').getElementsByTagName('button');
   for (var bi = 0; bi < bigBtns.length; bi++){
     bigBtns[bi].onclick = function(){ hst.cfg.big = this.getAttribute('data-v'); setSeg('hBig', hst.cfg.big); store(HOST_KEY, hst.cfg); };
@@ -1307,6 +1358,33 @@ function hostInit(){
   showScreen('scrHSetup');
 }
 function setViewSeg(v){ setSeg('hView', v); }
+function hostDerby(){ return !!hst.cfg && hst.cfg.sport === 'derby'; }
+function sportSetup(){
+  var d = hostDerby();
+  setSeg('hSport', hst.cfg.sport);
+  sportTitles(hst.cfg.sport);
+  $('hSportNote').textContent = d ?
+    'Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out. Misses, fouls and pitches you let go by are all strikes. Homers score 1 to 3 points by distance, and hitting the stadium lights (+5), scoreboard (+5) or blimp (+20) adds bonus points.' :
+    'Shoot the lit hoop in order (2, 3, then 5 points) to open the magic round and slam dunk for 10.';
+  $('hHalfLab').textContent = d ? '7th inning stretch study break' : 'Halftime study break';
+  $('hHalfNote').textContent = (d ? 'About 7/9 of the way through, the game pauses for the 7th inning stretch' : 'At the halfway point the game pauses') +
+    ' and everyone reads the study sheet, on phones and the big screen, until you tap RESUME. At the end of the game students can save the sheet as a picture.';
+}
+function keyHint(){
+  var d = hostDerby();
+  if (isTouch()) $('hKeyHint').textContent = d ? 'Teacher player. Tap an answer. At the plate: tap the field or B to swing, Up and Down to aim.' :
+    'Teacher player. Tap an answer. On the court: D-pad moves, A jumps, hold and let go of B to shoot.';
+  else $('hKeyHint').innerHTML = 'Teacher player. Keyboard: 1 to 4 (or A to D) answers, Enter goes on.<br>' +
+    (d ? 'At the plate: Space swings, Up and Down aim high or low.' : 'On the court: arrows move, Up jumps, Down drops, hold and let go of Space to shoot.');
+}
+/* seconds left on the clock when the break comes: halftime, or the 7th inning stretch in the derby */
+function halfMark(mins, sport){ return sport === 'derby' ? Math.round(mins * 60 * 2 / 9) : mins * 30; }
+function sportTitles(sp){
+  var d = sp === 'derby';
+  document.title = d ? 'Palm Park Derby' : 'Palm Court Hoops';
+  $('jLogo').innerHTML = d ? 'PALM PARK<br>DERBY' : 'PALM COURT<br>HOOPS';
+  $('hLogo').innerHTML = d ? 'PALM PARK DERBY' : 'PALM COURT HOOPS';
+}
 function setSeg(id, v){
   var b = $(id).getElementsByTagName('button');
   for (var i = 0; i < b.length; i++) b[i].className = b[i].getAttribute('data-v') === v ? 'on' : '';
@@ -1580,13 +1658,13 @@ function makeSoloLink(){
   $('hSoloLink').style.display = 'none'; $('hSoloCopy').style.display = 'none';
   if (r.questions.length < 3){ msg.className = 'okMsg warn'; msg.textContent = 'Add at least 3 questions first.'; return; }
   var obj = { v: 1, t: $('hQName').value.replace(/^\s+|\s+$/g, '').slice(0, 40), q: r.questions, n: notes, ne: gameNotesEs(),
-    m: clamp(parseInt($('hMins').value, 10) || 10, 1, 60), h: hst.cfg.half && notes ? 1 : 0 };
+    m: clamp(parseInt($('hMins').value, 10) || 10, 1, 60), h: hst.cfg.half && notes ? 1 : 0, s: hst.cfg.sport };
   packSolo(obj, function(code){
     var url = joinUrl() + '#solo=' + code, box = $('hSoloLink');
     box.value = url; box.style.display = 'block'; $('hSoloCopy').style.display = '';
     msg.className = 'okMsg' + (/^https:/.test(url) ? '' : ' warn');
     msg.textContent = /^https?:/.test(location.protocol) ?
-      'Link ready: ' + r.questions.length + ' questions, ' + obj.m + ' minute game' + (obj.h ? ' with a halftime study break' : '') + '. Copy it and post it for your students.' +
+      'Link ready: ' + r.questions.length + ' questions, ' + obj.m + ' minute game' + (obj.h ? (hostDerby() ? ' with a 7th inning stretch' : ' with a halftime study break') : '') + '. Copy it and post it for your students.' +
         (/^https:/.test(url) ? '' : ' Note: this link starts with http://, which apps on Android phones may refuse to open.') :
       'This page is open from the device, so the link will not work for students. Open the game from your website first, then make the link.';
   });
@@ -1801,7 +1879,7 @@ function setupLocal(){
   $('qConn').style.display = 'none';
   $('hBox').appendChild($('pad'));
   $('qNext').onclick = quizNext;
-  if (isTouch()) $('hKeyHint').textContent = 'Teacher player. Tap an answer. On the court: D-pad moves, A jumps, hold and let go of B to shoot.';
+  $('hBox').appendChild($('batPick'));
   bindPad();
 }
 function localShow(which){
@@ -1824,7 +1902,7 @@ function removeTeacher(){
   if (stu.local){ stu.local = false; stu.ai = false; stu.mode = 'none'; resetRun(); localShow('none'); }
 }
 function drawTeacherWaiting(v, t){
-  var p = hst.players.teacher, x = stu.hero ? stu.hero.x : W / 2;
+  var p = hst.players.teacher, x = hostDerby() ? DB.BAT_X : (stu.hero ? stu.hero.x : W / 2);
   if (!p) return;
   drawAvatar(v.c, p.look, x, FLOOR, 1, 0, false, 0, 0.35);
   vText(v, '?', x, FLOOR - 20, '#f8d878', nameSize(v));
@@ -1842,7 +1920,7 @@ function ranked(){
 function statusFor(p, arr, i){
   var rk = i + 1;
   while (rk > 1 && arr[rk - 2].score === p.score) rk--;
-  return { t: 'g', ph: hst.phase, l: Math.ceil(hostLeft()), hl: hst.halfDone ? 0 : Math.round(hst.cfg.mins * 30), sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
+  return { t: 'g', ph: hst.phase, l: Math.ceil(hostLeft()), hl: hst.halfDone ? 0 : halfMark(hst.cfg.mins, hst.cfg.sport), sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
 }
 function hostBroadcast(){
   var arr = ranked();
@@ -1862,7 +1940,7 @@ function hostData(conn, d){
     p.look = cleanLook(d.l);
     p.conn = conn; p.on = true; p.seen = performance.now();
     var arr = ranked();
-    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '', g: statusFor(p, arr, arr.indexOf(p)) });
+    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '', sp: hst.cfg.sport, m: hst.cfg.mins, g: statusFor(p, arr, arr.indexOf(p)) });
     refreshLobby();
     return;
   }
@@ -1891,6 +1969,27 @@ function hostData(conn, d){
     if (hst.phase === 'play'){ if (d.r) p.right++; else p.wrong++; }
   } else if (d.t === 'bn'){
     if (hst.phase === 'play'){ p.score += 1; }
+  } else if (d.t === 'hr'){
+    // a home run in the derby: the host works out the points from the distance
+    if (hst.phase === 'play' && hst.dby){
+      var ft = clamp(d.d | 0, 300, 700), hp = dbyHrPts(ft, d.g);
+      p.score += hp; hst.dby.total++;
+      if (!p.local){
+        dbyReplay(p, d);
+        addPop(hst.pops, 150, 30 + (hst.dby.total % 3) * 10, '+' + hp + ' ' + p.name + ' ' + ft + ' FT', '#fcfc78');
+      }
+      hostBroadcast();
+    }
+  } else if (d.t === 'tg'){
+    if (hst.phase === 'play' && DB_TG[d.k]){
+      var tp = dbyTgPts(d.k, d.g);
+      p.score += tp;
+      if (!p.local){
+        addPop(hst.pops, 190, 60, '+' + tp + ' ' + p.name + ' ' + DB_TG[d.k].n, '#58f8d0');
+        if (d.k === 'b' && hst.dby && hst.dby.S.blimp && !hst.dby.S.blimp.pop) hst.dby.S.blimp.pop = 0.01;
+      }
+      hostBroadcast();
+    }
   }
 }
 function hostStartGame(){
@@ -1899,17 +1998,20 @@ function hostStartGame(){
   hst.phase = 'play'; hst.netH = -1; hst.netT = 0; hst.halfDone = !hst.cfg.half;
   hst.startPerf = performance.now(); hst.endAt = Date.now() + hst.cfg.mins * 60000;
   hst.pops = []; hst.parts = []; hst.birds = []; hst.poops = []; hst.splats = []; hst.randT = 0; hst.lastSec = -1;
+  hst.dby = hostDerby() ? { S: dbyScene(), flys: [], bat: null, total: 0 } : null;
+  document.body.classList.toggle('dby', hostDerby());
+  keyHint();
   for (var k in hst.players){
     var p = hst.players[k];
     p.score = 0; p.right = 0; p.wrong = 0; p.st = null; p.rx = null; p.bxr = null;
-    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '' });
+    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '', sp: hst.cfg.sport, m: hst.cfg.mins });
   }
   $('hViewBtn').textContent = 'SHOW: ' + VIEW_LABELS[hst.cfg.view];
   showScreen('scrHGame');
   hostResize();
   hostBroadcast();
   hostBoard();
-  sfx.fanfare();
+  if (hostDerby()) sfx.charge(); else sfx.fanfare();
 }
 /* halftime: the clock stops and everyone studies until the teacher taps RESUME */
 function startHalf(){
@@ -1923,12 +2025,13 @@ function startHalf(){
       '<span class="sc">' + arr[i].score + '</span></div>';
   }
   $('hhBoard').innerHTML = html || '<div class="note">No scores yet</div>';
-  $('hhTime').innerHTML = 'SECOND HALF<br>' + fmt(hst.halfLeft) + ' TO PLAY';
+  $('hhTitle').textContent = hostDerby() ? '7TH INNING STRETCH' : 'HALFTIME';
+  $('hhTime').innerHTML = (hostDerby() ? 'LAST INNINGS<br>' : 'SECOND HALF<br>') + fmt(hst.halfLeft) + ' TO PLAY';
   $('hhNotes').innerHTML = studyHtml(hst.notes);
   showScreen('scrHHalf');
   $('scrHHalf').scrollTop = 0;
   hostBroadcast();
-  sfx.fanfare();
+  if (hostDerby()) sfx.ballgame(); else sfx.fanfare();
 }
 function resumeHalf(){
   if (hst.phase !== 'half') return;
@@ -2027,19 +2130,19 @@ function hostBoard(){
   var left = hostLeft();
   $('hTimer').textContent = fmt(left);
   $('hTimer').className = 'pix' + (left <= 30 ? ' low' : '');
-  $('hHoop').innerHTML = 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
+  $('hHoop').innerHTML = hostDerby() ? 'HOMERS 1 TO 3, LIGHTS +5<br>SCOREBOARD +5, BLIMP +20' : 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
   hst.lastBoard = performance.now();
 }
 function hostUpdate(dt, now){
   var left = hostLeft(), i;
   if (left <= 0){ hostEndGame(); if (stu.local){ stu.mode = 'over'; localShow('none'); } return; }
-  if (!hst.halfDone && left <= hst.cfg.mins * 30){ startHalf(); return; }
+  if (!hst.halfDone && left <= halfMark(hst.cfg.mins, hst.cfg.sport)){ startHalf(); return; }
   var sec = Math.ceil(left);
   if (sec !== hst.lastSec){ if (sec <= 10) sfx.tick(); hst.lastSec = sec; }
   hst.netT = Math.max(0, hst.netT - dt);
   // when the teacher is playing, the court only shows the teacher's own (interactive) birds
   hst.birdT -= dt;
-  if (stu.local) hst.birds = [];
+  if (stu.local || hst.dby) hst.birds = [];
   else if (hst.birdT <= 0){ spawnBird(hst.birds); hst.birdT = rand(4, 8); }
   var shown = visiblePlayers();
   for (i = hst.birds.length - 1; i >= 0; i--){
@@ -2074,6 +2177,7 @@ function hostUpdate(dt, now){
   }
   stepPoops(hst.poops, hst.splats, dt, null);
   stepFx(hst.parts, hst.pops, dt);
+  if (hst.dby) dbyHostUpdate(dt);
   var k1 = Math.min(1, dt * 14), k2 = Math.min(1, dt * 18);
   for (var key in hst.players){
     var p = hst.players[key], s = p.st;
@@ -2087,6 +2191,7 @@ function hostUpdate(dt, now){
   if (now - hst.lastBoard > 500) hostBoard();
 }
 function hostDraw(now){
+  if (hst.dby){ dbyHostDraw(); return; }
   var v = hst.view, c = v.c, t = gameTimeMs() / 1000, i;
   // light only the big-screen player's hoop while they play; otherwise every student has their own lit hoop
   var lit = (stu.local && stu.mode === 'play' && stu.hero) ? stuLit() : -1;
@@ -2128,6 +2233,7 @@ function hostFrame(dt, now){
     else if (stu.mode === 'play' && stu.hero) aiThink(dt);
   }
   if (stu.local && stu.mode === 'play' && stu.hero) stuUpdate(dt);
+  if (stu.local) dbyPickShow();
   hostUpdate(dt, now);
   if (hst.phase === 'play') hostDraw(now);
 }
@@ -2154,6 +2260,7 @@ function studentInit(){
   };
   $('jPw').value = saved.pw || '';
   stu.lang = saved.lang === 'es' ? 'es' : 'en';
+  sportTitles(saved.sp);
   var langBtns = $('jLang').getElementsByTagName('button');
   for (var lb = 0; lb < langBtns.length; lb++){
     langBtns[lb].onclick = function(){
@@ -2200,7 +2307,8 @@ function soloInit(){
       $('jErr').textContent = L('This practice link is broken or incomplete. Ask your teacher for a new link.');
       return;
     }
-    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), ne: String(d.ne || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n };
+    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), ne: String(d.ne || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n, s: d.s === 'derby' ? 'derby' : 'hoops' };
+    setStuSport(SOLO.s);
     soloTitle();
     $('jGo').textContent = L('PLAY'); $('jGo').disabled = false;
     $('jGo').onclick = soloStart;
@@ -2236,10 +2344,12 @@ function soloMsg(m){
     var h = m.h | 0, pts = h === 3 ? DUNK_PTS : HOOPS[clamp(h, 0, 2)].pts + (m.j ? 1 : 0);
     S.sc += pts; stu.G.sc = S.sc; stuData({ t: 'ok', p: pts }); stuHud(true);
   } else if (m.t === 'bn'){ S.sc += 1; stu.G.sc = S.sc; stuHud(true); }
+  else if (m.t === 'hr'){ S.sc += dbyHrPts(m.d, m.g); stu.G.sc = S.sc; stuHud(true); }
+  else if (m.t === 'tg' && DB_TG[m.k]){ S.sc += dbyTgPts(m.k, m.g); stu.G.sc = S.sc; stuHud(true); }
 }
 function soloTick(){
   if (stu.mode !== 'quiz' && stu.mode !== 'play') return false;
-  if (!stu.solo.halfDone && timeLeft() <= SOLO.m * 30){
+  if (!stu.solo.halfDone && timeLeft() <= halfMark(SOLO.m, SOLO.s)){
     stu.solo.halfDone = true;
     stu.G.l = timeLeft(); stu.lAt = performance.now(); stu.G.ph = 'half';
     goHalf();
@@ -2278,7 +2388,18 @@ function refreshLook(){
   $('jHatName').textContent = L(HATS[me.look.hat].n);
   paintThumb($('jPrev'), me.look);
 }
-function saveMe(){ var sv = load(ME_KEY) || {}; store(ME_KEY, { pid: me.pid, name: me.name, look: me.look, pw: stu.pw, lang: stu.lang, per: sv.per }); }
+function saveMe(){ var sv = load(ME_KEY) || {}; store(ME_KEY, { pid: me.pid, name: me.name, look: me.look, pw: stu.pw, lang: stu.lang, per: sv.per, sp: sv.sp }); }
+function isDerby(){ return stu.sport === 'derby'; }
+function setStuSport(sp){
+  stu.sport = sp === 'derby' ? 'derby' : 'hoops';
+  document.body.classList.toggle('dby', isDerby());
+  sportTitles(stu.sport);
+  $('btnA').style.display = isDerby() ? 'none' : '';
+  var bl = $('btnB').getElementsByTagName('i')[0];
+  bl._en = isDerby() ? 'SWING' : 'SHOOT'; bl.innerHTML = L(bl._en);
+  var sv = load(ME_KEY);
+  if (sv && !IS_HOST && sv.sp !== stu.sport){ sv.sp = stu.sport; store(ME_KEY, sv); }
+}
 function joinErr(msg){ $('jErr').textContent = L(msg); $('jGo').disabled = false; $('jGo').textContent = L('JOIN GAME'); }
 
 function studentJoin(){
@@ -2359,6 +2480,7 @@ function stuSendMsg(m){ if (stu.conn && stu.conn.open){ try { stu.conn.send(m); 
 function stuData(d){
   if (!d || !d.t) return;
   if (d.t === 'w'){
+    setStuSport(d.sp); stu.gameMins = d.m || 0;
     stu.bank = d.q || [];
     stu.notes = d.n || ''; stu.notesEs = d.ne || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     applyG(d.g);
@@ -2366,6 +2488,7 @@ function stuData(d){
     else if (d.g.ph === 'half'){}
     else if (stu.mode !== 'over' || d.g.ph === 'lobby') goWait();
   } else if (d.t === 'start'){
+    setStuSport(d.sp); stu.gameMins = d.m || 0;
     stu.bank = d.q || stu.bank;
     stu.notes = d.n || ''; stu.notesEs = d.ne || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     resetRun();
@@ -2398,7 +2521,7 @@ function resetRun(){
   stu.balls = 0; stu.ballK = 0; stu.correct = 0; stu.deck = []; stu.lastQ = -1;
   stu.seq = 0; stu.magic = null; stu.dunkBall = null; stu.aiS = null;
   stu.made = 0; stu.water = null; stu.waterT = 0; stu.qRight = 0; stu.qTotal = 0;
-  stu.hero = null; stu.flight = null; stu.meter = null;
+  stu.hero = null; stu.flight = null; stu.meter = null; stu.dby = null;
   stu.birds = []; stu.poops = []; stu.splats = []; stu.parts = []; stu.pops = [];
 }
 function goWait(){
@@ -2413,13 +2536,17 @@ function notesFor(){ return stu.lang === 'es' && stu.notesEs ? stu.notesEs : stu
 function goHalf(){
   stu.halfFrom = stu.mode; stu.mode = 'half'; stu.meter = null; stu.made = 0;
   stu.input.l = stu.input.r = stu.input.u = stu.input.d = stu.input.a = stu.input.b = false;
+  var d = isDerby();
   $('hfScore').innerHTML = L('YOUR SCORE') + ' ' + stu.G.sc + (stu.solo ? '' : '<br>' + L('PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n));
-  $('hfMsg').textContent = L(stu.solo ? 'Read the study sheet, then start the second half when you are ready.' : 'Study up for the second half! It starts when your teacher is ready.');
+  $('hfTitle')._en = d ? '7TH INNING STRETCH' : 'HALFTIME'; $('hfTitle').innerHTML = L($('hfTitle')._en);
+  $('hfMsg').textContent = L(stu.solo ? (d ? 'Read the study sheet, then start the last innings when you are ready.' : 'Read the study sheet, then start the second half when you are ready.') :
+    (d ? 'Stretch and study! The game starts again when your teacher is ready.' : 'Study up for the second half! It starts when your teacher is ready.'));
+  $('hfGo')._en = d ? 'START THE LAST INNINGS' : 'START THE SECOND HALF'; $('hfGo').innerHTML = L($('hfGo')._en);
   $('hfGo').style.display = stu.solo ? '' : 'none';
-  $('hfNotes').innerHTML = notesFor() ? studyHtml(notesFor()) : '<p>' + L('Take a breather! The second half starts soon.') + '</p>';
+  $('hfNotes').innerHTML = notesFor() ? studyHtml(notesFor()) : '<p>' + L(d ? 'Take a stretch! The game starts again soon.' : 'Take a breather! The second half starts soon.') + '</p>';
   showScreen('scrHalf');
   $('scrHalf').scrollTop = 0;
-  sfx.bonus();
+  if (d) sfx.ballgame(); else sfx.bonus();
 }
 function leaveHalf(){
   var from = stu.halfFrom;
@@ -2478,7 +2605,7 @@ function drawIdx(){
   return stu.lastQ;
 }
 function goQuiz(){
-  $('qHead').innerHTML = L(stu.water ? 'Water break!<br>Answer 3 questions' : 'Answer 3 right<br>to earn 3 balls');
+  $('qHead').innerHTML = L(stu.water ? 'Water break!<br>Answer 3 questions' : (isDerby() ? 'Answer 3 right<br>to step up to bat' : 'Answer 3 right<br>to earn 3 balls'));
   if (stu.ai){
     // the computer player "answers" for a moment, then gets 3 more balls
     stu.mode = 'quiz'; stu.meter = null; stu.aiQuizT = 2.5; localShow('none');
@@ -2538,7 +2665,7 @@ function answerQ(k){
     stu.correct++;
     fb.className = 'qFb good';
     fb.textContent = L(stu.water ? (stu.water.n >= 3 ? 'Correct! Break is over!' : 'Correct!') :
-      (stu.correct >= 3 ? 'Correct! You earned 3 balls!' : 'Correct! ' + (3 - stu.correct) + ' more to go.'));
+      (stu.correct >= 3 ? (isDerby() ? 'Correct! Batter up!' : 'Correct! You earned 3 balls!') : 'Correct! ' + (3 - stu.correct) + ' more to go.'));
     sfx.right();
   } else {
     fb.className = 'qFb bad';
@@ -2547,7 +2674,7 @@ function answerQ(k){
   }
   renderDots();
   var nb = $('qNext'), done = stu.water ? stu.water.n >= 3 : stu.correct >= 3;
-  nb.textContent = L(done ? (stu.water ? 'BACK TO THE COURT' : 'GET MY 3 BALLS') : 'NEXT QUESTION');
+  nb.textContent = L(done ? (stu.water ? (isDerby() ? 'BACK TO THE PLATE' : 'BACK TO THE COURT') : (isDerby() ? 'PLAY BALL!' : 'GET MY 3 BALLS')) : 'NEXT QUESTION');
   nb.className = 'bigBtn' + (done ? ' go' : '');
   nb.style.display = 'block';
 }
@@ -2563,6 +2690,7 @@ function newHero(){
     jumpHeld: false, inv: 0, hurtT: 0, dp: 0 };
 }
 function goPlay(keepBalls){
+  if (isDerby()){ dbyGoPlay(!!keepBalls); return; }
   if (stu.G.ph !== 'play'){ goWait(); return; }
   stu.mode = 'play'; stu.balls = keepBalls || 3; stu.flight = null; stu.meter = null; stu.outT = 0; stu.outShown = false; stu.waterT = 0;
   if (!stu.hero) stu.hero = newHero();
@@ -2576,7 +2704,7 @@ function goPlay(keepBalls){
 function stuResize(){
   if (!stu.view) return;
   var land = window.innerWidth > window.innerHeight;
-  document.body.className = land ? 'land' : '';
+  document.body.classList.toggle('land', land);
   if (stu.mode !== 'play') return;
   var hud = $('pHud').offsetHeight || 40, availW = window.innerWidth, availH;
   if (land) availH = window.innerHeight - hud;
@@ -2733,7 +2861,7 @@ function wrongHoopCheck(b, p){
 var WATER_EVERY = 10;
 function waterBlocked(){
   var left = stu.local ? hostLeft() : timeLeft();
-  var hl = stu.local ? (hst.halfDone ? 0 : hst.cfg.mins * 30) : (stu.solo ? (stu.solo.halfDone ? 0 : SOLO.m * 30) : (stu.G.hl || 0));
+  var hl = stu.local ? (hst.halfDone ? 0 : halfMark(hst.cfg.mins, hst.cfg.sport)) : (stu.solo ? (stu.solo.halfDone ? 0 : halfMark(SOLO.m, SOLO.s)) : (stu.G.hl || 0));
   return left <= 60 || (hl > 0 && left - hl <= 60);
 }
 function goWater(){
@@ -2743,7 +2871,7 @@ function goWater(){
 function endWater(){
   var balls = stu.water.balls;
   stu.water = null;
-  goPlay(balls);
+  goPlay(isDerby() ? true : balls);
 }
 function startMagic(){
   stu.magic = { left: MAGIC_SECS, dunk: null };
@@ -2795,6 +2923,7 @@ function stepMagic(p, dt, t){
   if (D.t >= 3.4) endMagic('WHAT A DUNK!');
 }
 function stuUpdate(dt){
+  if (isDerby()){ dbyUpdate(dt); return; }
   var p = stu.hero, t = syncT(), gs = hoopGeos(t), i;
   stu.rimSnd -= dt; stu.netT = Math.max(0, stu.netT - dt);
   var holding = stu.balls > 0 && !stu.flight;
@@ -2896,6 +3025,7 @@ function stuUpdate(dt){
 function stuLit(){ return stu.magic ? -2 : stu.seq; }
 function stuDraw(){
   var v = stu.view, t = syncT();
+  if (isDerby()){ dbyDrawAll(v, stu.dby, t, ['HOMERS', String(stu.dby.hr)]); drawPops(v, stu.pops); return; }
   drawScene(v, t, stu.netH, stu.netT, stuLit());
   drawLocalLayer(v, t);
   drawHoopLabels(v, t, stuLit());
@@ -2924,6 +3054,12 @@ function drawLocalLayer(v, t){
   if (stu.local) drawPops(v, stu.pops);
 }
 function stuSend(now){
+  if (isDerby()){
+    if (now - stu.lastSend < 500) return;
+    stu.lastSend = now;
+    stuSendMsg({ t: 'st', x: DB.BAT_X, y: FLOOR, f: 1, dz: 1, k: stu.dby.k });
+    return;
+  }
   if (now - stu.lastSend < 80) return;
   stu.lastSend = now;
   var p = stu.hero, hang = dunkHanging(), holding = stu.balls > 0 && !stu.flight && !hang, over = holding && (!!stu.meter || !p.ground);
@@ -2938,10 +3074,16 @@ function stuHud(force){
   var now = performance.now();
   if (!force && now - stu.lastHud < 250) return;
   stu.lastHud = now;
-  var h = '';
-  for (var i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi k' + stu.ballK + '"></span>';
-  $('pBalls').innerHTML = h;
-  $('pHoop').textContent = L(stu.magic ? 'MAGIC ' + Math.ceil(stu.magic.left) : 'NEXT: ' + HOOPS[stu.seq].pts + ' PTS');
+  var h = '', i, D = stu.dby;
+  if (isDerby()){
+    for (i = 0; i < 3; i++) h += '<span class="sk' + (D && i < D.k ? ' on' : '') + '"></span>';
+    $('pBalls').innerHTML = h;
+    $('pHoop').textContent = D ? L(D.gold > 0 ? 'GOLDEN ' + Math.ceil(D.gold) : 'AIM: ' + DB_AIMS[D.aim].n) : '';
+  } else {
+    for (i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi k' + stu.ballK + '"></span>';
+    $('pBalls').innerHTML = h;
+    $('pHoop').textContent = L(stu.magic ? 'MAGIC ' + Math.ceil(stu.magic.left) : 'NEXT: ' + HOOPS[stu.seq].pts + ' PTS');
+  }
   $('pTime').textContent = fmt(timeLeft());
   $('pScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : ' #' + (stu.G.rk || '-'));
   $('qScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : '  #' + (stu.G.rk || '-'));
@@ -2955,6 +3097,7 @@ function stuFrame(dt, now){
     if (stu.mode === 'quiz') stuHud(false);
     return;
   }
+  dbyPickShow();
   if (stu.mode !== 'play' || !stu.hero) return;
   if (!stu.view.cw) stuResize();
   stuUpdate(dt);
@@ -3000,6 +3143,7 @@ function aiPrep(){
   }
 }
 function aiThink(dt){
+  if (isDerby()){ dbyAi(dt); return; }
   var p = stu.hero, inp = stu.input, A = stu.aiS || (stu.aiS = { st: 'pick', wait: 1 });
   inp.l = inp.r = inp.u = inp.d = inp.a = false;
   if (stu.outT > 0) return;
@@ -3049,6 +3193,12 @@ function aiThink(dt){
 /* ---------- on-screen controller ---------- */
 function stuPress(k){
   if (stu.ai || stu.mode !== 'play' || !stu.hero || stu.outT > 0) return;
+  if (isDerby()){
+    if (k === 'jump') dbyAim(1);
+    else if (k === 'drop') dbyAim(-1);
+    else if (k === 'shoot') dbySwing();
+    return;
+  }
   if (k === 'jump') heroJump(stu.hero);
   else if (k === 'drop') heroDrop(stu.hero);
   else if (k === 'shoot') pressShoot();
@@ -3103,6 +3253,14 @@ function bindPad(){
     el.addEventListener('mousedown', function(){ on(); var u = function(){ document.removeEventListener('mouseup', u); off(); }; document.addEventListener('mouseup', u); });
   }
   bindBtn('btnA', function(){ stu.input.a = true; stuPress('jump'); }, function(){ stu.input.a = false; });
+  // derby: tap the field to swing, and the bat picker's two buttons
+  function stageTap(e){ if (!isDerby() || stu.mode !== 'play' || stu.ai || (IS_HOST && !stu.local)) return; e.preventDefault(); ac(); stuPress('shoot'); }
+  ['pStage', 'hStage'].forEach(function(id){
+    $(id).addEventListener('touchstart', stageTap, { passive: false });
+    $(id).addEventListener('mousedown', stageTap);
+  });
+  var bps = $('batPick').getElementsByTagName('button');
+  for (var bi = 0; bi < bps.length; bi++) bps[bi].onclick = function(){ if (!stu.ai) dbyPickBat(this.getAttribute('data-v')); };
   bindBtn('btnB', function(){ stu.input.b = true; stuPress('shoot'); }, function(){ stu.input.b = false; if (!stu.ai) releaseShoot(); });
 
   var keyMap = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd' };
@@ -3119,6 +3277,11 @@ function bindPad(){
       return;
     }
     if (stu.mode !== 'play' || e.repeat) return;
+    if (isDerby() && stu.dby && stu.dby.st === 'pick' && !stu.ai){
+      if (e.key === '1' || e.key === 'ArrowLeft'){ e.preventDefault(); dbyPickBat('power'); }
+      else if (e.key === '2' || e.key === 'ArrowRight'){ e.preventDefault(); dbyPickBat('contact'); }
+      return;
+    }
     var k = keyMap[e.key];
     if (k){ e.preventDefault(); touches['k' + k] = { l: k === 'l', r: k === 'r', u: k === 'u', d: k === 'd' }; evalDirs(); }
     else if (e.key === ' '){ e.preventDefault(); stu.input.b = true; stuPress('shoot'); }
@@ -3128,6 +3291,569 @@ function bindPad(){
     if (k){ delete touches['k' + k]; evalDirs(); }
     else if (e.key === ' '){ stu.input.b = false; if (!stu.ai) releaseShoot(); }
   });
+}
+
+/* ============================================================
+   HOME RUN DERBY (the other game: same quiz, lobby and phones)
+   Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out.
+   Misses, fouls and pitches you let go by are all strikes, and strikes add up for the whole turn.
+============================================================ */
+var DB = { BAT_X: 31, PLATE: 40, CY: 124, MOUND: 98, REL_X: 94, REL_Y: 116, MITT_X: 21, WALL_X: 198, WALL_TOP: 108, G: 120 };
+var DB_AIMS = [{ n: 'LOW', a: 24 }, { n: 'MID', a: 36 }, { n: 'HIGH', a: 52 }];
+var DB_BATS = {
+  std: { w: 0.06, pow: 1, col: '#c08040', dark: '#7a4a1c' },
+  power: { w: 0.042, pow: 1.1, col: '#383848', dark: '#16161e' },
+  contact: { w: 0.085, pow: 0.9, col: '#ecd8a8', dark: '#a88850' }
+};
+var DB_WIND = 0.75, DB_SW = 0.06, DB_FOUL = 0.07, DB_LOOK = 0.17, DB_GAP = 1.0, DB_PICK_AT = 120, LIGHT_OUT = 15, GOLD_SECS = 20;
+var DB_LIGHTS = [{ x1: 204, x2: 220, y1: 40, y2: 53 }, { x1: 238, x2: 254, y1: 58, y2: 71 }];
+var DB_SB = { x1: 222, x2: 252, y1: 74, y2: 95 };
+var DB_TG = { l: { n: 'LIGHTS', p: 5 }, s: { n: 'SCOREBOARD', p: 5 }, b: { n: 'BLIMP', p: 20 } };
+var PITCHER = { shirt: 8, skin: 1, hat: 1, hc: 4 };
+var CATCHER = makeSpriteP([
+  '..kkk...', '.kkkkk..', '.kgsgk..', '..kgk...', '.NNNNN..', 'NNNNNNmm', 'NNNNNNmm', '.PPPP...', 'PP..PP..', 'FF..FF..'
+], { k: '#283070', g: '#9a9aa8', s: '#f0b880', N: '#2a3060', m: '#8a4a1a', P: '#d8d8d8', F: '#181818' });
+
+function dbyHrPts(ft, g){ return (ft < 420 ? 1 : (ft < 470 ? 2 : 3)) * (g ? 2 : 1); }
+function dbyTgPts(k, g){ return (DB_TG[k] ? DB_TG[k].p : 0) * (g ? 2 : 1); }
+function bleachTop(x){ return 110 - Math.floor((x - 202) / 7) * 2; }
+
+var DBG = null, CROWD = [];
+function dbyBg(){
+  if (DBG) return DBG;
+  var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var c = cv.getContext('2d'), i, k, x, seed = 7;
+  function r(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  var sky = ['#0c0828', '#140c34', '#1e1048', '#2c1458', '#40186a', '#5a1c72', '#7a2274', '#9c2c6e', '#be3c62', '#de5652', '#f47a44'];
+  var bh = 104 / sky.length;
+  for (i = 0; i < sky.length; i++){ c.fillStyle = sky[i]; c.fillRect(0, Math.floor(i * bh), W, Math.ceil(bh) + 1); }
+  c.fillStyle = '#fcfcfc';
+  for (i = 0; i < 50; i++){ c.globalAlpha = 0.35 + r() * 0.65; c.fillRect(Math.floor(r() * W), Math.floor(r() * 50), 1, 1); }
+  c.globalAlpha = 1;
+  // the sun going down over the ocean beyond the outfield
+  c.fillStyle = '#fcd060'; c.beginPath(); c.arc(132, 104, 18, 0, Math.PI * 2); c.fill();
+  for (i = 0; i < 4; i++){ c.fillStyle = '#e8604e'; c.fillRect(112, 92 + i * 3, 40, i < 2 ? 1 : 2); }
+  c.fillStyle = '#2a1238';
+  c.fillRect(150, 101, 30, 3); c.fillRect(158, 99, 14, 2);
+  for (i = 104; i < 113; i++){ c.fillStyle = i < 107 ? '#3a3c94' : (i < 110 ? '#2c3282' : '#22286e'); c.fillRect(0, i, W, 1); }
+  c.fillStyle = '#f8c070';
+  for (i = 0; i < 12; i++) c.fillRect(118 + Math.floor(r() * 28), 105 + Math.floor(r() * 7), 2 + Math.floor(r() * 4), 1);
+  // grass in mowed stripes, warning track, infield dirt and the mound
+  for (i = 113; i < FLOOR; i++){ c.fillStyle = Math.floor((i - 113) / 3) % 2 ? '#2c8a38' : '#36a044'; c.fillRect(0, i, DB.WALL_X, 1); }
+  c.fillStyle = '#b07840'; c.fillRect(182, 128, 16, 4);
+  c.fillStyle = '#c8884a'; c.fillRect(12, 127, 108, 5); c.fillRect(18, 126, 96, 1);
+  c.fillStyle = '#b07038';
+  for (i = 0; i < 30; i++) c.fillRect(12 + Math.floor(r() * 108), 127 + Math.floor(r() * 5), 1, 1);
+  c.fillStyle = '#000'; c.fillRect(85, 127, 26, 1);
+  c.fillStyle = '#b87838'; c.fillRect(86, 128, 24, 4); c.fillRect(90, 127, 16, 1);
+  c.fillStyle = '#fcfcfc'; c.fillRect(96, 127, 5, 1);
+  c.fillStyle = '#f0f0e8'; c.fillRect(DB.PLATE + 4, 131, DB.WALL_X - DB.PLATE - 4, 1);
+  c.fillStyle = '#fcfcfc'; c.fillRect(37, 130, 7, 2);
+  c.fillStyle = '#e8e0d0'; c.fillRect(24, 131, 1, 1); c.fillRect(48, 131, 1, 1);
+  // backstop fence behind home plate
+  c.fillStyle = '#000'; c.fillRect(0, 90, 9, FLOOR - 90);
+  c.fillStyle = '#2a2a44'; c.fillRect(0, 91, 8, FLOOR - 91);
+  c.fillStyle = '#6a6a90';
+  for (i = 92; i < FLOOR; i += 3) c.fillRect(0, i, 8, 1);
+  for (k = 1; k < 8; k += 3) c.fillRect(k, 91, 1, FLOOR - 91);
+  // bleachers beyond the wall, stepping up to the right
+  for (k = 0; k * 7 + 202 < W; k++){
+    x = 202 + k * 7;
+    var top = bleachTop(x);
+    c.fillStyle = '#000'; c.fillRect(x, top - 1, W - x, 1);
+    c.fillStyle = '#2c2c44'; c.fillRect(x, top, W - x, FLOOR - top);
+    c.fillStyle = '#5a5a7a'; c.fillRect(x, top, W - x, 1);
+    for (var s = x + 1; s < W - 1; s += 3) CROWD.push({ x: s, y: top - 3, c: pick(SHIRTS), h: pick(SKINS), ph: r() * 6 });
+  }
+  // light tower poles (the lamps are drawn on top, lit or broken) and the foul pole
+  c.fillStyle = '#000'; c.fillRect(210, 53, 4, bleachTop(211) - 53); c.fillRect(244, 71, 4, bleachTop(245) - 71);
+  c.fillStyle = '#8a8aa0'; c.fillRect(211, 53, 2, bleachTop(211) - 53); c.fillRect(245, 71, 2, bleachTop(245) - 71);
+  c.fillStyle = '#000'; c.fillRect(195, 28, 3, DB.WALL_TOP - 28);
+  c.fillStyle = '#f8d800'; c.fillRect(196, 29, 1, DB.WALL_TOP - 29);
+  // the outfield wall with its padding
+  c.fillStyle = '#000'; c.fillRect(DB.WALL_X - 1, DB.WALL_TOP - 1, 6, FLOOR - DB.WALL_TOP + 1);
+  c.fillStyle = '#1e6a34'; c.fillRect(DB.WALL_X, DB.WALL_TOP, 4, FLOOR - DB.WALL_TOP);
+  c.fillStyle = '#145024';
+  for (i = DB.WALL_TOP + 4; i < FLOOR; i += 5) c.fillRect(DB.WALL_X, i, 4, 1);
+  c.fillStyle = '#f8d800'; c.fillRect(DB.WALL_X, DB.WALL_TOP, 4, 1);
+  c.fillStyle = '#000'; c.fillRect(0, FLOOR, W, 1);
+  c.fillStyle = '#8a5a2a'; c.fillRect(0, FLOOR + 1, W, H - FLOOR - 1);
+  c.fillStyle = '#6a4020';
+  for (i = 0; i < W; i += 16) c.fillRect(i, FLOOR + 1, 1, H - FLOOR - 1);
+  c.fillStyle = '#a87038'; c.fillRect(0, FLOOR + 1, W, 1);
+  DBG = cv;
+  return cv;
+}
+
+/* the stadium's moving parts: lights that shatter, the scoreboard, the crowd and the blimp */
+function dbyScene(){ return { lights: [0, 0], sbT: 0, crowdT: 0, blimp: null, blimpT: rand(8, 14) }; }
+function dbyStepScene(S, dt){
+  for (var k = 0; k < 2; k++) if (S.lights[k] > 0) S.lights[k] = Math.max(0, S.lights[k] - dt);
+  S.sbT = Math.max(0, S.sbT - dt); S.crowdT = Math.max(0, S.crowdT - dt);
+  var bp = S.blimp;
+  if (!bp){
+    S.blimpT -= dt;
+    if (S.blimpT <= 0){ var dir = Math.random() < 0.5 ? 1 : -1; S.blimp = { x: dir > 0 ? -16 : W + 16, y: 16, dir: dir, sp: rand(13, 18), bob: rand(0, 6), pop: 0 }; }
+  } else if (bp.pop > 0){
+    bp.pop += dt; bp.y += dt * 40 * bp.pop;
+    if (bp.pop > 1.6){ S.blimp = null; S.blimpT = rand(14, 22); }
+  } else {
+    bp.x += bp.dir * bp.sp * dt; bp.bob += dt * 1.5; bp.y = 16 + Math.sin(bp.bob) * 2;
+    if (bp.x < -20 || bp.x > W + 20){ S.blimp = null; S.blimpT = rand(10, 18); }
+  }
+}
+function drawBlimp(c, bp, t){
+  if (bp.pop > 0 && Math.floor(t * 12) % 2) return;
+  var x = Math.round(bp.x), y = Math.round(bp.y), dy, hw, bx = x - bp.dir * 13;
+  c.fillStyle = '#000';
+  c.fillRect(bx - 2, y - 6, 4, 4); c.fillRect(bx - 2, y + 3, 4, 4);
+  for (dy = -5; dy <= 5; dy++){ hw = Math.round(14 * Math.sqrt(Math.max(0, 1 - dy * dy / 30))); c.fillRect(x - hw - 1, y + dy, hw * 2 + 2, 1); }
+  for (dy = -4; dy <= 4; dy++){
+    hw = Math.round(13 * Math.sqrt(Math.max(0, 1 - dy * dy / 22)));
+    c.fillStyle = dy < -2 ? '#f0f0f8' : (dy > 2 ? '#9898b0' : '#c8c8dc'); c.fillRect(x - hw, y + dy, hw * 2, 1);
+  }
+  c.fillStyle = '#d82800'; c.fillRect(x - 10, y, 20, 1); c.fillRect(bx - 1, y - 5, 2, 2); c.fillRect(bx - 1, y + 4, 2, 2);
+  c.fillStyle = '#000'; c.fillRect(x - 4, y + 5, 8, 3);
+  c.fillStyle = '#404058'; c.fillRect(x - 3, y + 5, 6, 2);
+  c.fillStyle = '#f8d878'; c.fillRect(x - 2, y + 5, 1, 1); c.fillRect(x, y + 5, 1, 1); c.fillRect(x + 2, y + 5, 1, 1);
+}
+function dbyDrawScene(v, S, t, sb){
+  gameXf(v);
+  var c = v.c, k, i, b;
+  c.drawImage(dbyBg(), 0, 0);
+  for (k = 0; k < 2; k++){
+    b = DB_LIGHTS[k];
+    if (S.lights[k] > 0) continue;
+    c.fillStyle = 'rgba(255,246,200,0.05)';
+    c.beginPath(); c.moveTo(b.x1, b.y2); c.lineTo(b.x2, b.y2 - 6); c.lineTo(170 - k * 40, FLOOR); c.lineTo(12, FLOOR); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,250,210,0.2)'; c.fillRect(b.x1 - 4, b.y1 - 4, b.x2 - b.x1 + 8, b.y2 - b.y1 + 8);
+  }
+  for (k = 0; k < 2; k++){
+    b = DB_LIGHTS[k];
+    var out = S.lights[k] > 0;
+    c.fillStyle = '#000'; c.fillRect(b.x1 - 1, b.y1 - 1, b.x2 - b.x1 + 2, b.y2 - b.y1 + 2);
+    c.fillStyle = '#505068'; c.fillRect(b.x1, b.y1, b.x2 - b.x1, b.y2 - b.y1);
+    for (i = 0; i < 12; i++){
+      var lx = b.x1 + 1 + (i % 4) * 4, ly = b.y1 + 1 + Math.floor(i / 4) * 4;
+      c.fillStyle = out ? (i % 3 ? '#26262e' : '#3a3a48') : '#fffbe0'; c.fillRect(lx, ly, 3, 3);
+      if (!out){ c.fillStyle = '#f8e070'; c.fillRect(lx, ly + 2, 3, 1); }
+    }
+    if (out && Math.random() < 0.05){ c.fillStyle = '#f8d878'; c.fillRect(b.x1 + Math.floor(rand(0, 16)), b.y2, 1, 1); }
+  }
+  // the crowd stands up and bounces when someone goes deep
+  var cheer = S.crowdT > 0;
+  for (i = 0; i < CROWD.length; i++){
+    var p = CROWD[i], up = cheer && Math.sin(t * 16 + p.ph) > 0 ? 1 : 0;
+    c.fillStyle = p.c; c.fillRect(p.x, p.y + 1 - up, 2, 2);
+    c.fillStyle = p.h; c.fillRect(p.x, p.y - up, 2, 1);
+    if (cheer && up){ c.fillStyle = p.h; c.fillRect(p.x + (i % 2 ? 2 : -1), p.y - 2, 1, 2); }
+  }
+  b = DB_SB;
+  var fl = S.sbT > 0, sw = b.x2 - b.x1, shh = b.y2 - b.y1;
+  c.fillStyle = '#000'; c.fillRect(b.x1 + 4, b.y2, 3, bleachTop(b.x1 + 5) - b.y2); c.fillRect(b.x2 - 7, b.y2, 3, bleachTop(b.x2 - 6) - b.y2);
+  c.fillRect(b.x1 - 1, b.y1 - 1, sw + 2, shh + 2);
+  c.fillStyle = fl ? CHEER_COLS[Math.floor(t * 10) % CHEER_COLS.length] : '#f8b800'; c.fillRect(b.x1, b.y1, sw, shh);
+  c.fillStyle = '#0c1430'; c.fillRect(b.x1 + 1, b.y1 + 1, sw - 2, shh - 2);
+  if (fl) for (i = 0; i < 10; i++){ c.fillStyle = CHEER_COLS[(i + Math.floor(t * 12)) % CHEER_COLS.length]; c.fillRect(b.x1 + 2 + Math.floor(rand(0, sw - 4)), b.y1 + 2 + Math.floor(rand(0, shh - 4)), 1, 1); }
+  if (S.blimp) drawBlimp(c, S.blimp, t);
+  var cx = (b.x1 + b.x2) / 2, small = Math.max(6, Math.round(v.S * 2.1));
+  vText(v, fl ? 'WOW!' : L(sb[0]), cx, b.y1 + 6, fl ? '#fcfcfc' : '#f8d878', small);
+  vText(v, sb[1], cx, b.y1 + 15, fl ? CHEER_COLS[Math.floor(t * 10) % CHEER_COLS.length] : '#fcfcfc', Math.round(small * 1.4));
+}
+function drawBaseball(c, x, y, gold){
+  x = Math.round(x); y = Math.round(y);
+  c.fillStyle = '#000'; c.fillRect(x - 2, y - 1, 5, 3); c.fillRect(x - 1, y - 2, 3, 5);
+  c.fillStyle = gold ? '#f8d030' : '#fcfcfc'; c.fillRect(x - 1, y - 1, 3, 3);
+  c.fillStyle = gold ? '#a87808' : '#e83020'; c.fillRect(x - 1, y - 1, 1, 1); c.fillRect(x + 1, y + 1, 1, 1);
+}
+/* the bat swings around the batter's hands: up and back while waiting, level at contact, then all the way around */
+function batAng(sw, t){
+  var A0 = -2.1;
+  if (!sw) return A0 + Math.sin(t * 3) * 0.08;
+  var s = sw.t;
+  if (s < DB_SW) return A0 * (1 - s / DB_SW);
+  if (s < 0.2) return (s - DB_SW) / (0.2 - DB_SW) * 2.7;
+  if (s < 0.38) return 2.7;
+  return 2.7 + Math.min(1, (s - 0.38) / 0.17) * (A0 + Math.PI * 2 - 2.7);
+}
+function drawBat(c, px, py, ang, bat, gold, len){
+  var cs = Math.cos(ang), sn = Math.sin(ang), k, pass;
+  for (pass = 0; pass < 2; pass++){
+    for (k = 1; k <= len; k++){
+      var x = Math.round(px + cs * k), y = Math.round(py + sn * k), fat = k > 5 ? 2 : 1;
+      if (pass === 0){ c.fillStyle = '#000'; c.fillRect(x - 1, y - 1, fat + 2, fat + 2); }
+      else { c.fillStyle = gold ? (k < 4 ? '#a87808' : '#f8d030') : (k < 4 ? bat.dark : bat.col); c.fillRect(x, y, fat, fat); }
+    }
+  }
+}
+/* the people: catcher, batter (with the bat) and pitcher; D is the at-bat being played, or null on the big screen */
+function dbyDrawPeople(v, t, D, look, name, sw, faded){
+  var c = v.c, legs = 0, arms = false;
+  c.drawImage(CATCHER, 12, FLOOR - 10);
+  if (D && D.st === 'wind'){ arms = D.t > 0.25; legs = D.t > 0.55 ? 1 : 0; }
+  else if (D && D.st === 'pitch' && D.t < 0.25) legs = 1;
+  drawAvatar(c, PITCHER, DB.MOUND, FLOOR - 5, -1, legs, arms);
+  if (D && D.st === 'wind' && D.t > 0.25){ drawBaseball(c, DB.MOUND - 2, FLOOR - 21, false); }
+  if (!look) return;
+  var swing = sw && sw.t < 0.3;
+  drawAvatar(c, look, DB.BAT_X + (swing ? 1 : 0), FLOOR, 1, swing ? 1 : 0, false, 0, faded ? 0.35 : null);
+  if (faded) return;
+  var broke = D && D.brokeT > 0, gold = D ? D.gold > 0 : false;
+  drawBat(c, DB.BAT_X + 2 + (swing ? 1 : 0), FLOOR - 7, batAng(sw, t), DB_BATS[(D && D.bat) || 'std'], gold, broke ? 4 : 12);
+  vText(v, name, DB.BAT_X, H - 5, '#fcfcfc', nameSize(v));
+}
+function dbyDrawFly(c, f){
+  for (var i = 0; i < f.trail.length; i++){
+    c.globalAlpha = (i + 1) / (f.trail.length + 2) * 0.5;
+    c.fillStyle = f.gold ? '#f8d030' : '#fcfcfc'; c.fillRect(Math.round(f.trail[i][0]), Math.round(f.trail[i][1]), 1, 1);
+  }
+  c.globalAlpha = 1;
+  drawBaseball(c, f.x, f.y, f.gold);
+}
+/* everything on the phone (or the big screen while the teacher bats) */
+function dbyDrawAll(v, D, t, sb){
+  var c = v.c, ns = nameSize(v), i;
+  dbyDrawScene(v, D, t, sb);
+  dbyDrawPeople(v, t, D, me.look, me.name, D.swing, false);
+  gameXf(v);
+  if (D.ball) drawBaseball(c, D.ball.x, D.ball.y, false);
+  if (D.foul) drawBaseball(c, D.foul.x, D.foul.y, false);
+  if (D.fly) dbyDrawFly(c, D.fly);
+  drawParts(c, stu.parts);
+  // the count, the pitch speed and where you are aiming
+  var lab = L('STRIKES'), lw = lab.length * ns / v.S, dx = Math.round(4 + lw);
+  vText(v, lab, 2 + lw / 2, 6.5, '#fcfcfc', ns);
+  for (i = 0; i < 3; i++){
+    c.fillStyle = '#000'; c.fillRect(dx + i * 7, 3, 6, 6);
+    c.fillStyle = i < D.k ? '#f83800' : '#3a2a70'; c.fillRect(dx + 1 + i * 7, 4, 4, 4);
+  }
+  if (D.mph && (D.st === 'pitch' || D.st === 'after')) vText(v, D.mph + ' MPH', 46, 15, '#c9b8ff', ns);
+  vText(v, L('AIM: ' + DB_AIMS[D.aim].n), DB.BAT_X + 6, FLOOR - 28, '#58d8f8', ns);
+  if (D.gold > 0) vText(v, L('GOLDEN ' + Math.ceil(D.gold)), 46, 24, CHEER_COLS[Math.floor(t * 6) % CHEER_COLS.length], ns);
+}
+
+/* a batted ball: decided at contact, so the big screen can replay the same flight */
+function dbyLaunch(v, a){
+  var x0 = DB.PLATE, y0 = DB.CY, vx = v * Math.cos(a), vy = -v * Math.sin(a);
+  var tw = (DB.WALL_X - x0) / vx, yw = y0 + vy * tw + DB.G * tw * tw / 2;
+  var tl = (-vy + Math.sqrt(vy * vy + 2 * DB.G * (FLOOR - y0))) / DB.G, xl = x0 + vx * tl, hr = yw < DB.WALL_TOP;
+  return { x: x0, y: y0, vx: vx, vy: vy, t: 0, hr: hr, ft: hr ? Math.max(381, Math.round(380 + (xl - DB.WALL_X) * 0.75)) : Math.round((xl - x0) * 2.4),
+    hit: {}, trail: [], done: false, wall: false, landed: false };
+}
+function dbyStepFly(S, f, dt, on){
+  var n = 4, h = dt / n, k, b;
+  for (var i = 0; i < n && !f.done; i++){
+    var px = f.x;
+    f.vy += DB.G * h; f.x += f.vx * h; f.y += f.vy * h; f.t += h;
+    if (!f.wall && px < DB.WALL_X && f.x >= DB.WALL_X){
+      f.wall = true;
+      if (f.hr) on('hr', f);
+      else { f.x = DB.WALL_X - 1; f.vx = -Math.abs(f.vx) * 0.3; on('wall', f); }
+    }
+    if (f.hr && f.wall){
+      for (k = 0; k < 2; k++){
+        b = DB_LIGHTS[k];
+        if (!f.hit['l' + k] && !(S.lights[k] > 0) && f.x > b.x1 && f.x < b.x2 && f.y > b.y1 && f.y < b.y2){ f.hit['l' + k] = 1; S.lights[k] = LIGHT_OUT; on('light', f, k); }
+      }
+      b = DB_SB;
+      if (!f.hit.s && f.x > b.x1 && f.x < b.x2 && f.y > b.y1 && f.y < b.y2){ f.hit.s = 1; S.sbT = 2.5; f.vx = -f.vx * 0.15; f.vy = Math.abs(f.vy) * 0.2; on('sb', f); }
+      if (f.x > 202 && f.y >= bleachTop(f.x) - 2){ f.done = true; break; }
+    }
+    var bp = S.blimp;
+    if (bp && !bp.pop && !f.hit.b && Math.abs(f.x - bp.x) < 13 && Math.abs(f.y - bp.y) < 5){ f.hit.b = 1; bp.pop = 0.01; on('blimp', f); }
+    if (!f.hr && f.vy > 0 && f.y >= FLOOR - 2){
+      f.y = FLOOR - 2;
+      if (!f.landed){ f.landed = true; if (!f.wall) on('land', f); }
+      if (f.vy > 30){ f.vy = -f.vy * 0.35; f.vx *= 0.6; } else { f.vy = 0; f.vx *= 0.96; if (Math.abs(f.vx) < 3) f.done = true; }
+    }
+    if (f.x > W + 6 || f.x < -6 || f.t > 6) f.done = true;
+  }
+  f.trail.push([f.x, f.y]);
+  if (f.trail.length > 6) f.trail.shift();
+}
+function dbyFireworks(parts, n){
+  for (var i = 0; i < n; i++) burst(parts, rand(110, 240), rand(16, 50), 16, [pick(CHEER_COLS), pick(CHEER_COLS), '#fcfcfc'], 45, 25, 1.1);
+}
+function dbyLightBurst(parts, k){
+  var b = DB_LIGHTS[k];
+  burst(parts, (b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, 26, ['#fffbe0', '#f8d878', '#fcfcfc', '#a0a0b8'], 60, 120, 1.0);
+}
+
+/* ---------- the at-bat on the phone ---------- */
+function newDby(){
+  var D = dbyScene();
+  D.k = 0; D.aim = 1; D.bat = 'std'; D.picked = false; D.hr = 0; D.streak = 0; D.gold = 0; D.brokeT = 0;
+  D.st = 'wait'; D.t = 1.4; D.ball = null; D.fly = null; D.foul = null; D.swing = null; D.swung = false; D.plan = null; D.res = null;
+  D.pitchN = 0; D.pT = 0.66; D.mph = 0;
+  return D;
+}
+function dbyBat(){ return DB_BATS[stu.dby.bat] || DB_BATS.std; }
+function dbyGoPlay(keep){
+  if (stu.G.ph !== 'play'){ goWait(); return; }
+  var D = stu.dby || (stu.dby = newDby());
+  stu.mode = 'play'; stu.meter = null; stu.outT = 0; stu.waterT = 0;
+  if (!stu.hero) stu.hero = { x: DB.BAT_X, y: FLOOR, face: 1 };
+  if (!keep){ D.k = 0; D.streak = 0; }
+  D.ball = null; D.foul = null; D.fly = null; D.swing = null; D.plan = null; D.brokeT = 0;
+  if (D.st !== 'pick'){ D.st = 'wait'; D.t = 1.4; }
+  if (stu.local) localShow('play');
+  else { showScreen('scrPlay'); stuResize(); }
+  addPop(stu.pops, W / 2, 40, keep ? 'BACK IN THE BOX!' : 'BATTER UP!', '#fcfc78', true);
+  sfx.bonus();
+  stuHud(true);
+}
+function dbyElapsed(){
+  var mins = stu.local ? hst.cfg.mins : (stu.solo ? SOLO.m : (stu.gameMins || 0));
+  var left = stu.local ? hostLeft() : timeLeft();
+  return left > 15 ? mins * 60 - left : 0;
+}
+function dbyPickShow(){
+  var D = stu.dby, on = isDerby() && stu.mode === 'play' && !!D && D.st === 'pick' && !stu.ai, el = $('batPick');
+  if ((el.style.display !== 'none') !== on) el.style.display = on ? 'block' : 'none';
+}
+function dbyPickBat(v){
+  var D = stu.dby;
+  if (!D || D.st !== 'pick' || !DB_BATS[v]) return;
+  D.bat = v; D.picked = true; D.st = 'wait'; D.t = 0.9;
+  addPop(stu.pops, W / 2, 40, v === 'power' ? 'POWER BAT!' : 'CONTACT BAT!', '#fcfc78', true);
+  sfx.bonus();
+}
+function dbyAim(d){
+  var D = stu.dby;
+  if (!D) return;
+  var a = clamp(D.aim + d, 0, 2);
+  if (a !== D.aim){ D.aim = a; sfx.tick(); stuHud(true); }
+}
+function dbyPitch(D){
+  var base = clamp(0.66 - D.hr * 0.005, 0.46, 0.66);
+  D.st = 'wind'; D.t = 0; D.swung = false; D.plan = null; D.res = null; D.pitchN++;
+  D.pT = Math.random() < 0.25 ? base * 1.3 : base;  // a changeup now and then
+  D.mph = Math.round(30 + 30 / D.pT);
+}
+// the swing is judged by where the ball will be when the bat comes level, a moment after the press
+function dbySwing(){
+  var D = stu.dby;
+  if (!D) return;
+  var live = D.st === 'wind' || (D.st === 'pitch' && !D.res);
+  if (!live || D.swung){ if (!D.swing && D.st !== 'pick' && D.st !== 'out') D.swing = { t: 0 }; return; }
+  var now = D.st === 'wind' ? D.t - DB_WIND : D.t, w = dbyBat().w, late = now + DB_SW - D.pT;
+  if (late > w + DB_FOUL + DB_SW) return;
+  D.swung = true; D.swing = { t: 0 };
+  sfx.whiff();
+  D.plan = { kind: Math.abs(late) <= w ? 'hit' : (Math.abs(late) <= w + DB_FOUL ? 'foul' : 'miss'), e: late, at: now + DB_SW };
+}
+function dbyStrike(){
+  var D = stu.dby;
+  D.k++; D.streak = 0;
+  addPop(stu.pops, W / 2, 56, 'STRIKE ' + D.k + '!', '#f86060', D.k >= 3);
+  sfx.ump();
+  if (D.k >= 3){
+    D.st = 'out'; D.t = 2.4; D.gold = 0;
+    addPop(stu.pops, W / 2, 74, "YOU'RE OUT!", '#f86060', true);
+    sfx.over();
+  }
+  stuHud(true);
+}
+function dbyGold(){
+  var D = stu.dby;
+  D.gold = GOLD_SECS;
+  addCheer(stu.pops, W / 2, 72, 'GOLDEN BAT!!');
+  addPop(stu.pops, W / 2, 86, 'HOMERS COUNT DOUBLE!', '#f8d030');
+  sfx.charge();
+  stuHud(true);
+}
+function dbyResolve(kind, e){
+  var D = stu.dby, b = D.ball, bx = b ? b.x : DB.PLATE, by = b ? b.y : DB.CY;
+  D.st = 'after'; D.res = kind;
+  if (kind === 'hit' && Math.random() < 0.1) kind = Math.random() < 0.5 ? 'foul' : 'miss';  // nobody squares them all up
+  if (kind === 'hit' && D.k >= 2 && Math.random() < 0.1){
+    // with 2 strikes, even a great swing can snap the bat, and that is strike 3
+    var bt = dbyBat();
+    D.ball = null; D.brokeT = 1.2;
+    D.foul = { x: bx, y: by, vx: -rand(20, 40), vy: -rand(60, 90) };
+    burst(stu.parts, DB.BAT_X + 9, FLOOR - 9, 18, [bt.col, bt.dark, '#fcfcfc'], 60, 120, 0.9);
+    addPop(stu.pops, W / 2, 40, 'CRACK! THE BAT BROKE!', '#f8a040', true);
+    sfx.snap();
+    if (dbyElapsed() >= DB_PICK_AT) D.picked = false;  // pick a new bat next time up
+    dbyStrike();
+    return;
+  }
+  if (kind === 'hit'){
+    var bat = dbyBat(), q = clamp(1 - Math.abs(e) / bat.w + rand(-0.06, 0.06), 0, 1);
+    var v = (150 + 60 * Math.pow(q, 0.8)) * bat.pow, ad = DB_AIMS[D.aim].a + rand(-2, 2);
+    var f = D.fly = dbyLaunch(v, ad * Math.PI / 180);
+    f.gold = D.gold > 0;
+    D.ball = null;
+    burst(stu.parts, DB.PLATE, DB.CY, 10, ['#fcfcfc', '#f8d878'], 50, 0, 0.4);
+    sfx.crack();
+    if (f.hr) stuSendMsg({ t: 'hr', d: f.ft, g: f.gold ? 1 : 0, v: Math.round(v), a: Math.round(ad * 10) });
+    return;
+  }
+  if (kind === 'foul'){
+    D.ball = null;
+    D.foul = { x: bx, y: by, vx: -rand(40, 90), vy: -rand(150, 210) };
+    tone(900, 0.05, 'square', 0.04, -300);
+    addPop(stu.pops, W / 2, 40, 'FOUL BALL!', '#fcfcfc');
+  } else if (kind === 'miss') addPop(stu.pops, W / 2, 40, e < -0.25 ? 'TOO EARLY!' : (e > 0.25 ? 'TOO LATE!' : 'SWING AND A MISS!'), '#fcfcfc');
+  else addPop(stu.pops, W / 2, 40, 'STRIKE LOOKING!', '#fcfcfc');
+  dbyStrike();
+}
+// things that happen to your batted ball on the way out
+function dbyEv(kind, f, k){
+  var D = stu.dby, p;
+  if (kind === 'hr'){
+    D.hr++; stu.made++; D.streak++;
+    addCheer(stu.pops, W / 2, 38, 'HOME RUN!');
+    addPop(stu.pops, W / 2, 52, '+' + dbyHrPts(f.ft, f.gold) + '  ' + f.ft + ' FT', '#fcfc78');
+    D.crowdT = 2.5;
+    dbyFireworks(stu.parts, 3);
+    sfx.roar(); sfx.swish();
+    if (D.streak >= 3 && D.gold <= 0) dbyGold();
+    stuHud(true);
+  } else if (kind === 'wall'){
+    D.streak = 0; addPop(stu.pops, W / 2, 40, 'OFF THE WALL!', '#fcfcfc'); sfx.board();
+  } else if (kind === 'land'){
+    D.streak = 0; addPop(stu.pops, W / 2, 40, 'BASE HIT', '#fcfcfc');
+  } else {
+    var tg = kind === 'light' ? 'l' : (kind === 'sb' ? 's' : 'b'), pts = dbyTgPts(tg, f.gold);
+    stuSendMsg({ t: 'tg', k: tg, g: f.gold ? 1 : 0 });
+    if (kind === 'light'){
+      p = DB_LIGHTS[k];
+      addPop(stu.pops, (p.x1 + p.x2) / 2 - 20, p.y2 + 8, 'LIGHTS! +' + pts, '#fffbe0', true);
+      dbyLightBurst(stu.parts, k);
+      sfx.glass();
+      dbyGold();
+    } else if (kind === 'sb'){
+      addPop(stu.pops, (DB_SB.x1 + DB_SB.x2) / 2 - 24, DB_SB.y1 - 6, 'SCOREBOARD! +' + pts, '#58f8d0', true);
+      burst(stu.parts, (DB_SB.x1 + DB_SB.x2) / 2, DB_SB.y1 + 8, 24, CHEER_COLS, 60, 40, 1);
+      sfx.bonus();
+    } else {
+      addPop(stu.pops, clamp(f.x, 60, W - 60), f.y + 14, 'BLIMP! +' + pts, '#f878d8', true);
+      burst(stu.parts, f.x, f.y, 30, ['#c8c8dc', '#d82800', '#fcfcfc', '#f8d878'], 70, 60, 1.2);
+      sfx.fanfare();
+    }
+  }
+}
+function dbyUpdate(dt){
+  var D = stu.dby;
+  if (!D) return;
+  dbyStepScene(D, dt);
+  if (D.gold > 0){ D.gold -= dt; if (D.gold <= 0){ D.gold = 0; addPop(stu.pops, W / 2, 40, 'GOLDEN BAT FADED', '#f8d878'); } }
+  if (D.swing){ D.swing.t += dt; if (D.swing.t > 0.55) D.swing = null; }
+  if (D.brokeT > 0) D.brokeT -= dt;
+  if (D.ball){
+    // the pitch: from the pitcher's hand to the plate with a little drop, then on into the catcher's mitt
+    var bl = D.ball, u;
+    bl.pc += dt; u = bl.pc / D.pT;
+    if (u <= 1){ bl.x = DB.REL_X + (DB.PLATE - DB.REL_X) * u; bl.y = DB.REL_Y + (DB.CY - DB.REL_Y) * u - 5 * Math.sin(Math.PI * u); }
+    else {
+      var w2 = Math.min(1, (u - 1) / 0.33);
+      bl.x = DB.PLATE + (DB.MITT_X - DB.PLATE) * w2; bl.y = DB.CY + 3 * w2;
+      if (w2 >= 1){ D.ball = null; sfx.mitt(); }
+    }
+  }
+  if (D.fly){ dbyStepFly(D, D.fly, dt, dbyEv); if (D.fly.done) D.fly = null; }
+  if (D.foul){ var fb = D.foul; fb.vy += DB.G * dt; fb.x += fb.vx * dt; fb.y += fb.vy * dt; if (fb.y > H + 6 || fb.x < -8) D.foul = null; }
+  if (D.st === 'wait'){
+    D.t -= dt;
+    if (D.t <= 0 && !D.fly && !D.foul){
+      if (stu.made >= WATER_EVERY && !waterBlocked()){
+        D.st = 'water'; D.t = 1.6;
+        addCheer(stu.pops, W / 2, 40, '10 HOMERS!');
+        addPop(stu.pops, W / 2, 58, 'WATER BREAK: ANSWER 3 QUESTIONS', '#58d8f8');
+        sfx.bonus();
+      } else if (!D.picked && dbyElapsed() >= DB_PICK_AT){ D.st = 'pick'; sfx.bonus(); }
+      else dbyPitch(D);
+    }
+  } else if (D.st === 'wind'){
+    D.t += dt;
+    if (D.t >= DB_WIND){ D.st = 'pitch'; D.t = 0; D.ball = { pc: 0, x: DB.REL_X, y: DB.REL_Y }; tone(500, 0.05, 'square', 0.03, -200); }
+  } else if (D.st === 'pitch'){
+    D.t += dt;
+    if (D.plan){ if (D.t >= (D.plan.kind === 'miss' ? Math.max(D.plan.at, D.pT) : D.plan.at)) dbyResolve(D.plan.kind, D.plan.e); }
+    else if (D.t >= D.pT + DB_LOOK) dbyResolve('look', 0);
+  } else if (D.st === 'after'){
+    if (!D.ball && !D.fly && !D.foul){ D.st = 'wait'; D.t = DB_GAP; }
+  } else if (D.st === 'out'){
+    D.t -= dt;
+    if (D.t <= 0){ goQuiz(); return; }
+  } else if (D.st === 'water'){
+    D.t -= dt;
+    if (D.t <= 0){ goWater(); return; }
+  }
+  stepFx(stu.parts, stu.pops, dt);
+}
+
+/* ---------- the derby on the big screen ---------- */
+// replay a student's home run on the big screen from the same launch, with their name riding along
+function dbyReplay(p, d){
+  var HD = hst.dby;
+  if (hst.cfg.view !== 'all' && visiblePlayers().indexOf(p) < 0) return;
+  var f = dbyLaunch(clamp(+d.v || 180, 60, 320), clamp(+d.a || 360, 0, 800) / 10 * Math.PI / 180);
+  f.hr = true; f.name = p.name; f.col = SHIRTS[p.look.shirt]; f.gold = !!d.g;
+  HD.flys.push(f);
+  if (HD.flys.length > 8) HD.flys.shift();
+  HD.bat = { look: p.look, name: p.name, t: DB_SW };
+  sfx.crack();
+}
+function dbyHostUpdate(dt){
+  var HD = hst.dby, S = HD.S;
+  dbyStepScene(S, dt);
+  if (HD.bat) HD.bat.t += dt;
+  for (var i = HD.flys.length - 1; i >= 0; i--){
+    var f = HD.flys[i];
+    dbyStepFly(S, f, dt, function(kind, ff, k){
+      if (kind === 'hr'){ S.crowdT = 2.5; dbyFireworks(hst.parts, 2); sfx.roar(); }
+      else if (kind === 'light'){ dbyLightBurst(hst.parts, k); sfx.glass(); }
+      else if (kind === 'sb') burst(hst.parts, (DB_SB.x1 + DB_SB.x2) / 2, DB_SB.y1 + 8, 24, CHEER_COLS, 60, 40, 1);
+      else if (kind === 'blimp') burst(hst.parts, ff.x, ff.y, 30, ['#c8c8dc', '#d82800', '#fcfcfc'], 70, 60, 1.2);
+    });
+    if (f.done) HD.flys.splice(i, 1);
+  }
+}
+function dbyHostDraw(){
+  var v = hst.view, c = v.c, t = gameTimeMs() / 1000, HD = hst.dby, i, ns = nameSize(v);
+  var lp = stu.local && stu.mode === 'play' && stu.dby, sb = ['CLASS HR', String(HD.total)];
+  if (lp) dbyDrawAll(v, stu.dby, t, sb);
+  else {
+    dbyDrawScene(v, HD.S, t, sb);
+    var tp = hst.players.teacher;
+    if (stu.local && stu.mode === 'quiz' && tp){
+      dbyDrawPeople(v, t, null, tp.look, tp.name, null, true);
+      vText(v, '?', DB.BAT_X, FLOOR - 20, '#f8d878', ns);
+      vText(v, tp.name, DB.BAT_X, H - 5, '#b8b0d8', ns);
+    } else dbyDrawPeople(v, t, null, HD.bat && HD.bat.look, HD.bat && HD.bat.name, HD.bat, false);
+  }
+  gameXf(v);
+  for (i = 0; i < HD.flys.length; i++) dbyDrawFly(c, HD.flys[i]);
+  drawParts(c, hst.parts);
+  for (i = 0; i < HD.flys.length; i++){
+    var f = HD.flys[i];
+    if (f.y > -4) vText(v, f.name, clamp(f.x, 20, W - 20), f.y - 7, f.col, ns);
+  }
+  if (lp) drawPops(v, stu.pops);
+  drawPops(v, hst.pops);
+}
+
+/* ---------- computer demo batter ---------- */
+function dbyAi(dt){
+  var D = stu.dby, A = stu.aiS || (stu.aiS = {});
+  if (!D) return;
+  if (D.st === 'pick'){
+    A.pk = (A.pk || 0) + dt;
+    if (A.pk > 1.4){ A.pk = 0; dbyPickBat(Math.random() < 0.5 ? 'power' : 'contact'); }
+    return;
+  }
+  if ((D.st !== 'wind' && D.st !== 'pitch') || D.swung || D.res) return;
+  if (A.n !== D.pitchN){
+    A.n = D.pitchN;
+    A.take = Math.random() < 0.06;
+    A.err = (Math.random() + Math.random() - 1) * 0.08;
+    if (Math.random() < 0.3) D.aim = Math.floor(rand(0, 3));
+  }
+  if (A.take) return;
+  var remain = D.st === 'wind' ? DB_WIND - D.t + D.pT : D.pT - D.t;
+  if (remain <= DB_SW + A.err) dbySwing();
 }
 
 /* ============================================================
