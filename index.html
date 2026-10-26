@@ -228,31 +228,32 @@ body.land #pStage { flex: 1; }
     <h1 class="logo">PALM COURT<br>HOOPS</h1>
     <div id="jSolo" class="sub pix" style="display:none;line-height:1.8"></div>
     <div class="card">
-      <label class="lab first" for="jPw" id="jPwLab">Class password</label>
-      <input id="jPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" placeholder="From your teacher">
-      <div id="jPerWrap" style="display:none"><label class="lab" for="jPer">Class period</label>
-      <input id="jPer" class="inp" autocomplete="off" maxlength="12" placeholder="For example 3"></div>
-      <label class="lab" for="jName">Player name (up to 8 letters)</label>
-      <input id="jName" class="inp" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="8" placeholder="NAME">
+      <div class="seg" id="jLang" style="margin-bottom:14px"><button type="button" data-v="en">ENGLISH</button><button type="button" data-v="es">ESPA&Ntilde;OL</button></div>
+      <label class="lab first" for="jPw" id="jPwLab" data-l>Class password</label>
+      <input id="jPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" placeholder="From your teacher" data-lp>
+      <div id="jPerWrap" style="display:none"><label class="lab" for="jPer" data-l>Class period</label>
+      <input id="jPer" class="inp" autocomplete="off" maxlength="12" placeholder="For example 3" data-lp></div>
+      <label class="lab" for="jName" data-l>Player name (up to 8 letters)</label>
+      <input id="jName" class="inp" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="8" placeholder="NAME" data-lp>
     </div>
     <div class="card">
       <div class="custRow">
         <canvas id="jPrev" class="prevCv" width="96" height="180"></canvas>
         <div class="custCtl">
-          <span class="lab first">Hat or hair</span>
+          <span class="lab first" data-l>Hat or hair</span>
           <div class="stepper"><button type="button" id="jHatPrev" class="stepBtn">&#9664;</button><span id="jHatName"></span><button type="button" id="jHatNext" class="stepBtn">&#9654;</button></div>
-          <span class="lab">Hat or hair color</span>
+          <span class="lab" data-l>Hat or hair color</span>
           <div class="sw" id="jHc"></div>
         </div>
       </div>
-      <span class="lab">Shirt</span>
+      <span class="lab" data-l>Shirt</span>
       <div class="sw" id="jShirt"></div>
-      <span class="lab">Skin</span>
+      <span class="lab" data-l>Skin</span>
       <div class="sw" id="jSkin"></div>
     </div>
     <div id="jErr" class="err"></div>
-    <button type="button" id="jGo" class="bigBtn go">JOIN GAME</button>
-    <div class="foot"><a href="#host" id="jHostLink">Teacher? Host a game</a></div>
+    <button type="button" id="jGo" class="bigBtn go" data-l>JOIN GAME</button>
+    <div class="foot"><a href="#host" id="jHostLink" data-l>Teacher? Host a game</a></div>
   </div>
 </div>
 
@@ -260,11 +261,11 @@ body.land #pStage { flex: 1; }
 <div class="scr" id="scrWait">
   <div class="wrap center">
     <div class="connTag" id="wConn">Connected</div>
-    <h1 class="logo sm">YOU'RE IN!</h1>
+    <h1 class="logo sm" data-l>YOU'RE IN!</h1>
     <canvas id="wPrev" class="prevCv" width="96" height="180"></canvas>
     <div class="pixName" id="wName"></div>
     <p class="note" id="wMsg">Waiting for your teacher to start the game.</p>
-    <button type="button" id="wEdit" class="ghostBtn">Change my look</button>
+    <button type="button" id="wEdit" class="ghostBtn" data-l>Change my look</button>
   </div>
 </div>
 
@@ -289,8 +290,8 @@ body.land #pStage { flex: 1; }
     <div id="dpad"><div class="dpH"></div><div class="dpV"></div>
       <span class="dpA u" id="dpU">&#9650;</span><span class="dpA d" id="dpD">&#9660;</span><span class="dpA l" id="dpL">&#9664;</span><span class="dpA r" id="dpR">&#9654;</span></div>
     <div id="abWrap">
-      <div class="pb" id="btnB"><b>B</b><i>SHOOT</i></div>
-      <div class="pb" id="btnA"><b>A</b><i>JUMP</i></div>
+      <div class="pb" id="btnB"><b>B</b><i data-l>SHOOT</i></div>
+      <div class="pb" id="btnA"><b>A</b><i data-l>JUMP</i></div>
     </div>
   </div>
 </div>
@@ -298,16 +299,16 @@ body.land #pStage { flex: 1; }
 <!-- ================= STUDENT: game over ================= -->
 <div class="scr" id="scrOver">
   <div class="wrap center">
-    <h1 class="logo sm">GAME OVER</h1>
+    <h1 class="logo sm" data-l>GAME OVER</h1>
     <div id="oCard"></div>
     <ol id="oTop" class="topList"></ol>
     <p class="note" id="oMsg">Wait for your teacher to start the next game.</p>
-    <button type="button" id="oAgain" class="bigBtn go" style="display:none">PLAY AGAIN</button>
+    <button type="button" id="oAgain" class="bigBtn go" style="display:none" data-l>PLAY AGAIN</button>
     <div id="oNotes" style="display:none">
-      <button type="button" id="oNotesBtn" class="bigBtn go">SAVE STUDY NOTES</button>
+      <button type="button" id="oNotesBtn" class="bigBtn go" data-l>SAVE STUDY NOTES</button>
       <div id="oNotesOut" style="display:none">
-        <p class="note">Press and hold the picture, then choose <b>Save to Photos</b> or <b>Download image</b>.</p>
-        <a id="oNotesDl" class="ghostBtn" download="study-notes.png">Download picture</a>
+        <p class="note" data-l>Press and hold the picture, then choose <b>Save to Photos</b> or <b>Download image</b>.</p>
+        <a id="oNotesDl" class="ghostBtn" download="study-notes.png" data-l>Download picture</a>
         <img id="oNotesImg" class="notesImg" alt="Study notes">
       </div>
     </div>
@@ -317,11 +318,11 @@ body.land #pStage { flex: 1; }
 <!-- ================= STUDENT: halftime ================= -->
 <div class="scr" id="scrHalf">
   <div class="wrap">
-    <h1 class="logo sm">HALFTIME</h1>
+    <h1 class="logo sm" data-l>HALFTIME</h1>
     <div class="pix center" id="hfScore" style="font-size:11px;color:#f8d878;line-height:2"></div>
     <p class="note center" id="hfMsg">Study up for the second half! It starts when your teacher is ready.</p>
     <div class="studySheet" id="hfNotes"></div>
-    <button type="button" id="hfGo" class="bigBtn go" style="display:none">START THE SECOND HALF</button>
+    <button type="button" id="hfGo" class="bigBtn go" style="display:none" data-l>START THE SECOND HALF</button>
   </div>
 </div>
 
@@ -352,6 +353,11 @@ body.land #pStage { flex: 1; }
       <div class="note">Same format as Checks for Understanding: Question: ... on one line, then A: x, B: y, C: z, D: w, Answer: B</div>
       <textarea id="hBank" class="inp ta" rows="10" style="margin-top:8px"></textarea>
       <div id="hBankMsg" class="okMsg"></div>
+      <label class="lab" for="hBankEs">Spanish questions (optional)</label>
+      <div class="note">For students who choose Espa&ntilde;ol. Click Copy translation prompt, paste it into an AI chat, then paste its Spanish questions here. They are saved with the quiz.</div>
+      <textarea id="hBankEs" class="inp ta" rows="5" style="margin-top:8px"></textarea>
+      <div id="hBankEsMsg" class="okMsg"></div>
+      <div class="btnRow" style="margin-bottom:10px"><button type="button" id="hBankEsCopy" class="ghostBtn">Copy translation prompt</button><button type="button" id="hBankEsClear" class="ghostBtn">Clear box</button></div>
       <div class="btnRow" style="margin-bottom:10px"><input id="hQName" class="inp" maxlength="40" placeholder="Quiz name, e.g. Water cycle" style="flex:1;width:auto;min-width:0"><button type="button" id="hSave" class="ghostBtn">Save to bank</button></div>
       <span class="lab">Mix in more saved quizzes</span>
       <div class="note">Tick any saved quizzes to add their questions to this game, along with the questions above.</div>
@@ -369,6 +375,12 @@ body.land #pStage { flex: 1; }
       <div id="hStudyMsg" class="okMsg"></div>
       <div class="btnRow"><button type="button" id="hStudyCopy" class="ghostBtn">Copy box</button><button type="button" id="hStudyClear" class="ghostBtn">Clear box</button><button type="button" id="hStudyReset" class="ghostBtn">Put the AI prompt back</button></div>
       <div id="hStudyPrev" class="studySheet studyPrev" style="display:none"></div>
+      <label class="lab" for="hStudyEs">Spanish study sheet (optional)</label>
+      <div class="note">Make the English study sheet first. Then click Copy translation prompt, paste it into an AI chat, and paste its Spanish study sheet here. It is saved with the quiz.</div>
+      <textarea id="hStudyEs" class="inp ta" rows="6" style="margin-top:8px"></textarea>
+      <div id="hStudyEsMsg" class="okMsg"></div>
+      <div class="btnRow"><button type="button" id="hStudyEsCopy" class="ghostBtn">Copy translation prompt</button><button type="button" id="hStudyEsClear" class="ghostBtn">Clear box</button></div>
+      <div id="hStudyEsPrev" class="studySheet studyPrev" style="display:none"></div>
     </div>
     <div class="card">
       <span class="lab first">Solo practice link (play at home)</span>
@@ -500,7 +512,10 @@ var HATS = [
   { n: 'HEADBAND', r: ['........', '........', '........', '..kkkk..', '..hhhhh.', '..k.....'] },
   { n: 'CROWN', r: ['........', '..y.y.y.', '..yyyyy.', '..yryyy.', '..k.....', '........'] },
   { n: 'BOW', r: ['........', '.hh.hh..', '..hhh...', '..kkkk..', '..kk....', '........'] },
-  { n: 'MOHAWK', r: ['....h...', '...hhh..', '...hhh..', '...hhh..', '........', '........'] }
+  { n: 'MOHAWK', r: ['....h...', '...hhh..', '...hhh..', '...hhh..', '........', '........'] },
+  { n: 'LONG HAIR', r: ['........', '........', '..hhhh..', '.hhhhhh.', '.hhh....', '.hh.....', '.hh.....', '.hh.....', '.hh.....', '.h......'] },
+  { n: 'PONYTAIL', r: ['........', '........', '..hhhh..', '.hhhhhh.', 'rhhh....', 'h.h.....', 'h.......', 'h.......', '.h......'] },
+  { n: 'PIGTAILS', r: ['........', '........', '..hhhh..', 'rhhhhhhr', 'hhh....h', 'h.h....h', 'h......h', '.h......'] }
 ];
 var BODY = ['........', '..sssss.', '..sssEs.', '..sssss.', '...sss..', '.SSSSSS.', 'sSSSSSSs', 's.SSSS.s', '..SSSS..'];
 var BODY_UP = ['........', '..sssss.', '..sssEs.', '..sssss.', '...sss..', '.SSSSSS.', '.SSSSSS.', '..SSSS..', '..SSSS..'];
@@ -547,6 +562,70 @@ var AI_PROMPT = 'Write 20 multiple-choice questions about [TOPIC] for [GRADE LEV
   'Use exactly this format for every question, with a blank line between questions and nothing else before or after:\n\n' +
   'Question: What is 2 + 2?\nA: 1, B: 2, C: 3, D: 4, Answer: D\n\n' +
   'Rules: give 4 choices labeled A to D; do not use "A:", "B:", "C:" or "D:" inside a choice; mix up which letter is correct.';
+
+/* ============================================================
+   SPANISH (each student picks English or Español; the big screen stays English)
+============================================================ */
+var ES = {
+  'Class password': 'Contraseña de la clase', 'From your teacher': 'De tu maestro', 'Class period': 'Período de clase', 'For example 3': 'Por ejemplo 3',
+  'Player name (up to 8 letters)': 'Nombre de jugador (hasta 8 letras)', 'NAME': 'NOMBRE', 'Hat or hair': 'Gorra o peinado', 'Hat or hair color': 'Color de gorra o pelo',
+  'Shirt': 'Camiseta', 'Skin': 'Piel', 'JOIN GAME': 'ENTRAR AL JUEGO', 'Teacher? Host a game': '¿Eres maestro? Organiza un juego',
+  'Connected': 'Conectado', 'Reconnecting...': 'Reconectando...', "YOU'RE IN!": '¡ESTÁS DENTRO!',
+  'Waiting for your teacher to start the game.': 'Esperando a que tu maestro empiece el juego.', 'Getting you into the game...': 'Entrando al juego...',
+  'Change my look': 'Cambiar mi personaje', 'Answer 3 right<br>to earn 3 balls': 'Contesta 3 bien<br>para ganar 3 balones',
+  'Water break!<br>Answer 3 questions': '¡Descanso para agua!<br>Contesta 3 preguntas', 'NEXT QUESTION': 'SIGUIENTE PREGUNTA',
+  'GET MY 3 BALLS': 'DAME MIS 3 BALONES', 'BACK TO THE COURT': 'VOLVER A LA CANCHA', 'Waiting for questions from your teacher.': 'Esperando las preguntas de tu maestro.',
+  'Correct! You earned 3 balls!': '¡Correcto! ¡Ganaste 3 balones!', 'Correct! Break is over!': '¡Correcto! ¡Se acabó el descanso!', 'Correct!': '¡Correcto!',
+  'Not quite. The answer is': 'Casi. La respuesta es', 'SHOOT': 'TIRAR', 'JUMP': 'SALTAR', 'GAME OVER': 'FIN DEL JUEGO',
+  'Wait for your teacher to start the next game.': 'Espera a que tu maestro empiece el siguiente juego.', 'PLAY AGAIN': 'JUGAR OTRA VEZ',
+  'SAVE STUDY NOTES': 'GUARDAR NOTAS DE ESTUDIO', 'Download picture': 'Descargar imagen',
+  'Press and hold the picture, then choose <b>Save to Photos</b> or <b>Download image</b>.': 'Mantén presionada la imagen y elige <b>Guardar en Fotos</b> o <b>Descargar imagen</b>.',
+  'HALFTIME': 'MEDIO TIEMPO', 'Study up for the second half! It starts when your teacher is ready.': '¡Estudia para el segundo tiempo! Empieza cuando tu maestro esté listo.',
+  'Read the study sheet, then start the second half when you are ready.': 'Lee la hoja de estudio y empieza el segundo tiempo cuando estés listo.',
+  'START THE SECOND HALF': 'EMPEZAR EL SEGUNDO TIEMPO', 'Take a breather! The second half starts soon.': '¡Toma un respiro! El segundo tiempo empieza pronto.',
+  'Play again to beat your best score!': '¡Juega otra vez para superar tu mejor puntaje!', 'YOUR SCORE': 'TU PUNTAJE', 'CORRECT': 'CORRECTAS',
+  'SCORE': 'PUNTAJE', 'PERIOD': 'PERÍODO', 'NEW PERSONAL BEST!': '¡NUEVO RÉCORD PERSONAL!', 'BEST': 'MEJOR', 'Solo practice': 'Práctica individual',
+  'SOLO PRACTICE': 'PRÁCTICA INDIVIDUAL', 'QUESTIONS': 'PREGUNTAS', 'LOADING QUIZ...': 'CARGANDO...', 'LINK NOT WORKING': 'EL ENLACE NO FUNCIONA', 'PLAY': 'JUGAR',
+  'This practice link is broken or incomplete. Ask your teacher for a new link.': 'Este enlace de práctica está roto o incompleto. Pide a tu maestro un enlace nuevo.',
+  'Type your class period.': 'Escribe tu período de clase.', 'Type a player name.': 'Escribe un nombre de jugador.',
+  'Type the class password your teacher gave you.': 'Escribe la contraseña que te dio tu maestro.', 'CONNECTING...': 'CONECTANDO...',
+  'Could not reach the game. Check the password, and make sure your teacher has opened the game.': 'No se pudo llegar al juego. Revisa la contraseña y asegúrate de que tu maestro abrió el juego.',
+  'Could not load the connection library. Check the internet connection.': 'No se pudo cargar la conexión. Revisa el internet.',
+  'No game found with that password. Check it with your teacher.': 'No hay ningún juego con esa contraseña. Pregúntale a tu maestro.',
+  'Connection problem. Check the internet and try again.': 'Problema de conexión. Revisa el internet e intenta otra vez.',
+  '3 BALLS! SHOOT THE LIT HOOP!': '¡3 BALONES! ¡TIRA AL ARO ENCENDIDO!', 'BACK IN THE GAME!': '¡DE VUELTA AL JUEGO!', 'SLAM DUNK IT!': '¡HAZ UNA CLAVADA!',
+  'WAIT FOR IT': 'ESPERA', 'NO SHOTS. DUNK IT!': 'SIN TIROS. ¡CLÁVALA!', 'SQUAWK!': '¡CUAC!', 'JUMP SHOT +1': 'TIRO EN SALTO +1',
+  'NOT LIT! 0 PTS': '¡APAGADO! 0 PTS', 'WRONG HOOP! -1 BALL': '¡ARO EQUIVOCADO! -1 BALÓN', 'MAGIC MODE!!': '¡¡MODO MÁGICO!!',
+  'UNLIMITED JUMPS! SLAM DUNK IT!': '¡SALTOS SIN LÍMITE! ¡CLÁVALA!', 'MAGIC FADED': 'SE ACABÓ LA MAGIA', 'WHAT A DUNK!': '¡QUÉ CLAVADA!',
+  'BACK TO THE LOW HOOP': 'DE VUELTA AL ARO BAJO', 'REBOUND!': '¡REBOTE!', 'OUT OF BALLS!': '¡SIN BALONES!', '10 BUCKETS!': '¡10 CANASTAS!',
+  'WATER BREAK: ANSWER 3 QUESTIONS': 'DESCANSO: CONTESTA 3 PREGUNTAS', 'STOMP! +1': '¡PISOTÓN! +1', 'SPLAT!': '¡PLAF!', 'OUCH!': '¡AY!',
+  'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'STUDY NOTES': 'NOTAS DE ESTUDIO',
+  'SHORT HAIR': 'PELO CORTO', 'CAP': 'GORRA', 'BACKWARDS CAP': 'GORRA AL REVÉS', 'BEANIE': 'GORRO', 'AFRO': 'AFRO', 'SPIKY HAIR': 'PELO PARADO',
+  'HEADBAND': 'CINTA', 'CROWN': 'CORONA', 'BOW': 'MOÑO', 'MOHAWK': 'CRESTA', 'LONG HAIR': 'PELO LARGO', 'PONYTAIL': 'COLA DE CABALLO', 'PIGTAILS': 'DOS COLITAS'
+};
+var ES_HOOP = { LOW: 'BAJO', MIDDLE: 'MEDIO', HIGH: 'ALTO' };
+// messages with numbers or names in them
+var ES_PAT = [
+  [/^Correct! (\d+) more to go\.$/, '¡Correcto! Te faltan $1.'],
+  [/^NEXT: (LOW|MIDDLE|HIGH) HOOP$/, function(m, h){ return 'SIGUE: ARO ' + ES_HOOP[h]; }],
+  [/^NEXT: (\d+) PTS$/, 'SIGUE: $1 PTS'], [/^MAGIC (\d+)$/, 'MAGIA $1'], [/^PLACE (\d+) OF (\d+)$/, 'LUGAR $1 DE $2']
+];
+var CHEERS_ES = ['¡BUEN TIRO!', '¡GENIAL!', '¡QUÉ BIEN!', '¡CRACK!', '¡CANASTA!', '¡ADENTRO!', '¡EN LLAMAS!', '¡BRAVO!', '¡INCREÍBLE!', '¡ESO ES!'];
+function L(t){
+  if (typeof stu === 'undefined' || stu.lang !== 'es') return t;
+  var out = ES[t];
+  for (var i = 0; out == null && i < ES_PAT.length; i++) if (ES_PAT[i][0].test(t)) out = t.replace(ES_PAT[i][0], ES_PAT[i][1]);
+  if (out == null) return t;
+  // all-capital text uses the pixel font, which has no accented capitals (it does have Ñ)
+  return /[a-z\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1]/.test(out.replace(/<[^>]*>/g, '')) ? out : out.replace(/[\u00c1\u00c9\u00cd\u00d3\u00da]/g, function(ch){ return 'AEIOU'.charAt('\u00c1\u00c9\u00cd\u00d3\u00da'.indexOf(ch)); });
+}
+function applyLang(){
+  var els = document.querySelectorAll('[data-l]'), i;
+  for (i = 0; i < els.length; i++){ if (els[i]._en == null) els[i]._en = els[i].innerHTML; els[i].innerHTML = L(els[i]._en); }
+  els = document.querySelectorAll('[data-lp]');
+  for (i = 0; i < els.length; i++){ if (els[i]._en == null) els[i]._en = els[i].placeholder; els[i].placeholder = L(els[i]._en); }
+  if ($('jLang')) setSeg('jLang', stu.lang);
+}
 
 /* ============================================================
    UTILITIES
@@ -927,9 +1006,9 @@ function burst(list, x, y, n, cols, sp, g, life){
     list.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, g: g || 0, life: (life || 0.5) * rand(0.6, 1), c: cols[i % cols.length] });
   }
 }
-function addPop(list, x, y, text, col, big){ list.push({ x: x, y: y, text: text, col: col || '#fcfcfc', life: big ? 1.8 : 1.1, big: !!big }); }
+function addPop(list, x, y, text, col, big){ if (list === stu.pops) text = L(text); list.push({ x: x, y: y, text: text, col: col || '#fcfcfc', life: big ? 1.8 : 1.1, big: !!big }); }
 /* a big cheer whose color keeps changing */
-function addCheer(list, x, y, text){ list.push({ x: x, y: y, text: text || pick(CHEERS), col: '#fcfcfc', life: 1.6, big: true, rainbow: true, seed: Math.floor(rand(0, 7)) }); }
+function addCheer(list, x, y, text){ list.push({ x: x, y: y, text: text ? (list === stu.pops ? L(text) : text) : pick(list === stu.pops && stu.lang === 'es' ? CHEERS_ES : CHEERS), col: '#fcfcfc', life: 1.6, big: true, rainbow: true, seed: Math.floor(rand(0, 7)) }); }
 function stepFx(parts, pops, dt){
   var i;
   for (i = parts.length - 1; i >= 0; i--){
@@ -1110,7 +1189,23 @@ function hostInit(){
   }
   $('hBank').oninput = function(){ checkBank(); if (isStudyPrompt($('hStudy').value)) fillStudy(''); };
   checkBank();
-  $('hSample').onclick = function(){ $('hBank').value = SAMPLE_BANK; checkBank(); fillStudy(''); };
+  $('hSample').onclick = function(){ $('hBank').value = SAMPLE_BANK; $('hBankEs').value = ''; $('hStudyEs').value = ''; checkBank(); fillStudy(''); checkStudyEs(); };
+  $('hBankEs').value = hst.cfg.bankEs || '';
+  $('hBankEs').oninput = checkBank;
+  checkBank();
+  $('hBankEsCopy').onclick = function(){
+    if (!parseQuestions($('hBank').value).questions.length){ $('hBankEsMsg').className = 'okMsg warn'; $('hBankEsMsg').textContent = 'Put the English questions in the box above first.'; return; }
+    copyText(esQuestionPrompt($('hBank').value), this, 'Copy translation prompt');
+  };
+  $('hBankEsClear').onclick = function(){ $('hBankEs').value = ''; checkBank(); $('hBankEs').focus(); };
+  $('hStudyEs').value = hst.cfg.studyEsNotes || '';
+  $('hStudyEs').oninput = checkStudyEs;
+  $('hStudyEsCopy').onclick = function(){
+    if (!studyNotes()){ $('hStudyEsMsg').className = 'okMsg warn'; $('hStudyEsMsg').textContent = 'Make the English study sheet first, then translate it.'; return; }
+    copyText(esStudyPrompt(studyNotes()), this, 'Copy translation prompt');
+  };
+  $('hStudyEsClear').onclick = function(){ $('hStudyEs').value = ''; checkStudyEs(); $('hStudyEs').focus(); };
+  checkStudyEs();
   setSeg('hHalf', hst.cfg.half ? 'on' : 'off');
   var halfBtns = $('hHalf').getElementsByTagName('button');
   for (var hb = 0; hb < halfBtns.length; hb++){
@@ -1122,15 +1217,17 @@ function hostInit(){
   $('hStudyClear').onclick = function(){ $('hStudy').value = ''; checkStudy(); $('hStudy').focus(); };
   fillStudy(hst.cfg.studyNotes);
   $('hStudy').oninput = checkStudy;
-  $('hStudy').addEventListener('paste', function(e){
+  $('hStudyEs').addEventListener('paste', studyPaste);
+  $('hStudy').addEventListener('paste', studyPaste);
+  function studyPaste(e){
     var cd = e.clipboardData, html = cd && cd.getData('text/html'), txt = html ? htmlToStudy(html) : '';
     if (!txt || /\*\*/.test(cd.getData('text/plain'))) return;  // plain paste already has its **stars**
     e.preventDefault();
     var a = this.selectionStart, z = this.selectionEnd;
     this.value = this.value.slice(0, a) + txt + this.value.slice(z);
     this.selectionStart = this.selectionEnd = a + txt.length;
-    checkStudy();
-  });
+    checkStudy(); checkStudyEs();
+  }
   $('hStudyReset').onclick = function(){ fillStudy(''); };
   $('hStudyCopy').onclick = function(){
     var box = $('hStudy'), btn = this;
@@ -1159,13 +1256,15 @@ function hostInit(){
     setEditing(-1);
     var b = savedQuizzes()[this.value];
     if (!b) return;
-    $('hBank').value = b.text; $('hQName').value = b.name; checkBank(); fillStudy(b.study);
+    $('hBank').value = b.text; $('hQName').value = b.name; $('hBankEs').value = b.textEs || ''; $('hStudyEs').value = b.studyEs || '';
+    checkBank(); fillStudy(b.study); checkStudyEs();
   };
   $('hEdit').onclick = function(){
     if (editIdx >= 0){ setEditing(-1); return; }
     var i = parseInt($('hSaved').value, 10), b = savedQuizzes()[i];
     if (!b){ $('hBankMsg').textContent = 'Pick a saved quiz to edit first.'; return; }
-    $('hBank').value = b.text; $('hQName').value = b.name; checkBank(); fillStudy(b.study);
+    $('hBank').value = b.text; $('hQName').value = b.name; $('hBankEs').value = b.textEs || ''; $('hStudyEs').value = b.studyEs || '';
+    checkBank(); fillStudy(b.study); checkStudyEs();
     setEditing(i);
     $('hQName').focus();
   };
@@ -1216,10 +1315,12 @@ function setSeg(id, v){
 function checkBank(){
   var r = parseQuestions($('hBank').value), el = $('hBankMsg'), own = r.questions.length;
   var list = savedQuizzes(), seen = {}, mixed = 0, extra = 0, i, j;
+  attachEs(r.questions, $('hBankEs').value);
   for (i = 0; i < r.questions.length; i++) seen[r.questions[i].q] = 1;
   for (i = 0; i < list.length; i++){
     if (hst.cfg.picks.indexOf(list[i].name) < 0) continue;
     var qs = parseQuestions(list[i].text).questions;
+    attachEs(qs, list[i].textEs);
     mixed++;
     for (j = 0; j < qs.length; j++) if (!seen[qs[j].q]){ seen[qs[j].q] = 1; r.questions.push(qs[j]); extra++; }
   }
@@ -1227,6 +1328,9 @@ function checkBank(){
   el.textContent = (!$('hBank').value.replace(/\s/g, '') && !mixed) ? 'Paste or type questions above.' :
     r.questions.length + ' questions ready' + (mixed ? ' (' + own + ' above + ' + extra + ' from ' + mixed + ' saved ' + (mixed === 1 ? 'quiz' : 'quizzes') + ').' : '.') +
     (r.problems.length ? ' Could not read ' + r.problems.length + ': ' + r.problems.slice(0, 2).join(' | ') : '');
+  var nEs = r.questions.filter(function(q){ return q.es; }).length;
+  if (nEs) el.textContent += ' Spanish for ' + nEs + ' of ' + r.questions.length + '.';
+  if ($('hBankEsMsg')) checkEs();
   return r;
 }
 /* ---------- halftime study sheet ---------- */
@@ -1340,7 +1444,7 @@ function notesImage(text){
     y = PAD;
     c.textBaseline = 'top';
     c.font = 'bold 56px ' + FONT;
-    if (draw){ c.fillStyle = '#b03a00'; c.fillText('STUDY NOTES', PAD, y); }
+    if (draw){ c.fillStyle = '#b03a00'; c.fillText(L('STUDY NOTES'), PAD, y); }
     y += 90;
     for (var i = 0; i < blocks.length; i++){
       var bk = blocks[i], head = bk.k === 'h', size = head ? 44 : 34, lh = Math.round(size * 1.45);
@@ -1373,6 +1477,64 @@ function notesImage(text){
   c.fillStyle = '#fffbe8'; c.fillRect(0, 0, WD, cv.height);
   pass(true);
   return cv.toDataURL('image/png');
+}
+/* ---------- Spanish versions of the questions and study sheet ---------- */
+function esQuestionPrompt(text){
+  return 'Translate these multiple-choice review questions into Spanish for students.\n' +
+    'Keep exactly the same format, order and answer letters. Each question starts with "Question:" and the next line is "A: ..., B: ..., C: ..., D: ..., Answer: X".\n' +
+    'Keep the words Question, A:, B:, C:, D: and Answer in English so the game can read them; translate only the question and choice text. Do not reorder the choices.\n' +
+    'Put the whole answer in one code block so it is easy to copy.\n\n' + String(text || '').replace(/^\s+|\s+$/g, '');
+}
+function esStudyPrompt(notes){
+  return 'Translate this study sheet into Spanish for students.\n' +
+    'Keep exactly the same format: lines starting with "# " are section titles, lines starting with "- " are bullet points, and keep **double stars** around the same key words (translated).\n' +
+    'Put the whole answer in one code block so it is easy to copy.\n\n' + notes;
+}
+// give each English question its Spanish version, when the Spanish one lines up (same choices, same answer letter)
+function attachEs(qs, esText){
+  var es = parseQuestions(esText || '').questions, ok = 0;
+  for (var i = 0; i < qs.length; i++){
+    var e = es[i];
+    if (e && e.c.length === qs[i].c.length && e.a === qs[i].a){ qs[i].es = { q: e.q, c: e.c }; ok++; }
+  }
+  return ok;
+}
+function checkEs(){
+  var en = parseQuestions($('hBank').value).questions, txt = $('hBankEs').value, msg = $('hBankEsMsg');
+  if (!txt.replace(/\s/g, '')){ msg.className = 'okMsg'; msg.textContent = 'No Spanish questions yet. Students who choose Espa\u00f1ol will see the English questions.'; return; }
+  var es = parseQuestions(txt), ok = attachEs(en, txt);
+  var bad = [];
+  for (var i = 0; i < en.length && i < es.questions.length; i++) if (!en[i].es) bad.push(i + 1);
+  msg.className = 'okMsg' + (ok === en.length && es.questions.length === en.length ? '' : ' warn');
+  if (es.questions.length !== en.length) msg.textContent = 'The Spanish box has ' + es.questions.length + ' questions but the English box has ' + en.length + '. They need to match, in the same order.' + (ok ? ' For now ' + ok + ' line up.' : '');
+  else if (bad.length) msg.textContent = ok + ' of ' + en.length + ' Spanish questions line up. Check question ' + bad.slice(0, 5).join(', ') + ': the answer letter or number of choices is different from the English.';
+  else msg.textContent = 'All ' + ok + ' Spanish questions line up with the English ones.';
+}
+function studyEsNotes(){ return $('hStudyEs').value.replace(/^\s+|\s+$/g, ''); }
+function checkStudyEs(){
+  var notes = studyEsNotes(), msg = $('hStudyEsMsg'), prev = $('hStudyEsPrev');
+  if (!notes){ msg.className = 'okMsg'; msg.textContent = 'No Spanish study sheet yet. Students who choose Espa\u00f1ol will see the English one.'; prev.style.display = 'none'; return; }
+  var marked = parseStudy(notes).some(function(b){ return b.segs.some(function(sg){ return sg.m; }); });
+  msg.className = 'okMsg' + (marked ? '' : ' warn');
+  msg.textContent = 'Spanish study sheet ready.' + (marked ? ' Preview:' : ' No key ideas are highlighted: keep the **double stars** from the English sheet. Preview:');
+  prev.innerHTML = studyHtml(notes); prev.style.display = 'block';
+}
+function copyText(text, btn, label){
+  function done(){ btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = label; }, 1500); }
+  function fallback(){ var box = $('hPromptBox'); box.style.display = 'block'; box.value = text; box.focus(); box.select(); btn.textContent = 'Copy the text in the box below the questions'; }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  } catch (e) { fallback(); }
+}
+function gameNotesEs(){
+  var parts = [], list = savedQuizzes(), own = studyEsNotes(), i;
+  if (own) parts.push(own);
+  for (i = 0; i < list.length; i++){
+    var st = String(list[i].studyEs || '').replace(/^\s+|\s+$/g, '');
+    if (st && hst.cfg.picks.indexOf(list[i].name) >= 0 && parts.indexOf(st) < 0) parts.push(st);
+  }
+  return parts.join('\n\n');
 }
 // the study sheet for this game: the box above plus any ticked saved quizzes' sheets
 function gameNotes(){
@@ -1417,7 +1579,7 @@ function makeSoloLink(){
   var r = checkBank(), msg = $('hSoloMsg'), notes = gameNotes();
   $('hSoloLink').style.display = 'none'; $('hSoloCopy').style.display = 'none';
   if (r.questions.length < 3){ msg.className = 'okMsg warn'; msg.textContent = 'Add at least 3 questions first.'; return; }
-  var obj = { v: 1, t: $('hQName').value.replace(/^\s+|\s+$/g, '').slice(0, 40), q: r.questions, n: notes,
+  var obj = { v: 1, t: $('hQName').value.replace(/^\s+|\s+$/g, '').slice(0, 40), q: r.questions, n: notes, ne: gameNotesEs(),
     m: clamp(parseInt($('hMins').value, 10) || 10, 1, 60), h: hst.cfg.half && notes ? 1 : 0 };
   packSolo(obj, function(code){
     var url = joinUrl() + '#solo=' + code, box = $('hSoloLink');
@@ -1483,18 +1645,22 @@ function saveQuiz(name, loud){
     // automatic save when a game opens: never overwrite a different quiz that has the same name
     for (i = 0; i < list.length; i++) if (list[i].name === name && list[i].text !== text) name = '';
   }
-  var study = studyNotes();
+  var study = studyNotes(), textEs = $('hBankEs').value.replace(/^\s+|\s+$/g, ''), studyEs = studyEsNotes();
   if (!name && !editing){
     for (i = 0; i < list.length; i++){
       if (list[i].text !== text) continue;
-      if (study && list[i].study !== study){ list[i].study = study; store(BANKS_KEY, list); }
+      var changed = false;
+      if (study && list[i].study !== study){ list[i].study = study; changed = true; }
+      if (textEs && list[i].textEs !== textEs){ list[i].textEs = textEs; changed = true; }
+      if (studyEs && list[i].studyEs !== studyEs){ list[i].studyEs = studyEs; changed = true; }
+      if (changed) store(BANKS_KEY, list);
       return;
     }
     var base = r.questions[0].q.slice(0, 30) + (r.questions[0].q.length > 30 ? '...' : ''), k = 2;
     name = base;
     while (list.some(function(e){ return e.name === name; })) name = base + ' ' + k++;
   }
-  var entry = { name: name, text: text, n: r.questions.length, study: study };
+  var entry = { name: name, text: text, n: r.questions.length, study: study, textEs: textEs, studyEs: studyEs };
   if (editing){
     i = ei;
     var pk = hst.cfg.picks.indexOf(list[ei].name);
@@ -1502,7 +1668,11 @@ function saveQuiz(name, loud){
   }
   else for (i = 0; i < list.length; i++) if (list[i].name === name) break;
   // an automatic save never wipes out a study sheet saved earlier for the same questions
-  if (!loud && !study && list[i] && list[i].text === text && list[i].study) entry.study = list[i].study;
+  if (!loud && list[i] && list[i].text === text){
+    if (!study && list[i].study) entry.study = list[i].study;
+    if (!textEs && list[i].textEs) entry.textEs = list[i].textEs;
+    if (!studyEs && list[i].studyEs) entry.studyEs = list[i].studyEs;
+  }
   list[i] = entry;
   store(BANKS_KEY, list);
   $('hQName').value = name;
@@ -1530,7 +1700,8 @@ function hostOpen(){
   $('hPw').value = pw;
   if (pw.length < 3){ $('hErr').textContent = 'Make the password at least 3 letters or numbers.'; return; }
   if (r.questions.length < 3){ $('hErr').textContent = 'Add at least 3 questions in the format shown.'; return; }
-  hst.notes = gameNotes();
+  hst.notes = gameNotes(); hst.notesEs = gameNotesEs();
+  hst.cfg.bankEs = $('hBankEs').value; hst.cfg.studyEsNotes = studyEsNotes();
   if (hst.cfg.half && !hst.notes){ $('hErr').textContent = 'Halftime is on, so paste the AI study sheet into the Study sheet box first (or turn halftime off).'; return; }
   hst.cfg.studyNotes = studyNotes();
   hst.cfg.period = $('hPeriod').value.replace(/^\s+|\s+$/g, '').slice(0, 12);
@@ -1691,7 +1862,7 @@ function hostData(conn, d){
     p.look = cleanLook(d.l);
     p.conn = conn; p.on = true; p.seen = performance.now();
     var arr = ranked();
-    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', pr: hst.cfg.period, tt: hst.title || '', g: statusFor(p, arr, arr.indexOf(p)) });
+    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '', g: statusFor(p, arr, arr.indexOf(p)) });
     refreshLobby();
     return;
   }
@@ -1731,7 +1902,7 @@ function hostStartGame(){
   for (var k in hst.players){
     var p = hst.players[k];
     p.score = 0; p.right = 0; p.wrong = 0; p.st = null; p.rx = null; p.bxr = null;
-    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '', pr: hst.cfg.period, tt: hst.title || '' });
+    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '', ne: hst.notesEs || '', pr: hst.cfg.period, tt: hst.title || '' });
   }
   $('hViewBtn').textContent = 'SHOW: ' + VIEW_LABELS[hst.cfg.view];
   showScreen('scrHGame');
@@ -1967,7 +2138,7 @@ function hostFrame(dt, now){
 var me = null;
 var stu = {
   peer: null, conn: null, joined: false, pw: '', mode: 'join', lastMode: 'wait', connTimer: null, retryT: null,
-  G: { ph: 'lobby', l: 0, sc: 0, rk: 0, n: 0 }, lAt: 0, syncOff: 0,
+  G: { ph: 'lobby', l: 0, sc: 0, rk: 0, n: 0 }, lang: 'en', notesEs: '', lAt: 0, syncOff: 0,
   bank: [], deck: [], lastQ: -1, correct: 0, balls: 0, ballK: 0, seq: 0, magic: null, dunkBall: null, ai: false, aiS: null, aiQuizT: 0,
   hero: null, flight: null, meter: null, birds: [], poops: [], splats: [], parts: [], pops: [],
   birdT: 5, outT: 0, outShown: false, rimSnd: 0, netT: 0, netH: -1, lastSend: 0, lastHud: 0,
@@ -1982,6 +2153,19 @@ function studentInit(){
     look: saved.look ? cleanLook(saved.look) : { shirt: Math.floor(rand(0, SHIRTS.length)), skin: 0, hat: 1, hc: 0 }
   };
   $('jPw').value = saved.pw || '';
+  stu.lang = saved.lang === 'es' ? 'es' : 'en';
+  var langBtns = $('jLang').getElementsByTagName('button');
+  for (var lb = 0; lb < langBtns.length; lb++){
+    langBtns[lb].onclick = function(){
+      stu.lang = this.getAttribute('data-v');
+      var sv = load(ME_KEY) || {}; sv.lang = stu.lang; store(ME_KEY, sv);
+      applyLang(); refreshLook();
+      if (SOLO){ soloTitle(); if (!$('jGo').disabled) $('jGo').textContent = L('PLAY'); }
+      else if (!$('jGo').disabled) $('jGo').textContent = L('JOIN GAME');
+      $('jErr').textContent = '';
+    };
+  }
+  applyLang();
   $('jName').value = me.name;
   buildSwatches('jShirt', SHIRTS, 'shirt');
   buildSwatches('jSkin', SKINS, 'skin');
@@ -2007,22 +2191,25 @@ function soloInit(){
   $('jPw').style.display = 'none'; $('jPwLab').style.display = 'none';
   $('jHostLink').parentNode.style.display = 'none';
   $('qConn').style.display = 'none';
-  $('jSolo').style.display = ''; $('jSolo').textContent = 'SOLO PRACTICE';
+  $('jSolo').style.display = ''; $('jSolo').textContent = L('SOLO PRACTICE');
   $('jPerWrap').style.display = ''; $('jPer').value = (load(ME_KEY) || {}).per || '';
-  $('jGo').textContent = 'LOADING QUIZ...'; $('jGo').disabled = true;
+  $('jGo').textContent = L('LOADING QUIZ...'); $('jGo').disabled = true;
   unpackSolo(location.hash.slice(6), function(d){
     if (!d || !d.q || d.q.length < 1){
-      $('jGo').textContent = 'LINK NOT WORKING';
-      $('jErr').textContent = 'This practice link is broken or incomplete. Ask your teacher for a new link.';
+      $('jGo').textContent = L('LINK NOT WORKING');
+      $('jErr').textContent = L('This practice link is broken or incomplete. Ask your teacher for a new link.');
       return;
     }
-    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n };
-    $('jSolo').innerHTML = 'SOLO PRACTICE' + (SOLO.t ? '<br>' + esc(SOLO.t.toUpperCase()) : '') + '<br>' + SOLO.q.length + ' QUESTIONS, ' + SOLO.m + ' MIN';
-    $('jGo').textContent = 'PLAY'; $('jGo').disabled = false;
+    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), ne: String(d.ne || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n };
+    soloTitle();
+    $('jGo').textContent = L('PLAY'); $('jGo').disabled = false;
     $('jGo').onclick = soloStart;
   });
   $('hfGo').onclick = soloResume;
   $('oAgain').onclick = function(){ soloStart(); };
+}
+function soloTitle(){
+  $('jSolo').innerHTML = L('SOLO PRACTICE') + (SOLO.t ? '<br>' + esc(SOLO.t.toUpperCase()) : '') + '<br>' + SOLO.q.length + ' ' + L('QUESTIONS') + ', ' + SOLO.m + ' MIN';
 }
 function soloStart(){
   ac();
@@ -2035,7 +2222,7 @@ function soloStart(){
   $('jErr').textContent = '';
   stu.solo = { sc: 0, halfDone: !SOLO.h, period: per };
   stu.conn = { open: true, send: soloMsg };
-  stu.bank = SOLO.q; stu.notes = SOLO.n;
+  stu.bank = SOLO.q; stu.notes = SOLO.n; stu.notesEs = SOLO.ne;
   resetRun();
   stu.hero = null;
   stu.G = { ph: 'play', l: SOLO.m * 60, sc: 0, rk: 1, n: 1 }; stu.lAt = performance.now(); stu.syncOff = 0;
@@ -2071,7 +2258,7 @@ function soloOver(){
   if (newBest) store(key, S.sc);
   stu.G.ph = 'over';
   showOver({ top: [], sc: S.sc, rk: 1, n: 1 });
-  overCard(S.sc, newBest ? 'NEW PERSONAL BEST!' : 'BEST ' + best);
+  overCard(S.sc, newBest ? L('NEW PERSONAL BEST!') : L('BEST') + ' ' + best);
 }
 function buildSwatches(id, cols, field){
   var box = $(id); box.innerHTML = '';
@@ -2088,11 +2275,11 @@ function markSwatches(id, val){
 }
 function refreshLook(){
   markSwatches('jShirt', me.look.shirt); markSwatches('jSkin', me.look.skin); markSwatches('jHc', me.look.hc);
-  $('jHatName').textContent = HATS[me.look.hat].n;
+  $('jHatName').textContent = L(HATS[me.look.hat].n);
   paintThumb($('jPrev'), me.look);
 }
-function saveMe(){ store(ME_KEY, { pid: me.pid, name: me.name, look: me.look, pw: stu.pw }); }
-function joinErr(msg){ $('jErr').textContent = msg; $('jGo').disabled = false; $('jGo').textContent = 'JOIN GAME'; }
+function saveMe(){ var sv = load(ME_KEY) || {}; store(ME_KEY, { pid: me.pid, name: me.name, look: me.look, pw: stu.pw, lang: stu.lang, per: sv.per }); }
+function joinErr(msg){ $('jErr').textContent = L(msg); $('jGo').disabled = false; $('jGo').textContent = L('JOIN GAME'); }
 
 function studentJoin(){
   ac();
@@ -2112,7 +2299,7 @@ function studentJoin(){
   if (stu.conn){ try { stu.conn.close(); } catch (e) {} stu.conn = null; }
   stu.joined = false;
   $('jErr').textContent = '';
-  $('jGo').disabled = true; $('jGo').textContent = 'CONNECTING...';
+  $('jGo').disabled = true; $('jGo').textContent = L('CONNECTING...');
   clearTimeout(stu.connTimer);
   stu.connTimer = setTimeout(function(){ if (!stu.joined) joinErr('Could not reach the game. Check the password, and make sure your teacher has opened the game.'); }, 12000);
   stuConnect();
@@ -2135,7 +2322,7 @@ function stuOpenConn(){
   c.on('open', function(){
     c.send({ t: 'hi', pid: me.pid, n: me.name, l: me.look });
     stu.joined = true; clearTimeout(stu.connTimer);
-    $('jGo').disabled = false; $('jGo').textContent = 'JOIN GAME';
+    $('jGo').disabled = false; $('jGo').textContent = L('JOIN GAME');
     setConn(true);
   });
   c.on('data', stuData);
@@ -2163,7 +2350,7 @@ function scheduleRetry(){
 function setConn(ok){
   var ids = ['wConn', 'qConn'];
   for (var i = 0; i < ids.length; i++){
-    $(ids[i]).textContent = ok ? 'Connected' : 'Reconnecting...';
+    $(ids[i]).textContent = L(ok ? 'Connected' : 'Reconnecting...');
     $(ids[i]).className = 'connTag' + (ok ? '' : ' bad');
   }
 }
@@ -2173,14 +2360,14 @@ function stuData(d){
   if (!d || !d.t) return;
   if (d.t === 'w'){
     stu.bank = d.q || [];
-    stu.notes = d.n || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
+    stu.notes = d.n || ''; stu.notesEs = d.ne || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     applyG(d.g);
     if (d.g.ph === 'play'){ if (stu.mode !== 'quiz' && stu.mode !== 'play') goQuiz(); }
     else if (d.g.ph === 'half'){}
     else if (stu.mode !== 'over' || d.g.ph === 'lobby') goWait();
   } else if (d.t === 'start'){
     stu.bank = d.q || stu.bank;
-    stu.notes = d.n || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
+    stu.notes = d.n || ''; stu.notesEs = d.ne || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     resetRun();
     stu.G.ph = 'play';
     goQuiz();
@@ -2200,7 +2387,7 @@ function applyG(g){
   if (typeof g.gt === 'number') stu.syncOff = g.gt - performance.now();
   if (!stu.local){
     if (g.ph === 'half' && stu.mode !== 'half') goHalf();
-    else if (g.ph === 'half') $('hfScore').innerHTML = 'YOUR SCORE ' + g.sc + '<br>PLACE ' + (g.rk || '-') + ' OF ' + g.n;
+    else if (g.ph === 'half') $('hfScore').innerHTML = L('YOUR SCORE') + ' ' + g.sc + '<br>' + L('PLACE ' + (g.rk || '-') + ' OF ' + g.n);
     else if (g.ph !== 'half' && stu.mode === 'half') leaveHalf();
   }
   stuHud(true);
@@ -2219,16 +2406,17 @@ function goWait(){
   if (stu.local){ localShow('none'); return; }
   paintThumb($('wPrev'), me.look);
   $('wName').textContent = me.name;
-  $('wMsg').textContent = stu.G.ph === 'play' ? 'Getting you into the game...' : 'Waiting for your teacher to start the game.';
+  $('wMsg').textContent = L(stu.G.ph === 'play' ? 'Getting you into the game...' : 'Waiting for your teacher to start the game.');
   showScreen('scrWait');
 }
+function notesFor(){ return stu.lang === 'es' && stu.notesEs ? stu.notesEs : stu.notes; }
 function goHalf(){
   stu.halfFrom = stu.mode; stu.mode = 'half'; stu.meter = null; stu.made = 0;
   stu.input.l = stu.input.r = stu.input.u = stu.input.d = stu.input.a = stu.input.b = false;
-  $('hfScore').innerHTML = 'YOUR SCORE ' + stu.G.sc + (stu.solo ? '' : '<br>PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n);
-  $('hfMsg').textContent = stu.solo ? 'Read the study sheet, then start the second half when you are ready.' : 'Study up for the second half! It starts when your teacher is ready.';
+  $('hfScore').innerHTML = L('YOUR SCORE') + ' ' + stu.G.sc + (stu.solo ? '' : '<br>' + L('PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n));
+  $('hfMsg').textContent = L(stu.solo ? 'Read the study sheet, then start the second half when you are ready.' : 'Study up for the second half! It starts when your teacher is ready.');
   $('hfGo').style.display = stu.solo ? '' : 'none';
-  $('hfNotes').innerHTML = stu.notes ? studyHtml(stu.notes) : '<p>Take a breather! The second half starts soon.</p>';
+  $('hfNotes').innerHTML = notesFor() ? studyHtml(notesFor()) : '<p>' + L('Take a breather! The second half starts soon.') + '</p>';
   showScreen('scrHalf');
   $('scrHalf').scrollTop = 0;
   sfx.bonus();
@@ -2243,28 +2431,28 @@ function overCard(sc, place){
   var pct = stu.qTotal ? Math.round(stu.qRight * 100 / stu.qTotal) : 0, d = new Date();
   var per = stu.solo ? stu.solo.period : stu.period, title = stu.solo ? SOLO.t : stu.title;
   var info = [];
-  if (per) info.push('PERIOD ' + esc(String(per).toUpperCase()));
+  if (per) info.push(L('PERIOD') + ' ' + esc(String(per).toUpperCase()));
   if (title) info.push(esc(title.toUpperCase()));
   $('oCard').innerHTML = '<div class="ocName">' + esc(me.name) + '</div>' +
     (info.length ? '<div class="ocLine">' + info.join('<br>') + '</div>' : '') +
-    '<div class="ocBig">' + stu.qRight + '/' + stu.qTotal + ' CORRECT</div>' +
+    '<div class="ocBig">' + stu.qRight + '/' + stu.qTotal + ' ' + L('CORRECT') + '</div>' +
     '<div class="ocPct">' + pct + '%</div>' +
-    '<div class="ocLine">SCORE ' + sc + (place ? '<br>' + place : '') + '</div>' +
-    '<div class="ocDate">' + (stu.solo ? 'Solo practice, ' : '') + d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
-    d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div>';
+    '<div class="ocLine">' + L('SCORE') + ' ' + sc + (place ? '<br>' + L(place) : '') + '</div>' +
+    '<div class="ocDate">' + (stu.solo ? L('Solo practice') + ', ' : '') + d.toLocaleDateString(stu.lang === 'es' ? 'es' : [], { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+    d.toLocaleTimeString(stu.lang === 'es' ? 'es' : [], { hour: 'numeric', minute: '2-digit' }) + '</div>';
 }
 function showOver(d){
   stu.mode = 'over';
   if (stu.local){ localShow('none'); return; }
   overCard(d.sc, stu.solo ? '' : 'PLACE ' + d.rk + ' OF ' + d.n);
-  $('oNotes').style.display = stu.notes ? '' : 'none';
-  $('oMsg').textContent = stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.';
+  $('oNotes').style.display = notesFor() ? '' : 'none';
+  $('oMsg').textContent = L(stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.');
   $('oAgain').style.display = stu.solo ? '' : 'none';
   $('oTop').style.display = stu.solo ? 'none' : '';
   $('oNotesOut').style.display = 'none';
   $('oNotesBtn').style.display = '';
   $('oNotesBtn').onclick = function(){
-    var url = notesImage(stu.notes);
+    var url = notesImage(notesFor());
     $('oNotesImg').src = url; $('oNotesDl').href = url;
     $('oNotesOut').style.display = ''; this.style.display = 'none';
   };
@@ -2290,7 +2478,7 @@ function drawIdx(){
   return stu.lastQ;
 }
 function goQuiz(){
-  $('qHead').innerHTML = stu.water ? 'Water break!<br>Answer 3 questions' : 'Answer 3 right<br>to earn 3 balls';
+  $('qHead').innerHTML = L(stu.water ? 'Water break!<br>Answer 3 questions' : 'Answer 3 right<br>to earn 3 balls');
   if (stu.ai){
     // the computer player "answers" for a moment, then gets 3 more balls
     stu.mode = 'quiz'; stu.meter = null; stu.aiQuizT = 2.5; localShow('none');
@@ -2315,17 +2503,18 @@ function showQuestion(){
   $('qFb').textContent = ''; $('qFb').className = 'qFb';
   $('qNext').style.display = 'none';
   var box = $('qChoices'); box.innerHTML = '';
-  if (!stu.bank.length){ $('qText').textContent = 'Waiting for questions from your teacher.'; return; }
+  if (!stu.bank.length){ $('qText').textContent = L('Waiting for questions from your teacher.'); return; }
   var q = stu.bank[drawIdx()], order = [], i;
   for (i = 0; i < q.c.length; i++) order.push(i);
   shuffle(order);
-  curQ = { q: q, order: order, done: false };
-  $('qText').textContent = cleanText(q.q);
+  var shown = stu.lang === 'es' && q.es ? q.es : q;
+  curQ = { q: q, shown: shown, order: order, done: false };
+  $('qText').textContent = cleanText(shown.q);
   for (i = 0; i < order.length; i++){
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'ch'; b.setAttribute('data-k', i);
     var mk = document.createElement('span'); mk.className = 'mk'; mk.textContent = String.fromCharCode(65 + i);
-    var tx = document.createElement('span'); tx.textContent = cleanText(q.c[order[i]]);
+    var tx = document.createElement('span'); tx.textContent = cleanText(shown.c[order[i]]);
     b.appendChild(mk); b.appendChild(tx);
     b.onclick = function(){ answerQ(parseInt(this.getAttribute('data-k'), 10)); };
     box.appendChild(b);
@@ -2348,17 +2537,17 @@ function answerQ(k){
   if (right){
     stu.correct++;
     fb.className = 'qFb good';
-    fb.textContent = stu.water ? (stu.water.n >= 3 ? 'Correct! Break is over!' : 'Correct!') :
-      (stu.correct >= 3 ? 'Correct! You earned 3 balls!' : 'Correct! ' + (3 - stu.correct) + ' more to go.');
+    fb.textContent = L(stu.water ? (stu.water.n >= 3 ? 'Correct! Break is over!' : 'Correct!') :
+      (stu.correct >= 3 ? 'Correct! You earned 3 balls!' : 'Correct! ' + (3 - stu.correct) + ' more to go.'));
     sfx.right();
   } else {
     fb.className = 'qFb bad';
-    fb.textContent = 'Not quite. The answer is ' + String.fromCharCode(65 + rightK) + ': ' + curQ.q.c[curQ.q.a];
+    fb.textContent = L('Not quite. The answer is') + ' ' + String.fromCharCode(65 + rightK) + ': ' + cleanText(curQ.shown.c[curQ.q.a]);
     sfx.wrong();
   }
   renderDots();
   var nb = $('qNext'), done = stu.water ? stu.water.n >= 3 : stu.correct >= 3;
-  nb.textContent = done ? (stu.water ? 'BACK TO THE COURT' : 'GET MY 3 BALLS') : 'NEXT QUESTION';
+  nb.textContent = L(done ? (stu.water ? 'BACK TO THE COURT' : 'GET MY 3 BALLS') : 'NEXT QUESTION');
   nb.className = 'bigBtn' + (done ? ' go' : '');
   nb.style.display = 'block';
 }
@@ -2730,8 +2919,8 @@ function drawLocalLayer(v, t){
   if (stu.flight) drawBall(c, stu.flight.x, stu.flight.y, stu.flight.rot, stu.flight.k);
   drawParts(c, stu.parts);
   vText(v, me.name, p.x, Math.min(H - 5, p.y + 6), '#fcfcfc', nameSize(v));
-  if (M && !D) vText(v, 'MAGIC ' + Math.ceil(M.left), W / 2, H - 5, MAGIC_COLS[Math.floor(t * 6) % MAGIC_COLS.length], nameSize(v));
-  if (D && D.t < 2.6) vText(v, 'SLAM DUNK!!!', W / 2, H / 2 - 8, CHEER_COLS[Math.floor(t * 10) % CHEER_COLS.length], Math.round(nameSize(v) * (3 + Math.sin(t * 20) * 0.25)));
+  if (M && !D) vText(v, L('MAGIC ' + Math.ceil(M.left)), W / 2, H - 5, MAGIC_COLS[Math.floor(t * 6) % MAGIC_COLS.length], nameSize(v));
+  if (D && D.t < 2.6) vText(v, L('SLAM DUNK!!!'), W / 2, H / 2 - 8, CHEER_COLS[Math.floor(t * 10) % CHEER_COLS.length], Math.round(nameSize(v) * (3 + Math.sin(t * 20) * 0.25)));
   if (stu.local) drawPops(v, stu.pops);
 }
 function stuSend(now){
@@ -2752,7 +2941,7 @@ function stuHud(force){
   var h = '';
   for (var i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi k' + stu.ballK + '"></span>';
   $('pBalls').innerHTML = h;
-  $('pHoop').textContent = stu.magic ? 'MAGIC ' + Math.ceil(stu.magic.left) : 'NEXT: ' + HOOPS[stu.seq].pts + ' PTS';
+  $('pHoop').textContent = L(stu.magic ? 'MAGIC ' + Math.ceil(stu.magic.left) : 'NEXT: ' + HOOPS[stu.seq].pts + ' PTS');
   $('pTime').textContent = fmt(timeLeft());
   $('pScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : ' #' + (stu.G.rk || '-'));
   $('qScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : '  #' + (stu.G.rk || '-'));
