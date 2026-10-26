@@ -324,6 +324,7 @@ body.land #pStage { flex: 1; }
       <div class="row2">
         <div><label class="lab" for="hMins">Game length (minutes)</label><input id="hMins" class="inp" type="number" min="1" max="60"></div>
       </div>
+      <div id="hMinsTip" class="okMsg" style="display:none">Halftime is on: try doubling the game length so there is still plenty of play time. <button type="button" id="hMinsDouble" class="ghostBtn" style="padding:6px 10px;font-size:13px">Double it</button></div>
       <span class="lab">Main screen shows</span>
       <div class="seg" id="hView"><button type="button" data-v="all">EVERYONE</button><button type="button" data-v="top">TOP 5</button><button type="button" data-v="rand">RANDOM 5</button></div>
       <span class="lab">Player on the big screen</span>
@@ -353,7 +354,7 @@ body.land #pStage { flex: 1; }
       <div class="note">1. Copy everything in this box. It already has your questions in it. 2. Paste it into an AI chat. 3. Replace everything here with the AI's answer. Words wrapped in **double stars** show up highlighted. The study sheet is saved with the quiz when you click Save to bank.</div>
       <textarea id="hStudy" class="inp ta" rows="9" style="margin-top:8px"></textarea>
       <div id="hStudyMsg" class="okMsg"></div>
-      <div class="btnRow"><button type="button" id="hStudyCopy" class="ghostBtn">Copy box</button><button type="button" id="hStudyReset" class="ghostBtn">Put the AI prompt back</button></div>
+      <div class="btnRow"><button type="button" id="hStudyCopy" class="ghostBtn">Copy box</button><button type="button" id="hStudyClear" class="ghostBtn">Clear box</button><button type="button" id="hStudyReset" class="ghostBtn">Put the AI prompt back</button></div>
       <div id="hStudyPrev" class="studySheet studyPrev" style="display:none"></div>
     </div>
     <div id="hErr" class="err"></div>
@@ -1090,8 +1091,12 @@ function hostInit(){
   setSeg('hHalf', hst.cfg.half ? 'on' : 'off');
   var halfBtns = $('hHalf').getElementsByTagName('button');
   for (var hb = 0; hb < halfBtns.length; hb++){
-    halfBtns[hb].onclick = function(){ hst.cfg.half = this.getAttribute('data-v') === 'on'; setSeg('hHalf', hst.cfg.half ? 'on' : 'off'); };
+    halfBtns[hb].onclick = function(){ hst.cfg.half = this.getAttribute('data-v') === 'on'; setSeg('hHalf', hst.cfg.half ? 'on' : 'off'); halfTip(); };
   }
+  function halfTip(){ $('hMinsTip').style.display = hst.cfg.half ? 'block' : 'none'; }
+  halfTip();
+  $('hMinsDouble').onclick = function(){ $('hMins').value = clamp((parseInt($('hMins').value, 10) || 10) * 2, 1, 60); };
+  $('hStudyClear').onclick = function(){ $('hStudy').value = ''; checkStudy(); $('hStudy').focus(); };
   fillStudy(hst.cfg.studyNotes);
   $('hStudy').oninput = checkStudy;
   $('hStudyReset').onclick = function(){ fillStudy(''); };
@@ -1200,15 +1205,16 @@ function fillStudy(notes){ $('hStudy').value = notes || studyPrompt($('hBank').v
 function checkStudy(){
   var notes = studyNotes(), msg = $('hStudyMsg'), prev = $('hStudyPrev');
   if (!notes){
-    if (!$('hStudy').value.replace(/\s/g, '')) $('hStudy').value = studyPrompt($('hBank').value);
     msg.className = 'okMsg warn';
-    msg.textContent = 'This is the AI prompt, not a study sheet yet. Copy it into an AI chat, then paste the answer back here.';
+    msg.textContent = $('hStudy').value.replace(/\s/g, '') ?
+      'This is the AI prompt, not a study sheet yet. Copy it into an AI chat, then paste the answer back here.' :
+      'The box is empty. Paste the AI\'s study sheet here.';
     prev.style.display = 'none';
     return;
   }
   var n = parseStudy(notes).filter(function(b){ return b.k === 'h'; }).length;
   msg.className = 'okMsg';
-  msg.textContent = 'Study sheet ready' + (n ? ' (' + n + ' sections)' : '') + '. Preview:';
+  msg.textContent = 'Study sheet ready' + (n ? ' (' + n + (n === 1 ? ' section)' : ' sections)') : '') + '. Preview:';
   prev.innerHTML = studyHtml(notes); prev.style.display = 'block';
 }
 function inlineSegs(t){
