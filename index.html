@@ -623,7 +623,8 @@ var ES = {
   'Correct! Batter up!': '¡Correcto! ¡Al bate!', 'SWING': 'BATEAR', 'BATTER UP!': '¡AL BATE!', 'BACK IN THE BOX!': '¡DE VUELTA AL BATE!',
   'HOME RUN!': '¡JONRÓN!', 'STRIKES': 'STRIKES', 'FOUL BALL!': '¡FOUL!', 'SWING AND A MISS!': '¡ABANICÓ!', 'STRIKE LOOKING!': '¡STRIKE CANTADO!', 'TOO EARLY!': '¡MUY TEMPRANO!',
   'TOO LATE!': '¡MUY TARDE!', 'CRACK! THE BAT BROKE!': '¡CRAC! ¡SE ROMPIÓ EL BATE!', "YOU'RE OUT!": '¡PONCHADO!', 'BASE HIT': 'HIT', 'OFF THE WALL!': '¡A LA PARED!',
-  'GOLDEN BAT!!': '¡¡BATE DE ORO!!', 'HOMERS COUNT DOUBLE!': '¡JONRONES DOBLES!', 'GOLDEN BAT FADED': 'SE ACABÓ EL BATE DE ORO', '10 HOMERS!': '¡10 JONRONES!',
+  'MAGIC BAT!!': '¡¡BATE MÁGICO!!', 'DOUBLE POINTS! HIT THE SUN!': '¡PUNTOS DOBLES! ¡PÉGALE AL SOL!', 'DOUBLE POINTS! HIT THE MOON!': '¡PUNTOS DOBLES! ¡PÉGALE A LA LUNA!',
+  'MAGIC BAT FADED': 'SE ACABÓ EL BATE MÁGICO', '10 HOMERS!': '¡10 JONRONES!',
   'PICK YOUR BAT': 'ELIGE TU BATE', 'POWER BAT': 'BATE DE PODER', 'CONTACT BAT': 'BATE DE CONTACTO', 'POWER BAT!': '¡BATE DE PODER!', 'CONTACT BAT!': '¡BATE DE CONTACTO!',
   'Hits farther, but harder to time': 'Batea más lejos, pero es más difícil', 'Easier to time, shorter hits': 'Más fácil de pegar, batazos más cortos',
   '7TH INNING STRETCH': 'ESTIRÓN DE LA 7MA ENTRADA', 'START THE LAST INNINGS': 'EMPEZAR LAS ÚLTIMAS ENTRADAS', 'HOMERS': 'JONRONES',
@@ -639,8 +640,9 @@ var ES_PAT = [
   [/^Correct! (\d+) more to go\.$/, '¡Correcto! Te faltan $1.'],
   [/^NEXT: (LOW|MIDDLE|HIGH) HOOP$/, function(m, h){ return 'SIGUE: ARO ' + ES_HOOP[h]; }],
   [/^NEXT: (\d+) PTS$/, 'SIGUE: $1 PTS'], [/^MAGIC (\d+)$/, 'MAGIA $1'], [/^PLACE (\d+) OF (\d+)$/, 'LUGAR $1 DE $2'],
-  [/^STRIKE (\d)!$/, '¡STRIKE $1!'], [/^GOLDEN (\d+)$/, 'ORO $1'], [/^\+(\d+) {2}(\d+) FT$/, '+$1  $2 PIES'], [/^LIGHTS! \+(\d+)$/, '¡LUCES! +$1'],
-  [/^SCOREBOARD! \+(\d+)$/, '¡MARCADOR! +$1'], [/^BLIMP! \+(\d+)$/, '¡DIRIGIBLE! +$1'],
+  [/^STRIKE (\d)!$/, '¡STRIKE $1!'], [/^\+(\d+) {2}(\d+) FT$/, '+$1  $2 PIES'], [/^LIGHTS! \+(\d+)$/, '¡LUCES! +$1'],
+  [/^SCOREBOARD! \+(\d+)$/, '¡MARCADOR! +$1'], [/^BLIMP! \+(\d+)$/, '¡DIRIGIBLE! +$1'], [/^SAILBOAT SUNK! \+(\d+)$/, '¡VELERO HUNDIDO! +$1'],
+  [/^NIGHT FALLS! \+(\d+)$/, '¡ANOCHECE! +$1'], [/^CRESCENT MOON! \+(\d+)$/, '¡LUNA CRECIENTE! +$1'], [/^SUNRISE! \+(\d+)$/, '¡AMANECE! +$1'],
   [/^AIM: (LOW|MID|HIGH)$/, function(m, a){ return 'APUNTA: ' + { LOW: 'BAJO', MID: 'MEDIO', HIGH: 'ALTO' }[a]; }]
 ];
 var CHEERS_ES = ['¡BUEN TIRO!', '¡GENIAL!', '¡QUÉ BIEN!', '¡CRACK!', '¡CANASTA!', '¡ADENTRO!', '¡EN LLAMAS!', '¡BRAVO!', '¡INCREÍBLE!', '¡ESO ES!'];
@@ -1364,7 +1366,7 @@ function sportSetup(){
   setSeg('hSport', hst.cfg.sport);
   sportTitles(hst.cfg.sport);
   $('hSportNote').textContent = d ?
-    'Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out. Misses, fouls and pitches you let go by are all strikes. Homers score 1 to 3 points by distance, and hitting the stadium lights (+5), scoreboard (+5) or blimp (+20) adds bonus points.' :
+    'Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out. Misses, fouls and pitches you let go by are all strikes. Homers score 1 to 3 points by distance, and hitting the stadium lights (+5), scoreboard (+5), sailboat (+10) or blimp (+20) adds bonus points. 3 homers in a row or hitting the lights gives the magic bat for 20 seconds: double points, high homers that curve toward the blimp, and the power to hit the sun and moon (+15) to turn day into night and back.' :
     'Shoot the lit hoop in order (2, 3, then 5 points) to open the magic round and slam dunk for 10.';
   $('hHalfLab').textContent = d ? '7th inning stretch study break' : 'Halftime study break';
   $('hHalfNote').textContent = (d ? 'About 7/9 of the way through, the game pauses for the 7th inning stretch' : 'At the halfway point the game pauses') +
@@ -1984,9 +1986,15 @@ function hostData(conn, d){
     if (hst.phase === 'play' && DB_TG[d.k]){
       var tp = dbyTgPts(d.k, d.g);
       p.score += tp;
-      if (!p.local){
-        addPop(hst.pops, 190, 60, '+' + tp + ' ' + p.name + ' ' + DB_TG[d.k].n, '#58f8d0');
-        if (d.k === 'b' && hst.dby && hst.dby.S.blimp && !hst.dby.S.blimp.pop) hst.dby.S.blimp.pop = 0.01;
+      var HS = hst.dby && hst.dby.S, sky = 'umc'.indexOf(d.k) >= 0;
+      if (p.local){
+        // the teacher's own sky is already showing; keep the big screen's sky in step with it
+        if (sky && HS && stu.dby){ HS.sky = stu.dby.sky; HS.skyFrom = stu.dby.skyFrom; HS.skyT = stu.dby.skyT; }
+      } else if (HS){
+        addPop(hst.pops, sky ? W / 2 : 190, sky ? 70 : 60, '+' + tp + ' ' + p.name + ' ' + DB_TG[d.k].n, sky ? '#e0b0ff' : '#58f8d0', sky);
+        if (d.k === 'b' && HS.blimp && !HS.blimp.pop) HS.blimp.pop = 0.01;
+        if (d.k === 'w' && HS.boat && !HS.boat.sink){ HS.boat.sink = 0.01; HS.shake = 0.5; }
+        if (sky){ dbySkyNext(HS); sfx.bonus(); }
       }
       hostBroadcast();
     }
@@ -2130,7 +2138,7 @@ function hostBoard(){
   var left = hostLeft();
   $('hTimer').textContent = fmt(left);
   $('hTimer').className = 'pix' + (left <= 30 ? ' low' : '');
-  $('hHoop').innerHTML = hostDerby() ? 'HOMERS 1 TO 3, LIGHTS +5<br>SCOREBOARD +5, BLIMP +20' : 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
+  $('hHoop').innerHTML = hostDerby() ? 'HOMERS 1-3, LIGHTS +5, BOARD +5, BOAT +10<br>BLIMP +20, MAGIC BAT: SUN AND MOON +15' : 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
   hst.lastBoard = performance.now();
 }
 function hostUpdate(dt, now){
@@ -3078,7 +3086,7 @@ function stuHud(force){
   if (isDerby()){
     for (i = 0; i < 3; i++) h += '<span class="sk' + (D && i < D.k ? ' on' : '') + '"></span>';
     $('pBalls').innerHTML = h;
-    $('pHoop').textContent = D ? L(D.gold > 0 ? 'GOLDEN ' + Math.ceil(D.gold) : 'AIM: ' + DB_AIMS[D.aim].n) : '';
+    $('pHoop').textContent = D ? L(D.gold > 0 ? 'MAGIC ' + Math.ceil(D.gold) : 'AIM: ' + DB_AIMS[D.aim].n) : '';
   } else {
     for (i = 0; i < stu.balls && i < 8; i++) h += '<span class="bi k' + stu.ballK + '"></span>';
     $('pBalls').innerHTML = h;
@@ -3308,36 +3316,41 @@ var DB_BATS = {
 var DB_WIND = 0.75, DB_SW = 0.06, DB_FOUL = 0.07, DB_LOOK = 0.17, DB_GAP = 1.0, DB_PICK_AT = 120, LIGHT_OUT = 15, GOLD_SECS = 20;
 var DB_LIGHTS = [{ x1: 204, x2: 220, y1: 40, y2: 53 }, { x1: 238, x2: 254, y1: 58, y2: 71 }];
 var DB_SB = { x1: 222, x2: 252, y1: 74, y2: 95 };
-var DB_TG = { l: { n: 'LIGHTS', p: 5 }, s: { n: 'SCOREBOARD', p: 5 }, b: { n: 'BLIMP', p: 20 } };
+var DB_TG = { l: { n: 'LIGHTS', p: 5 }, s: { n: 'SCOREBOARD', p: 5 }, b: { n: 'BLIMP', p: 20 }, w: { n: 'SANK THE SAILBOAT', p: 10 },
+  u: { n: 'HIT THE SUN', p: 15, flat: 1 }, m: { n: 'HIT THE MOON', p: 15, flat: 1 }, c: { n: 'HIT THE MOON', p: 15, flat: 1 } };
 var PITCHER = { shirt: 8, skin: 1, hat: 1, hc: 4 };
 var CATCHER = makeSpriteP([
   '..kkk...', '.kkkkk..', '.kgsgk..', '..kgk...', '.NNNNN..', 'NNNNNNmm', 'NNNNNNmm', '.PPPP...', 'PP..PP..', 'FF..FF..'
 ], { k: '#283070', g: '#9a9aa8', s: '#f0b880', N: '#2a3060', m: '#8a4a1a', P: '#d8d8d8', F: '#181818' });
 
 function dbyHrPts(ft, g){ return (ft < 420 ? 1 : (ft < 470 ? 2 : 3)) * (g ? 2 : 1); }
-function dbyTgPts(k, g){ return (DB_TG[k] ? DB_TG[k].p : 0) * (g ? 2 : 1); }
+function dbyTgPts(k, g){ var o = DB_TG[k]; return o ? o.p * (g && !o.flat ? 2 : 1) : 0; }
 function bleachTop(x){ return 110 - Math.floor((x - 202) / 7) * 2; }
 
 var DBG = null, CROWD = [];
+var SUN = { x: 132, y: 104, r: 18 }, MOON = { x: 126, y: 64, r: 21 };
+var DAY_SKY = ['#0c0828', '#140c34', '#1e1048', '#2c1458', '#40186a', '#5a1c72', '#7a2274', '#9c2c6e', '#be3c62', '#de5652', '#f47a44'];
+var NIGHT_SKY = ['#02020c', '#04061a', '#060a24', '#0a0e30', '#0e1438', '#121a40', '#162048', '#1a2650', '#1e2c58', '#223260', '#263868'];
 function dbyBg(){
-  if (DBG) return DBG;
+  if (!DBG) DBG = [dbyBgMake(false), dbyBgMake(true)];
+  return DBG;
+}
+function dbyBgMake(night){
   var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   var c = cv.getContext('2d'), i, k, x, seed = 7;
   function r(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
-  var sky = ['#0c0828', '#140c34', '#1e1048', '#2c1458', '#40186a', '#5a1c72', '#7a2274', '#9c2c6e', '#be3c62', '#de5652', '#f47a44'];
+  var sky = night ? NIGHT_SKY : DAY_SKY, crowd = !CROWD.length;
   var bh = 104 / sky.length;
   for (i = 0; i < sky.length; i++){ c.fillStyle = sky[i]; c.fillRect(0, Math.floor(i * bh), W, Math.ceil(bh) + 1); }
   c.fillStyle = '#fcfcfc';
-  for (i = 0; i < 50; i++){ c.globalAlpha = 0.35 + r() * 0.65; c.fillRect(Math.floor(r() * W), Math.floor(r() * 50), 1, 1); }
+  for (i = 0; i < (night ? 110 : 50); i++){ c.globalAlpha = 0.35 + r() * 0.65; c.fillRect(Math.floor(r() * W), Math.floor(r() * (night ? 96 : 50)), 1, 1); }
   c.globalAlpha = 1;
-  // the sun going down over the ocean beyond the outfield
-  c.fillStyle = '#fcd060'; c.beginPath(); c.arc(132, 104, 18, 0, Math.PI * 2); c.fill();
-  for (i = 0; i < 4; i++){ c.fillStyle = '#e8604e'; c.fillRect(112, 92 + i * 3, 40, i < 2 ? 1 : 2); }
-  c.fillStyle = '#2a1238';
+  // islands on the horizon and the ocean beyond the outfield (the sun and moon are drawn over this)
+  c.fillStyle = night ? '#06040e' : '#2a1238';
   c.fillRect(150, 101, 30, 3); c.fillRect(158, 99, 14, 2);
-  for (i = 104; i < 113; i++){ c.fillStyle = i < 107 ? '#3a3c94' : (i < 110 ? '#2c3282' : '#22286e'); c.fillRect(0, i, W, 1); }
-  c.fillStyle = '#f8c070';
-  for (i = 0; i < 12; i++) c.fillRect(118 + Math.floor(r() * 28), 105 + Math.floor(r() * 7), 2 + Math.floor(r() * 4), 1);
+  for (i = 104; i < 113; i++){ c.fillStyle = night ? (i < 107 ? '#141a48' : (i < 110 ? '#10163c' : '#0c1030')) : (i < 107 ? '#3a3c94' : (i < 110 ? '#2c3282' : '#22286e')); c.fillRect(0, i, W, 1); }
+  c.fillStyle = night ? '#d8dcf8' : '#f8c070';
+  for (i = 0; i < 12; i++) c.fillRect((night ? 104 : 118) + Math.floor(r() * 28), 105 + Math.floor(r() * 7), 2 + Math.floor(r() * 4), 1);
   // grass in mowed stripes, warning track, infield dirt and the mound
   for (i = 113; i < FLOOR; i++){ c.fillStyle = Math.floor((i - 113) / 3) % 2 ? '#2c8a38' : '#36a044'; c.fillRect(0, i, DB.WALL_X, 1); }
   c.fillStyle = '#b07840'; c.fillRect(182, 128, 16, 4);
@@ -3363,7 +3376,7 @@ function dbyBg(){
     c.fillStyle = '#000'; c.fillRect(x, top - 1, W - x, 1);
     c.fillStyle = '#2c2c44'; c.fillRect(x, top, W - x, FLOOR - top);
     c.fillStyle = '#5a5a7a'; c.fillRect(x, top, W - x, 1);
-    for (var s = x + 1; s < W - 1; s += 3) CROWD.push({ x: s, y: top - 3, c: pick(SHIRTS), h: pick(SKINS), ph: r() * 6 });
+    if (crowd) for (var s = x + 1; s < W - 1; s += 3) CROWD.push({ x: s, y: top - 3, c: pick(SHIRTS), h: pick(SKINS), ph: r() * 6 });
   }
   // light tower poles (the lamps are drawn on top, lit or broken) and the foul pole
   c.fillStyle = '#000'; c.fillRect(210, 53, 4, bleachTop(211) - 53); c.fillRect(244, 71, 4, bleachTop(245) - 71);
@@ -3381,18 +3394,35 @@ function dbyBg(){
   c.fillStyle = '#6a4020';
   for (i = 0; i < W; i += 16) c.fillRect(i, FLOOR + 1, 1, H - FLOOR - 1);
   c.fillStyle = '#a87038'; c.fillRect(0, FLOOR + 1, W, 1);
-  DBG = cv;
+  if (night){ c.fillStyle = 'rgba(0,0,30,0.38)'; c.fillRect(0, 104, W, H - 104); }
   return cv;
 }
 
 /* the stadium's moving parts: lights that shatter, the scoreboard, the crowd and the blimp */
-function dbyScene(){ return { lights: [0, 0], sbT: 0, crowdT: 0, blimp: null, blimpT: rand(8, 14) }; }
-function dbyStepScene(S, dt){
+function dbyScene(){
+  return { lights: [0, 0], sbT: 0, crowdT: 0, blimp: null, blimpT: rand(8, 14), sky: 0, skyFrom: 0, skyT: 1, shake: 0, boat: null, boatT: rand(3, 8) };
+}
+// the sky goes day -> night with a full moon -> crescent moon -> the sun comes back up
+function dbySkyNext(S){ S.skyFrom = S.sky; S.sky = (S.sky + 1) % 3; S.skyT = 0; S.shake = 0.9; }
+function dbyNight(S){ var a = S.skyFrom > 0 ? 1 : 0, b = S.sky > 0 ? 1 : 0; return a + (b - a) * S.skyT; }
+function dbyStepScene(S, dt, magic){
   for (var k = 0; k < 2; k++) if (S.lights[k] > 0) S.lights[k] = Math.max(0, S.lights[k] - dt);
   S.sbT = Math.max(0, S.sbT - dt); S.crowdT = Math.max(0, S.crowdT - dt);
+  S.skyT = Math.min(1, S.skyT + dt / 1.6); S.shake = Math.max(0, S.shake - dt);
+  var bt = S.boat;
+  if (!bt){
+    S.boatT -= dt;
+    if (S.boatT <= 0){ var bd = Math.random() < 0.5 ? 1 : -1; S.boat = { x: bd > 0 ? -8 : 204, dir: bd, sp: rand(5, 8), sink: 0, bob: rand(0, 6) }; }
+  } else if (bt.sink > 0){
+    bt.sink += dt;
+    if (bt.sink > 2.2){ S.boat = null; S.boatT = rand(10, 18); }
+  } else {
+    bt.x += bt.dir * bt.sp * dt; bt.bob += dt * 2;
+    if (bt.x < -12 || bt.x > 206){ S.boat = null; S.boatT = rand(6, 12); }
+  }
   var bp = S.blimp;
   if (!bp){
-    S.blimpT -= dt;
+    S.blimpT -= dt * (magic ? 6 : 1);  // the magic bat brings the blimp out
     if (S.blimpT <= 0){ var dir = Math.random() < 0.5 ? 1 : -1; S.blimp = { x: dir > 0 ? -16 : W + 16, y: 16, dir: dir, sp: rand(13, 18), bob: rand(0, 6), pop: 0 }; }
   } else if (bp.pop > 0){
     bp.pop += dt; bp.y += dt * 40 * bp.pop;
@@ -3417,10 +3447,57 @@ function drawBlimp(c, bp, t){
   c.fillStyle = '#404058'; c.fillRect(x - 3, y + 5, 6, 2);
   c.fillStyle = '#f8d878'; c.fillRect(x - 2, y + 5, 1, 1); c.fillRect(x, y + 5, 1, 1); c.fillRect(x + 2, y + 5, 1, 1);
 }
+function drawBoat(c, bt){
+  var x = Math.round(bt.x), y = 110 + Math.round(Math.sin(bt.bob) * 0.6) + Math.round(bt.sink * 7), k;
+  c.save(); c.beginPath(); c.rect(9, 0, DB.WALL_X - 10, 112); c.clip();
+  c.fillStyle = '#000'; c.fillRect(x - 7, y - 3, 15, 4); c.fillRect(x - 1, y - 17, 2, 15);
+  for (k = 0; k < 11; k++) c.fillRect(x + 1, y - 15 + k, Math.round((k + 1) * 0.65) + 1, 1);
+  c.fillStyle = '#a85a20'; c.fillRect(x - 6, y - 2, 13, 2);
+  c.fillStyle = '#6a3410'; c.fillRect(x - 5, y, 11, 1);
+  for (k = 0; k < 10; k++){ c.fillStyle = k % 4 === 3 ? '#e83020' : '#fcfcfc'; c.fillRect(x + 1, y - 14 + k, Math.round((k + 1) * 0.6), 1); }
+  c.fillStyle = '#e83020'; c.fillRect(x - 3, y - 17, 2, 2);
+  c.restore();
+}
+function dbyDrawSky(c, S){
+  var p = S.skyT, fr = S.skyFrom, to = S.sky, sy = null, i;
+  // the sun sets into the ocean when night comes, and rises back out of it
+  if (fr === 0 && to === 0) sy = SUN.y; else if (fr === 0) sy = SUN.y + 34 * p; else if (to === 0) sy = SUN.y + 34 * (1 - p);
+  if (sy != null){
+    c.save(); c.beginPath(); c.rect(0, 0, W, 104); c.clip();
+    c.fillStyle = '#fcd060'; c.beginPath(); c.arc(SUN.x, sy, SUN.r, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(SUN.x, sy, SUN.r, 0, Math.PI * 2); c.clip();
+    c.fillStyle = '#e8604e';
+    for (i = 0; i < 4; i++) c.fillRect(SUN.x - 20, sy - 12 + i * 3, 40, i < 2 ? 1 : 2);
+    c.restore();
+  }
+  // the giant full moon comes up with the night; a hit bites it down to a crescent; at sunrise it fades
+  var ma = to > 0 ? (fr > 0 ? 1 : p) : (fr > 0 ? 1 - p : 0);
+  if (ma <= 0) return;
+  var cr = to === 2 ? (fr === 2 ? 1 : p) : (fr === 2 ? 1 : 0), my = MOON.y + (fr === 0 && to === 1 ? (1 - p) * 30 : 0);
+  c.globalAlpha = ma;
+  c.fillStyle = 'rgba(240,240,210,0.12)'; c.beginPath(); c.arc(MOON.x, my, MOON.r + 7, 0, Math.PI * 2); c.fill();
+  c.save(); c.beginPath(); c.arc(MOON.x, my, MOON.r, 0, Math.PI * 2); c.clip();
+  c.fillStyle = '#f4f0d8'; c.fillRect(MOON.x - MOON.r, my - MOON.r, MOON.r * 2, MOON.r * 2);
+  c.fillStyle = '#dcd6b8';
+  [[-6, -5, 4], [7, 4, 5], [-2, 10, 3], [9, -9, 2]].forEach(function(k){ c.beginPath(); c.arc(MOON.x + k[0], my + k[1], k[2], 0, Math.PI * 2); c.fill(); });
+  if (cr > 0){ c.fillStyle = NIGHT_SKY[Math.floor(MOON.y / (104 / NIGHT_SKY.length))]; c.beginPath(); c.arc(MOON.x - 8 - (1 - cr) * 32, my - 3, MOON.r, 0, Math.PI * 2); c.fill(); }
+  c.restore();
+  c.globalAlpha = 1;
+}
+function dbyShake(v, S){
+  if (S.shake > 0){
+    var m = Math.min(1, S.shake) * 4;
+    v.cv.style.transform = 'translate(' + Math.round(rand(-m, m)) + 'px,' + Math.round(rand(-m, m)) + 'px)'; v.shk = true;
+  } else if (v.shk){ v.cv.style.transform = ''; v.shk = false; }
+}
 function dbyDrawScene(v, S, t, sb){
   gameXf(v);
-  var c = v.c, k, i, b;
-  c.drawImage(dbyBg(), 0, 0);
+  var c = v.c, k, i, b, bgs = dbyBg(), nf = dbyNight(S);
+  dbyShake(v, S);
+  c.drawImage(bgs[0], 0, 0);
+  if (nf > 0){ c.globalAlpha = nf; c.drawImage(bgs[1], 0, 0); c.globalAlpha = 1; }
+  dbyDrawSky(c, S);
+  if (S.boat) drawBoat(c, S.boat);
   for (k = 0; k < 2; k++){
     b = DB_LIGHTS[k];
     if (S.lights[k] > 0) continue;
@@ -3476,13 +3553,13 @@ function batAng(sw, t){
   if (s < 0.38) return 2.7;
   return 2.7 + Math.min(1, (s - 0.38) / 0.17) * (A0 + Math.PI * 2 - 2.7);
 }
-function drawBat(c, px, py, ang, bat, gold, len){
+function drawBat(c, px, py, ang, bat, gold, len, t){
   var cs = Math.cos(ang), sn = Math.sin(ang), k, pass;
   for (pass = 0; pass < 2; pass++){
     for (k = 1; k <= len; k++){
       var x = Math.round(px + cs * k), y = Math.round(py + sn * k), fat = k > 5 ? 2 : 1;
       if (pass === 0){ c.fillStyle = '#000'; c.fillRect(x - 1, y - 1, fat + 2, fat + 2); }
-      else { c.fillStyle = gold ? (k < 4 ? '#a87808' : '#f8d030') : (k < 4 ? bat.dark : bat.col); c.fillRect(x, y, fat, fat); }
+      else { c.fillStyle = gold ? MAGIC_COLS[(k + Math.floor(t * 12)) % MAGIC_COLS.length] : (k < 4 ? bat.dark : bat.col); c.fillRect(x, y, fat, fat); }
     }
   }
 }
@@ -3499,13 +3576,14 @@ function dbyDrawPeople(v, t, D, look, name, sw, faded){
   drawAvatar(c, look, DB.BAT_X + (swing ? 1 : 0), FLOOR, 1, swing ? 1 : 0, false, 0, faded ? 0.35 : null);
   if (faded) return;
   var broke = D && D.brokeT > 0, gold = D ? D.gold > 0 : false;
-  drawBat(c, DB.BAT_X + 2 + (swing ? 1 : 0), FLOOR - 7, batAng(sw, t), DB_BATS[(D && D.bat) || 'std'], gold, broke ? 4 : 12);
+  drawBat(c, DB.BAT_X + 2 + (swing ? 1 : 0), FLOOR - 7, batAng(sw, t), DB_BATS[(D && D.bat) || 'std'], gold, broke ? 4 : 12, t);
+  if (gold && Math.random() < 0.5) burst(stu.parts, DB.BAT_X + rand(-4, 10), FLOOR - rand(4, 20), 1, MAGIC_COLS, 8, -20, 0.6);
   vText(v, name, DB.BAT_X, H - 5, '#fcfcfc', nameSize(v));
 }
 function dbyDrawFly(c, f){
   for (var i = 0; i < f.trail.length; i++){
     c.globalAlpha = (i + 1) / (f.trail.length + 2) * 0.5;
-    c.fillStyle = f.gold ? '#f8d030' : '#fcfcfc'; c.fillRect(Math.round(f.trail[i][0]), Math.round(f.trail[i][1]), 1, 1);
+    c.fillStyle = f.gold ? MAGIC_COLS[i % MAGIC_COLS.length] : '#fcfcfc'; c.fillRect(Math.round(f.trail[i][0]), Math.round(f.trail[i][1]), f.gold ? 2 : 1, f.gold ? 2 : 1);
   }
   c.globalAlpha = 1;
   drawBaseball(c, f.x, f.y, f.gold);
@@ -3529,7 +3607,7 @@ function dbyDrawAll(v, D, t, sb){
   }
   if (D.mph && (D.st === 'pitch' || D.st === 'after')) vText(v, D.mph + ' MPH', 46, 15, '#c9b8ff', ns);
   vText(v, L('AIM: ' + DB_AIMS[D.aim].n), DB.BAT_X + 6, FLOOR - 28, '#58d8f8', ns);
-  if (D.gold > 0) vText(v, L('GOLDEN ' + Math.ceil(D.gold)), 46, 24, CHEER_COLS[Math.floor(t * 6) % CHEER_COLS.length], ns);
+  if (D.gold > 0) vText(v, L('MAGIC ' + Math.ceil(D.gold)), 46, 24, MAGIC_COLS[Math.floor(t * 6) % MAGIC_COLS.length], ns);
 }
 
 /* a batted ball: decided at contact, so the big screen can replay the same flight */
@@ -3543,8 +3621,18 @@ function dbyLaunch(v, a){
 function dbyStepFly(S, f, dt, on){
   var n = 4, h = dt / n, k, b;
   for (var i = 0; i < n && !f.done; i++){
-    var px = f.x;
+    var px = f.x, bp = S.blimp, bo = S.boat;
+    // magic bat, aimed high: once past the sun and moon, the ball bends toward the blimp
+    if (f.home && f.x > 150 && bp && !bp.pop && !f.hit.b && bp.x > f.x + 6 && f.vx > 20){
+      var tt = (bp.x - f.x) / f.vx, need = (bp.y - f.y - DB.G * tt * tt / 2) / tt;
+      f.vy += (need - f.vy) * Math.min(1, h * 5);
+    }
     f.vy += DB.G * h; f.x += f.vx * h; f.y += f.vy * h; f.t += h;
+    if (!f.replay && bo && !bo.sink && !f.hit.w && Math.abs(f.x - bo.x) < (f.gold ? 12 : 8) && f.y > 95 && f.y < 112){ f.hit.w = 1; bo.sink = 0.01; S.shake = 0.5; on('boat', f); }
+    if (f.gold && !f.replay && !f.hit.sky && S.skyT >= 1 &&
+        (S.sky === 0 ? (hyp(f.x - SUN.x, f.y - SUN.y) < SUN.r + 3 && f.y < 104) : hyp(f.x - MOON.x, f.y - MOON.y) < MOON.r + 3)){
+      f.hit.sky = 1; var was = S.sky; dbySkyNext(S); on('sky', f, was);
+    }
     if (!f.wall && px < DB.WALL_X && f.x >= DB.WALL_X){
       f.wall = true;
       if (f.hr) on('hr', f);
@@ -3559,7 +3647,6 @@ function dbyStepFly(S, f, dt, on){
       if (!f.hit.s && f.x > b.x1 && f.x < b.x2 && f.y > b.y1 && f.y < b.y2){ f.hit.s = 1; S.sbT = 2.5; f.vx = -f.vx * 0.15; f.vy = Math.abs(f.vy) * 0.2; on('sb', f); }
       if (f.x > 202 && f.y >= bleachTop(f.x) - 2){ f.done = true; break; }
     }
-    var bp = S.blimp;
     if (bp && !bp.pop && !f.hit.b && Math.abs(f.x - bp.x) < 13 && Math.abs(f.y - bp.y) < 5){ f.hit.b = 1; bp.pop = 0.01; on('blimp', f); }
     if (!f.hr && f.vy > 0 && f.y >= FLOOR - 2){
       f.y = FLOOR - 2;
@@ -3569,7 +3656,7 @@ function dbyStepFly(S, f, dt, on){
     if (f.x > W + 6 || f.x < -6 || f.t > 6) f.done = true;
   }
   f.trail.push([f.x, f.y]);
-  if (f.trail.length > 6) f.trail.shift();
+  if (f.trail.length > (f.gold ? 12 : 6)) f.trail.shift();
 }
 function dbyFireworks(parts, n){
   for (var i = 0; i < n; i++) burst(parts, rand(110, 240), rand(16, 50), 16, [pick(CHEER_COLS), pick(CHEER_COLS), '#fcfcfc'], 45, 25, 1.1);
@@ -3657,8 +3744,8 @@ function dbyStrike(){
 function dbyGold(){
   var D = stu.dby;
   D.gold = GOLD_SECS;
-  addCheer(stu.pops, W / 2, 72, 'GOLDEN BAT!!');
-  addPop(stu.pops, W / 2, 86, 'HOMERS COUNT DOUBLE!', '#f8d030');
+  addCheer(stu.pops, W / 2, 72, 'MAGIC BAT!!');
+  addPop(stu.pops, W / 2, 86, D.sky === 0 ? 'DOUBLE POINTS! HIT THE SUN!' : 'DOUBLE POINTS! HIT THE MOON!', '#e0b0ff');
   sfx.charge();
   stuHud(true);
 }
@@ -3682,7 +3769,7 @@ function dbyResolve(kind, e){
     var bat = dbyBat(), q = clamp(1 - Math.abs(e) / bat.w + rand(-0.06, 0.06), 0, 1);
     var v = (150 + 60 * Math.pow(q, 0.8)) * bat.pow, ad = DB_AIMS[D.aim].a + rand(-2, 2);
     var f = D.fly = dbyLaunch(v, ad * Math.PI / 180);
-    f.gold = D.gold > 0;
+    f.gold = D.gold > 0; f.home = f.gold && ad >= 45;
     D.ball = null;
     burst(stu.parts, DB.PLATE, DB.CY, 10, ['#fcfcfc', '#f8d878'], 50, 0, 0.4);
     sfx.crack();
@@ -3715,7 +3802,7 @@ function dbyEv(kind, f, k){
   } else if (kind === 'land'){
     D.streak = 0; addPop(stu.pops, W / 2, 40, 'BASE HIT', '#fcfcfc');
   } else {
-    var tg = kind === 'light' ? 'l' : (kind === 'sb' ? 's' : 'b'), pts = dbyTgPts(tg, f.gold);
+    var tg = { light: 'l', sb: 's', blimp: 'b', boat: 'w' }[kind] || ['u', 'm', 'c'][k], pts = dbyTgPts(tg, f.gold);
     stuSendMsg({ t: 'tg', k: tg, g: f.gold ? 1 : 0 });
     if (kind === 'light'){
       p = DB_LIGHTS[k];
@@ -3727,6 +3814,15 @@ function dbyEv(kind, f, k){
       addPop(stu.pops, (DB_SB.x1 + DB_SB.x2) / 2 - 24, DB_SB.y1 - 6, 'SCOREBOARD! +' + pts, '#58f8d0', true);
       burst(stu.parts, (DB_SB.x1 + DB_SB.x2) / 2, DB_SB.y1 + 8, 24, CHEER_COLS, 60, 40, 1);
       sfx.bonus();
+    } else if (kind === 'boat'){
+      addPop(stu.pops, clamp(f.x, 60, W - 60), 92, 'SAILBOAT SUNK! +' + pts, '#58d8f8', true);
+      burst(stu.parts, f.x, 110, 26, ['#fcfcfc', '#9cd8fc', '#3a3c94'], 50, 90, 1);
+      hiss(0.5, 0.07, 700); tone(160, 0.4, 'square', 0.05, -100);
+    } else if (kind === 'sky'){
+      addCheer(stu.pops, W / 2, 60, (k === 0 ? 'NIGHT FALLS! +' : (k === 1 ? 'CRESCENT MOON! +' : 'SUNRISE! +')) + pts);
+      if (k === 0) burst(stu.parts, SUN.x, SUN.y - 8, 40, ['#fcd060', '#f8a040', '#fcfcfc'], 70, 30, 1.4);
+      else burst(stu.parts, MOON.x, MOON.y, 40, ['#f4f0d8', '#fcfcfc', '#b078ff'], 70, 30, 1.4);
+      tone(70, 0.7, 'square', 0.07, -30); hiss(0.8, 0.06, 300); sfx.bonus();
     } else {
       addPop(stu.pops, clamp(f.x, 60, W - 60), f.y + 14, 'BLIMP! +' + pts, '#f878d8', true);
       burst(stu.parts, f.x, f.y, 30, ['#c8c8dc', '#d82800', '#fcfcfc', '#f8d878'], 70, 60, 1.2);
@@ -3737,8 +3833,8 @@ function dbyEv(kind, f, k){
 function dbyUpdate(dt){
   var D = stu.dby;
   if (!D) return;
-  dbyStepScene(D, dt);
-  if (D.gold > 0){ D.gold -= dt; if (D.gold <= 0){ D.gold = 0; addPop(stu.pops, W / 2, 40, 'GOLDEN BAT FADED', '#f8d878'); } }
+  dbyStepScene(D, dt, D.gold > 0);
+  if (D.gold > 0){ D.gold -= dt; if (D.gold <= 0){ D.gold = 0; addPop(stu.pops, W / 2, 40, 'MAGIC BAT FADED', '#e0b0ff'); } }
   if (D.swing){ D.swing.t += dt; if (D.swing.t > 0.55) D.swing = null; }
   if (D.brokeT > 0) D.brokeT -= dt;
   if (D.ball){
@@ -3790,7 +3886,7 @@ function dbyReplay(p, d){
   var HD = hst.dby;
   if (hst.cfg.view !== 'all' && visiblePlayers().indexOf(p) < 0) return;
   var f = dbyLaunch(clamp(+d.v || 180, 60, 320), clamp(+d.a || 360, 0, 800) / 10 * Math.PI / 180);
-  f.hr = true; f.name = p.name; f.col = SHIRTS[p.look.shirt]; f.gold = !!d.g;
+  f.hr = true; f.replay = true; f.name = p.name; f.col = SHIRTS[p.look.shirt]; f.gold = !!d.g; f.home = f.gold && d.a >= 450;
   HD.flys.push(f);
   if (HD.flys.length > 8) HD.flys.shift();
   HD.bat = { look: p.look, name: p.name, t: DB_SW };
@@ -3798,7 +3894,7 @@ function dbyReplay(p, d){
 }
 function dbyHostUpdate(dt){
   var HD = hst.dby, S = HD.S;
-  dbyStepScene(S, dt);
+  dbyStepScene(S, dt, false);
   if (HD.bat) HD.bat.t += dt;
   for (var i = HD.flys.length - 1; i >= 0; i--){
     var f = HD.flys[i];
