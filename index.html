@@ -586,9 +586,10 @@ function loadPeer(cb){
 /* ============================================================
    QUESTION PARSER (same format as Checks for Understanding)
 ============================================================ */
+function cleanText(t){ return String(t || '').replace(/\\+[ \t]*$/gm, '').replace(/\\([*_`#\[\]()\-.!>+~|?:])/g, '$1'); }
 function parseQuestions(text){
   var questions = [], problems = [];
-  var blocks = String(text || '').replace(/\r/g, '').split(/\n(?=\s*(?:question|q)\s*\d*\s*[:.)\-]\s)/i);
+  var blocks = cleanText(text).replace(/\r/g, '').split(/\n(?=\s*(?:question|q)\s*\d*\s*[:.)\-]\s)/i);
   for (var i = 0; i < blocks.length; i++){
     var raw = blocks[i].replace(/^\s+|\s+$/g, '');
     if (!raw) continue;
@@ -1110,6 +1111,15 @@ function hostInit(){
   $('hStudyClear').onclick = function(){ $('hStudy').value = ''; checkStudy(); $('hStudy').focus(); };
   fillStudy(hst.cfg.studyNotes);
   $('hStudy').oninput = checkStudy;
+  $('hStudy').addEventListener('paste', function(e){
+    var cd = e.clipboardData, html = cd && cd.getData('text/html'), txt = html ? htmlToStudy(html) : '';
+    if (!txt || /\*\*/.test(cd.getData('text/plain'))) return;  // plain paste already has its **stars**
+    e.preventDefault();
+    var a = this.selectionStart, z = this.selectionEnd;
+    this.value = this.value.slice(0, a) + txt + this.value.slice(z);
+    this.selectionStart = this.selectionEnd = a + txt.length;
+    checkStudy();
+  });
   $('hStudyReset').onclick = function(){ fillStudy(''); };
   $('hStudyCopy').onclick = function(){
     var box = $('hStudy'), btn = this;
@@ -1216,7 +1226,9 @@ function studyPrompt(bankText){
     'Use exactly this format, with nothing before or after it:\n' +
     '# A short section title\n' +
     '- One key fact per line, with the most important words wrapped in **double stars**\n\n' +
-    'Use 3 to 6 sections with 2 to 5 lines each. Plain text only: no tables, no emojis, no answer letters, and do not copy the questions.\n\n' +
+    'Use 3 to 6 sections with 2 to 5 lines each. In EVERY line, wrap 1 to 3 key words in **double stars**, for example:\n' +
+    '- **Evaporation** turns liquid water into **water vapor**.\n' +
+    'Plain text only: no tables, no emojis, no answer letters, and do not copy the questions. Put the whole answer in one code block so it is easy to copy.\n\n' +
     'Review questions:\n\n' + String(bankText || '').replace(/^\s+|\s+$/g, '');
 }
 function isStudyPrompt(t){ return String(t || '').replace(/^\s+/, '').indexOf(STUDY_HEAD) === 0; }
@@ -1233,10 +1245,54 @@ function checkStudy(){
     prev.style.display = 'none';
     return;
   }
-  var n = parseStudy(notes).filter(function(b){ return b.k === 'h'; }).length;
-  msg.className = 'okMsg';
-  msg.textContent = 'Study sheet ready' + (n ? ' (' + n + (n === 1 ? ' section)' : ' sections)') : '') + '. Preview:';
+  var blocks = parseStudy(notes), n = blocks.filter(function(b){ return b.k === 'h'; }).length;
+  var marked = blocks.some(function(b){ return b.segs.some(function(sg){ return sg.m; }); });
+  msg.className = 'okMsg' + (marked ? '' : ' warn');
+  msg.textContent = 'Study sheet ready' + (n ? ' (' + n + (n === 1 ? ' section)' : ' sections)') : '') + '.' +
+    (marked ? ' Preview:' : ' No key ideas are highlighted yet: ask the AI to wrap key words in **double stars**, or copy its answer with its copy button. Preview:');
   prev.innerHTML = studyHtml(notes); prev.style.display = 'block';
+}
+// turn a formatted paste (from an AI chat or a document) into study sheet text: bold becomes **highlight**
+function htmlToStudy(html){
+  var doc = new DOMParser().parseFromString(html, 'text/html'), out = [];
+  function bold(n){
+    var fw = ((n.getAttribute('style') || '').match(/font-weight:\s*([a-z0-9]+)/i) || [])[1];
+    if (fw) return /bold|[6-9]00/i.test(fw);
+    return /^(B|STRONG|MARK)$/.test(n.tagName);
+  }
+  function inline(node){
+    var t = '';
+    for (var i = 0; i < node.childNodes.length; i++){
+      var n = node.childNodes[i];
+      if (n.nodeType === 3) t += n.nodeValue;
+      else if (n.nodeType === 1){
+        if (n.tagName === 'BR') t += ' ';
+        else if (/^(UL|OL)$/.test(n.tagName)) continue;
+        else if (bold(n)){ var x = inline(n).replace(/\*\*/g, '').replace(/^\s+|\s+$/g, ''); if (x) t += ' **' + x + '** '; }
+        else t += inline(n);
+      }
+    }
+    return t;
+  }
+  function tidy(t){ return t.replace(/\s+/g, ' ').replace(/\s+([.,;:!?)])/g, '$1').replace(/^\s+|\s+$/g, ''); }
+  function block(node){
+    for (var i = 0; i < node.childNodes.length; i++){
+      var n = node.childNodes[i], tag = n.tagName, x;
+      if (n.nodeType === 3){ if (tidy(n.nodeValue)) out.push(tidy(n.nodeValue)); continue; }
+      if (n.nodeType !== 1 || /^(SCRIPT|STYLE|META)$/.test(tag)) continue;
+      if (/^H[1-6]$/.test(tag)) out.push('# ' + tidy(inline(n).replace(/\*\*/g, '')));
+      else if (tag === 'LI'){ out.push('- ' + tidy(inline(n))); block2(n); }
+      else if (/^(UL|OL|DIV|SECTION|ARTICLE|MAIN|BLOCKQUOTE|BODY)$/.test(tag) || (tag === 'B' && !bold(n))) block(n);
+      else if ((x = tidy(inline(n)))){
+        // a line that is all bold reads as a section title
+        var m = x.match(/^\*\*([^*]+)\*\*:?$/);
+        out.push(m ? '# ' + m[1] : x);
+      }
+    }
+  }
+  function block2(li){ for (var i = 0; i < li.childNodes.length; i++) if (/^(UL|OL)$/.test(li.childNodes[i].tagName || '')) block(li.childNodes[i]); }
+  block(doc.body);
+  return out.join('\n');
 }
 function inlineSegs(t){
   var parts = t.split(/\*\*(.+?)\*\*/), segs = [];
@@ -1355,9 +1411,10 @@ function makeSoloLink(){
   packSolo(obj, function(code){
     var url = joinUrl() + '#solo=' + code, box = $('hSoloLink');
     box.value = url; box.style.display = 'block'; $('hSoloCopy').style.display = '';
-    msg.className = 'okMsg' + (/^https?:/.test(location.protocol) ? '' : ' warn');
+    msg.className = 'okMsg' + (/^https:/.test(url) ? '' : ' warn');
     msg.textContent = /^https?:/.test(location.protocol) ?
-      'Link ready: ' + r.questions.length + ' questions, ' + obj.m + ' minute game' + (obj.h ? ' with a halftime study break' : '') + '. Copy it and post it for your students.' :
+      'Link ready: ' + r.questions.length + ' questions, ' + obj.m + ' minute game' + (obj.h ? ' with a halftime study break' : '') + '. Copy it and post it for your students.' +
+        (/^https:/.test(url) ? '' : ' Note: this link starts with http://, which apps on Android phones may refuse to open.') :
       'This page is open from the device, so the link will not work for students. Open the game from your website first, then make the link.';
   });
 }
@@ -1497,7 +1554,12 @@ function hostOpen(){
   });
 }
 // keep any ?query part: some file hosts (like a wiki's file links) need it to find the file
-function joinUrl(){ return location.href.split('#')[0]; }
+function joinUrl(){
+  var u = location.href.split('#')[0];
+  // apps on Android (like Canvas) will not open plain http:// pages, and PBworks also works over https
+  if (location.protocol === 'http:' && /(^|\.)pbworks\.com$/i.test(location.hostname)) u = 'https:' + u.slice(5);
+  return u;
+}
 function qrSrc(url){
   try {
     var q = window.qrcode(0, 'L');
@@ -2225,12 +2287,12 @@ function showQuestion(){
   for (i = 0; i < q.c.length; i++) order.push(i);
   shuffle(order);
   curQ = { q: q, order: order, done: false };
-  $('qText').textContent = q.q;
+  $('qText').textContent = cleanText(q.q);
   for (i = 0; i < order.length; i++){
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'ch'; b.setAttribute('data-k', i);
     var mk = document.createElement('span'); mk.className = 'mk'; mk.textContent = String.fromCharCode(65 + i);
-    var tx = document.createElement('span'); tx.textContent = q.c[order[i]];
+    var tx = document.createElement('span'); tx.textContent = cleanText(q.c[order[i]]);
     b.appendChild(mk); b.appendChild(tx);
     b.onclick = function(){ answerQ(parseInt(this.getAttribute('data-k'), 10)); };
     box.appendChild(b);
