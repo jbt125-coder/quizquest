@@ -210,6 +210,13 @@ body.land #pStage { flex: 1; }
 .repTbl td.low { color: #c02010; font-weight: 800; }
 .repTot { margin-top: 10px; font-size: 13px; color: #4a3696; }
 .repBtns { margin-top: 14px; }
+#oCard { background: #fff8ea; color: #1b1040; border: 3px solid #000; border-radius: 14px; padding: 14px 12px; margin: 4px 0 10px; box-shadow: 0 0 0 3px #f8b800; }
+#oCard .ocName { font-family: "Press Start 2P", monospace; font-size: 22px; color: #d82800; margin-bottom: 8px; word-break: break-all; }
+#oCard .ocLine { font-family: "Press Start 2P", monospace; font-size: 10px; line-height: 1.9; }
+#oCard .ocBig { font-family: "Press Start 2P", monospace; font-size: 15px; margin-top: 10px; }
+#oCard .ocPct { font-family: "Press Start 2P", monospace; font-size: 34px; color: #1f9a50; margin: 6px 0 8px; }
+#oCard .ocDate { font-size: 13px; color: #5a4a8a; margin-top: 6px; }
+#oTop { font-size: 10px; line-height: 2; margin: 0 auto 4px; }
 .topList { text-align: left; font-family: "Press Start 2P", monospace; font-size: 11px; line-height: 2.3; color: #fff; display: inline-block; margin: 10px auto; padding-left: 28px; }
 </style>
 </head>
@@ -223,6 +230,8 @@ body.land #pStage { flex: 1; }
     <div class="card">
       <label class="lab first" for="jPw" id="jPwLab">Class password</label>
       <input id="jPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" placeholder="From your teacher">
+      <div id="jPerWrap" style="display:none"><label class="lab" for="jPer">Class period</label>
+      <input id="jPer" class="inp" autocomplete="off" maxlength="12" placeholder="For example 3"></div>
       <label class="lab" for="jName">Player name (up to 8 letters)</label>
       <input id="jName" class="inp" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="8" placeholder="NAME">
     </div>
@@ -263,7 +272,7 @@ body.land #pStage { flex: 1; }
 <div class="scr" id="scrQuiz">
   <div class="wrap">
     <div class="qTop"><span class="connTag" id="qConn">Connected</span><span id="qScore" class="pix"></span><span id="qTime" class="pix"></span></div>
-    <div class="qHead pix">Answer 3 right<br>to earn 3 balls</div>
+    <div class="qHead pix" id="qHead">Answer 3 right<br>to earn 3 balls</div>
     <div class="dots" id="qDots"></div>
     <div class="qBox" id="qText"></div>
     <div id="qChoices"></div>
@@ -290,7 +299,7 @@ body.land #pStage { flex: 1; }
 <div class="scr" id="scrOver">
   <div class="wrap center">
     <h1 class="logo sm">GAME OVER</h1>
-    <div id="oMine" class="pix" style="font-size:12px;line-height:2;color:#f8d878"></div>
+    <div id="oCard"></div>
     <ol id="oTop" class="topList"></ol>
     <p class="note" id="oMsg">Wait for your teacher to start the next game.</p>
     <button type="button" id="oAgain" class="bigBtn go" style="display:none">PLAY AGAIN</button>
@@ -326,6 +335,7 @@ body.land #pStage { flex: 1; }
       <input id="hPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20">
       <div class="row2">
         <div><label class="lab" for="hMins">Game length (minutes)</label><input id="hMins" class="inp" type="number" min="1" max="60"></div>
+        <div><label class="lab" for="hPeriod">Class period (shows on students' final screen)</label><input id="hPeriod" class="inp" maxlength="12" placeholder="For example 3"></div>
       </div>
       <div id="hMinsTip" class="okMsg" style="display:none">Halftime is on: try doubling the game length so there is still plenty of play time. <button type="button" id="hMinsDouble" class="ghostBtn" style="padding:6px 10px;font-size:13px">Double it</button></div>
       <span class="lab">Main screen shows</span>
@@ -1082,10 +1092,11 @@ function randomPw(){ return pick(['palm', 'coco', 'surf', 'wave', 'reef', 'mango
 
 function hostInit(){
   var saved = load(HOST_KEY) || {};
-  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', big: saved.big || 'me', half: !!saved.half, studyNotes: saved.studyNotes || '', bank: saved.bank || SAMPLE_BANK,
+  hst.cfg = { pw: saved.pw || randomPw(), mins: saved.mins || 10, view: saved.view || 'top', big: saved.big || 'me', period: saved.period || '', half: !!saved.half, studyNotes: saved.studyNotes || '', bank: saved.bank || SAMPLE_BANK,
     picks: Array.isArray(saved.picks) ? saved.picks : [] };
   $('hPw').value = hst.cfg.pw;
   $('hMins').value = hst.cfg.mins;
+  $('hPeriod').value = hst.cfg.period;
   $('hBank').value = hst.cfg.bank;
   setViewSeg(hst.cfg.view);
   setSeg('hBig', hst.cfg.big);
@@ -1522,6 +1533,8 @@ function hostOpen(){
   hst.notes = gameNotes();
   if (hst.cfg.half && !hst.notes){ $('hErr').textContent = 'Halftime is on, so paste the AI study sheet into the Study sheet box first (or turn halftime off).'; return; }
   hst.cfg.studyNotes = studyNotes();
+  hst.cfg.period = $('hPeriod').value.replace(/^\s+|\s+$/g, '').slice(0, 12);
+  hst.title = $('hQName').value.replace(/^\s+|\s+$/g, '').slice(0, 40);
   hst.cfg.pw = pw; hst.cfg.mins = mins; hst.cfg.bank = $('hBank').value;
   hst.bank = r.questions;
   store(HOST_KEY, hst.cfg);
@@ -1658,7 +1671,7 @@ function ranked(){
 function statusFor(p, arr, i){
   var rk = i + 1;
   while (rk > 1 && arr[rk - 2].score === p.score) rk--;
-  return { t: 'g', ph: hst.phase, l: Math.ceil(hostLeft()), sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
+  return { t: 'g', ph: hst.phase, l: Math.ceil(hostLeft()), hl: hst.halfDone ? 0 : Math.round(hst.cfg.mins * 30), sc: p.score, rk: rk, n: arr.length, gt: gameTimeMs() };
 }
 function hostBroadcast(){
   var arr = ranked();
@@ -1678,7 +1691,7 @@ function hostData(conn, d){
     p.look = cleanLook(d.l);
     p.conn = conn; p.on = true; p.seen = performance.now();
     var arr = ranked();
-    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', g: statusFor(p, arr, arr.indexOf(p)) });
+    conn.send({ t: 'w', q: hst.bank, n: hst.notes || '', pr: hst.cfg.period, tt: hst.title || '', g: statusFor(p, arr, arr.indexOf(p)) });
     refreshLobby();
     return;
   }
@@ -1718,7 +1731,7 @@ function hostStartGame(){
   for (var k in hst.players){
     var p = hst.players[k];
     p.score = 0; p.right = 0; p.wrong = 0; p.st = null; p.rx = null; p.bxr = null;
-    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '' });
+    hostSend(p, { t: 'start', q: hst.bank, n: hst.notes || '', pr: hst.cfg.period, tt: hst.title || '' });
   }
   $('hViewBtn').textContent = 'SHOW: ' + VIEW_LABELS[hst.cfg.view];
   showScreen('scrHGame');
@@ -1730,6 +1743,7 @@ function hostStartGame(){
 /* halftime: the clock stops and everyone studies until the teacher taps RESUME */
 function startHalf(){
   hst.halfDone = true; hst.halfLeft = hostLeft(); hst.phase = 'half';
+  if (stu.local) stu.made = 0;
   if (stu.local){ stu.meter = null; localShow('none'); }
   var arr = ranked(), html = '', i;
   for (i = 0; i < arr.length && i < 5; i++){
@@ -1939,7 +1953,7 @@ function hostFrame(dt, now){
   if (hst.phase !== 'play') return;
   if (!hst.view.cw) hostResize();
   if (stu.local && stu.ai){
-    if (stu.mode === 'quiz'){ stu.aiQuizT -= dt; if (stu.aiQuizT <= 0) goPlay(); }
+    if (stu.mode === 'quiz'){ stu.aiQuizT -= dt; if (stu.aiQuizT <= 0){ if (stu.water) endWater(); else goPlay(); } }
     else if (stu.mode === 'play' && stu.hero) aiThink(dt);
   }
   if (stu.local && stu.mode === 'play' && stu.hero) stuUpdate(dt);
@@ -1994,6 +2008,7 @@ function soloInit(){
   $('jHostLink').parentNode.style.display = 'none';
   $('qConn').style.display = 'none';
   $('jSolo').style.display = ''; $('jSolo').textContent = 'SOLO PRACTICE';
+  $('jPerWrap').style.display = ''; $('jPer').value = (load(ME_KEY) || {}).per || '';
   $('jGo').textContent = 'LOADING QUIZ...'; $('jGo').disabled = true;
   unpackSolo(location.hash.slice(6), function(d){
     if (!d || !d.q || d.q.length < 1){
@@ -2012,10 +2027,13 @@ function soloInit(){
 function soloStart(){
   ac();
   var name = cleanName($('jName').value);
+  var per = $('jPer').value.replace(/^\s+|\s+$/g, '').slice(0, 12);
+  if (!per){ joinErr('Type your class period.'); return; }
   if (!name){ joinErr('Type a player name.'); return; }
   me.name = name; $('jName').value = name; saveMe();
+  var saved = load(ME_KEY) || {}; saved.per = per; store(ME_KEY, saved);
   $('jErr').textContent = '';
-  stu.solo = { sc: 0, right: 0, wrong: 0, halfDone: !SOLO.h };
+  stu.solo = { sc: 0, halfDone: !SOLO.h, period: per };
   stu.conn = { open: true, send: soloMsg };
   stu.bank = SOLO.q; stu.notes = SOLO.n;
   resetRun();
@@ -2031,7 +2049,6 @@ function soloMsg(m){
     var h = m.h | 0, pts = h === 3 ? DUNK_PTS : HOOPS[clamp(h, 0, 2)].pts + (m.j ? 1 : 0);
     S.sc += pts; stu.G.sc = S.sc; stuData({ t: 'ok', p: pts }); stuHud(true);
   } else if (m.t === 'bn'){ S.sc += 1; stu.G.sc = S.sc; stuHud(true); }
-  else if (m.t === 'ans'){ if (m.r) S.right++; else S.wrong++; }
 }
 function soloTick(){
   if (stu.mode !== 'quiz' && stu.mode !== 'play') return false;
@@ -2054,8 +2071,7 @@ function soloOver(){
   if (newBest) store(key, S.sc);
   stu.G.ph = 'over';
   showOver({ top: [], sc: S.sc, rk: 1, n: 1 });
-  $('oMine').innerHTML = 'YOUR SCORE ' + S.sc + '<br>' + (newBest ? 'NEW PERSONAL BEST!' : 'BEST ' + best) +
-    '<br>QUESTIONS RIGHT ' + S.right + ' OF ' + (S.right + S.wrong);
+  overCard(S.sc, newBest ? 'NEW PERSONAL BEST!' : 'BEST ' + best);
 }
 function buildSwatches(id, cols, field){
   var box = $(id); box.innerHTML = '';
@@ -2157,14 +2173,14 @@ function stuData(d){
   if (!d || !d.t) return;
   if (d.t === 'w'){
     stu.bank = d.q || [];
-    stu.notes = d.n || '';
+    stu.notes = d.n || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     applyG(d.g);
     if (d.g.ph === 'play'){ if (stu.mode !== 'quiz' && stu.mode !== 'play') goQuiz(); }
     else if (d.g.ph === 'half'){}
     else if (stu.mode !== 'over' || d.g.ph === 'lobby') goWait();
   } else if (d.t === 'start'){
     stu.bank = d.q || stu.bank;
-    stu.notes = d.n || '';
+    stu.notes = d.n || ''; stu.period = d.pr || ''; stu.title = d.tt || '';
     resetRun();
     stu.G.ph = 'play';
     goQuiz();
@@ -2194,6 +2210,7 @@ function timeLeft(){ return Math.max(0, stu.G.l - (performance.now() - stu.lAt) 
 function resetRun(){
   stu.balls = 0; stu.ballK = 0; stu.correct = 0; stu.deck = []; stu.lastQ = -1;
   stu.seq = 0; stu.magic = null; stu.dunkBall = null; stu.aiS = null;
+  stu.made = 0; stu.water = null; stu.waterT = 0; stu.qRight = 0; stu.qTotal = 0;
   stu.hero = null; stu.flight = null; stu.meter = null;
   stu.birds = []; stu.poops = []; stu.splats = []; stu.parts = []; stu.pops = [];
 }
@@ -2206,7 +2223,7 @@ function goWait(){
   showScreen('scrWait');
 }
 function goHalf(){
-  stu.halfFrom = stu.mode; stu.mode = 'half'; stu.meter = null;
+  stu.halfFrom = stu.mode; stu.mode = 'half'; stu.meter = null; stu.made = 0;
   stu.input.l = stu.input.r = stu.input.u = stu.input.d = stu.input.a = stu.input.b = false;
   $('hfScore').innerHTML = 'YOUR SCORE ' + stu.G.sc + (stu.solo ? '' : '<br>PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n);
   $('hfMsg').textContent = stu.solo ? 'Read the study sheet, then start the second half when you are ready.' : 'Study up for the second half! It starts when your teacher is ready.';
@@ -2222,9 +2239,24 @@ function leaveHalf(){
   else if (from === 'quiz'){ stu.mode = 'quiz'; showScreen('scrQuiz'); }
   else goQuiz();
 }
+function overCard(sc, place){
+  var pct = stu.qTotal ? Math.round(stu.qRight * 100 / stu.qTotal) : 0, d = new Date();
+  var per = stu.solo ? stu.solo.period : stu.period, title = stu.solo ? SOLO.t : stu.title;
+  var info = [];
+  if (per) info.push('PERIOD ' + esc(String(per).toUpperCase()));
+  if (title) info.push(esc(title.toUpperCase()));
+  $('oCard').innerHTML = '<div class="ocName">' + esc(me.name) + '</div>' +
+    (info.length ? '<div class="ocLine">' + info.join('<br>') + '</div>' : '') +
+    '<div class="ocBig">' + stu.qRight + '/' + stu.qTotal + ' CORRECT</div>' +
+    '<div class="ocPct">' + pct + '%</div>' +
+    '<div class="ocLine">SCORE ' + sc + (place ? '<br>' + place : '') + '</div>' +
+    '<div class="ocDate">' + (stu.solo ? 'Solo practice, ' : '') + d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+    d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + '</div>';
+}
 function showOver(d){
   stu.mode = 'over';
   if (stu.local){ localShow('none'); return; }
+  overCard(d.sc, stu.solo ? '' : 'PLACE ' + d.rk + ' OF ' + d.n);
   $('oNotes').style.display = stu.notes ? '' : 'none';
   $('oMsg').textContent = stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.';
   $('oAgain').style.display = stu.solo ? '' : 'none';
@@ -2236,7 +2268,6 @@ function showOver(d){
     $('oNotesImg').src = url; $('oNotesDl').href = url;
     $('oNotesOut').style.display = ''; this.style.display = 'none';
   };
-  $('oMine').innerHTML = 'YOUR SCORE ' + d.sc + '<br>PLACE ' + d.rk + ' OF ' + d.n;
   var ol = $('oTop'); ol.innerHTML = '';
   for (var i = 0; i < d.top.length; i++){
     var li = document.createElement('li'); li.textContent = d.top[i].n + '  ' + d.top[i].s; ol.appendChild(li);
@@ -2259,6 +2290,7 @@ function drawIdx(){
   return stu.lastQ;
 }
 function goQuiz(){
+  $('qHead').innerHTML = stu.water ? 'Water break!<br>Answer 3 questions' : 'Answer 3 right<br>to earn 3 balls';
   if (stu.ai){
     // the computer player "answers" for a moment, then gets 3 more balls
     stu.mode = 'quiz'; stu.meter = null; stu.aiQuizT = 2.5; localShow('none');
@@ -2274,7 +2306,8 @@ function goQuiz(){
 }
 function renderDots(){
   var h = '';
-  for (var i = 0; i < 3; i++) h += '<span class="ballDot' + (i < stu.correct ? ' on' : '') + '"></span>';
+  var got = stu.water ? stu.water.n : stu.correct;
+  for (var i = 0; i < 3; i++) h += '<span class="ballDot' + (i < got ? ' on' : '') + '"></span>';
   $('qDots').innerHTML = h;
 }
 function showQuestion(){
@@ -2309,11 +2342,14 @@ function answerQ(k){
     else btns[i].className = 'ch dim';
   }
   stuSendMsg({ t: 'ans', r: right ? 1 : 0 });
+  stu.qTotal++; if (right) stu.qRight++;
+  if (stu.water) stu.water.n++;
   var fb = $('qFb');
   if (right){
     stu.correct++;
     fb.className = 'qFb good';
-    fb.textContent = stu.correct >= 3 ? 'Correct! You earned 3 balls!' : 'Correct! ' + (3 - stu.correct) + ' more to go.';
+    fb.textContent = stu.water ? (stu.water.n >= 3 ? 'Correct! Break is over!' : 'Correct!') :
+      (stu.correct >= 3 ? 'Correct! You earned 3 balls!' : 'Correct! ' + (3 - stu.correct) + ' more to go.');
     sfx.right();
   } else {
     fb.className = 'qFb bad';
@@ -2321,13 +2357,14 @@ function answerQ(k){
     sfx.wrong();
   }
   renderDots();
-  var nb = $('qNext');
-  nb.textContent = stu.correct >= 3 ? 'GET MY 3 BALLS' : 'NEXT QUESTION';
-  nb.className = 'bigBtn' + (stu.correct >= 3 ? ' go' : '');
+  var nb = $('qNext'), done = stu.water ? stu.water.n >= 3 : stu.correct >= 3;
+  nb.textContent = done ? (stu.water ? 'BACK TO THE COURT' : 'GET MY 3 BALLS') : 'NEXT QUESTION';
+  nb.className = 'bigBtn' + (done ? ' go' : '');
   nb.style.display = 'block';
 }
 function quizNext(){
-  if (stu.correct >= 3){ goPlay(); return; }
+  if (stu.water){ if (stu.water.n >= 3){ endWater(); return; } }
+  else if (stu.correct >= 3){ goPlay(); return; }
   showQuestion();
 }
 
@@ -2336,14 +2373,14 @@ function newHero(){
   return { x: rand(40, 216), y: FLOOR, vx: 0, vy: 0, face: 1, ground: 'floor', anim: 0, air2: true, drop: 0, flipT: 0,
     jumpHeld: false, inv: 0, hurtT: 0, dp: 0 };
 }
-function goPlay(){
+function goPlay(keepBalls){
   if (stu.G.ph !== 'play'){ goWait(); return; }
-  stu.mode = 'play'; stu.balls = 3; stu.flight = null; stu.meter = null; stu.outT = 0; stu.outShown = false;
+  stu.mode = 'play'; stu.balls = keepBalls || 3; stu.flight = null; stu.meter = null; stu.outT = 0; stu.outShown = false; stu.waterT = 0;
   if (!stu.hero) stu.hero = newHero();
   else { stu.hero.y = FLOOR; stu.hero.ground = 'floor'; stu.hero.vy = 0; stu.hero.inv = 0; }
   if (stu.local) localShow('play');
   else { showScreen('scrPlay'); stuResize(); }
-  addPop(stu.pops, W / 2, 40, stu.magic ? 'SLAM DUNK IT!' : '3 BALLS! SHOOT THE LIT HOOP!', '#fcfc78', true);
+  addPop(stu.pops, W / 2, 40, keepBalls ? 'BACK IN THE GAME!' : (stu.magic ? 'SLAM DUNK IT!' : '3 BALLS! SHOOT THE LIT HOOP!'), '#fcfc78', true);
   sfx.bonus();
   stuHud(true);
 }
@@ -2409,6 +2446,7 @@ function pressShoot(){
   if (stu.flight){ addPop(stu.pops, p.x, p.y - 22, 'WAIT FOR IT', '#fcfcfc'); return; }
   if (stu.balls <= 0) return;
   if (stu.magic){ addPop(stu.pops, p.x, p.y - 22, 'NO SHOTS. DUNK IT!', '#e0b0ff'); return; }
+  if (stu.waterT > 0) return;
   stu.meter = { p: 0, dir: 1 };
 }
 function releaseShoot(){
@@ -2446,6 +2484,7 @@ function ballScored(b, g){
     stu.ballK = (stu.ballK + 1) % BALL_STYLES.length;
     if (b.jump) addPop(stu.pops, cx, g.y - 12, 'JUMP SHOT +1', '#58f878');
     stuSendMsg({ t: 'bk', h: g.i, j: b.jump ? 1 : 0 });
+    stu.made++;
     stu.seq++;
     if (stu.seq >= HOOPS.length) startMagic();
     else addPop(stu.pops, W / 2, 52, 'NEXT: ' + HOOPS[stu.seq].name + ' HOOP', '#58f8d0');
@@ -2500,6 +2539,23 @@ function wrongHoopCheck(b, p){
   addPop(stu.pops, p.x, p.y - 32, 'WRONG HOOP! -1 BALL', '#f86060');
   tone(220, 0.25, 'square', 0.05, -100);
 }
+/* water break: every 10 scoring baskets, answer 3 questions, then back to the court with the same balls.
+   Never in the last minute of the game or the minute before halftime, so a hot streak is not broken. */
+var WATER_EVERY = 10;
+function waterBlocked(){
+  var left = stu.local ? hostLeft() : timeLeft();
+  var hl = stu.local ? (hst.halfDone ? 0 : hst.cfg.mins * 30) : (stu.solo ? (stu.solo.halfDone ? 0 : SOLO.m * 30) : (stu.G.hl || 0));
+  return left <= 60 || (hl > 0 && left - hl <= 60);
+}
+function goWater(){
+  stu.made = 0; stu.water = { n: 0, balls: stu.balls };
+  goQuiz();
+}
+function endWater(){
+  var balls = stu.water.balls;
+  stu.water = null;
+  goPlay(balls);
+}
 function startMagic(){
   stu.magic = { left: MAGIC_SECS, dunk: null };
   stu.meter = null;
@@ -2529,6 +2585,7 @@ function stepMagic(p, dt, t){
       stu.ballK = (stu.ballK + 1) % BALL_STYLES.length;
       stu.netH = 3; stu.netT = 0.8;
       stuSendMsg({ t: 'bk', h: 3 });
+      stu.made++;
       burst(stu.parts, cx, g.y, 24, ['#f8d800', '#fcfcfc', '#f878d8'], 80, 40, 1);
       sfx.swish(); sfx.bonus();
     }
@@ -2599,6 +2656,13 @@ function stuUpdate(dt){
     sfx.over();
   }
   if (stu.outT > 0){ stu.outT -= dt; if (stu.outT <= 0){ goQuiz(); return; } }
+  if (stu.waterT > 0){ stu.waterT -= dt; if (stu.waterT <= 0){ goWater(); return; } }
+  else if (stu.made >= WATER_EVERY && stu.balls > 0 && !stu.flight && !stu.magic && stu.outT <= 0 && !waterBlocked()){
+    stu.waterT = 1.6; stu.meter = null;
+    addCheer(stu.pops, W / 2, 40, '10 BUCKETS!');
+    addPop(stu.pops, W / 2, 58, 'WATER BREAK: ANSWER 3 QUESTIONS', '#58d8f8');
+    sfx.bonus();
+  }
 
   stu.birdT -= dt;
   if (stu.birdT <= 0){ spawnBird(stu.birds); stu.birdT = rand(6, 10); sfx.tweet(); }
