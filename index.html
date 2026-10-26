@@ -219,8 +219,9 @@ body.land #pStage { flex: 1; }
 <div class="scr" id="scrJoin">
   <div class="wrap">
     <h1 class="logo">PALM COURT<br>HOOPS</h1>
+    <div id="jSolo" class="sub pix" style="display:none;line-height:1.8"></div>
     <div class="card">
-      <label class="lab first" for="jPw">Class password</label>
+      <label class="lab first" for="jPw" id="jPwLab">Class password</label>
       <input id="jPw" class="inp" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" placeholder="From your teacher">
       <label class="lab" for="jName">Player name (up to 8 letters)</label>
       <input id="jName" class="inp" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="8" placeholder="NAME">
@@ -291,7 +292,8 @@ body.land #pStage { flex: 1; }
     <h1 class="logo sm">GAME OVER</h1>
     <div id="oMine" class="pix" style="font-size:12px;line-height:2;color:#f8d878"></div>
     <ol id="oTop" class="topList"></ol>
-    <p class="note">Wait for your teacher to start the next game.</p>
+    <p class="note" id="oMsg">Wait for your teacher to start the next game.</p>
+    <button type="button" id="oAgain" class="bigBtn go" style="display:none">PLAY AGAIN</button>
     <div id="oNotes" style="display:none">
       <button type="button" id="oNotesBtn" class="bigBtn go">SAVE STUDY NOTES</button>
       <div id="oNotesOut" style="display:none">
@@ -308,8 +310,9 @@ body.land #pStage { flex: 1; }
   <div class="wrap">
     <h1 class="logo sm">HALFTIME</h1>
     <div class="pix center" id="hfScore" style="font-size:11px;color:#f8d878;line-height:2"></div>
-    <p class="note center">Study up for the second half! It starts when your teacher is ready.</p>
+    <p class="note center" id="hfMsg">Study up for the second half! It starts when your teacher is ready.</p>
     <div class="studySheet" id="hfNotes"></div>
+    <button type="button" id="hfGo" class="bigBtn go" style="display:none">START THE SECOND HALF</button>
   </div>
 </div>
 
@@ -356,6 +359,13 @@ body.land #pStage { flex: 1; }
       <div id="hStudyMsg" class="okMsg"></div>
       <div class="btnRow"><button type="button" id="hStudyCopy" class="ghostBtn">Copy box</button><button type="button" id="hStudyClear" class="ghostBtn">Clear box</button><button type="button" id="hStudyReset" class="ghostBtn">Put the AI prompt back</button></div>
       <div id="hStudyPrev" class="studySheet studyPrev" style="display:none"></div>
+    </div>
+    <div class="card">
+      <span class="lab first">Solo practice link (play at home)</span>
+      <div class="note">Makes a link with these questions, the study sheet and the game settings built in. Post it on Canvas or your class website and students can play on their own anytime, with no password. Solo scores stay on the student's device and are not sent to you.</div>
+      <div class="btnRow" style="margin-top:8px"><button type="button" id="hSoloMake" class="ghostBtn">Make solo link</button><button type="button" id="hSoloCopy" class="ghostBtn" style="display:none">Copy link</button></div>
+      <textarea id="hSoloLink" class="inp ta" rows="3" readonly style="display:none;margin-top:8px"></textarea>
+      <div id="hSoloMsg" class="okMsg"></div>
     </div>
     <div id="hErr" class="err"></div>
     <button type="button" id="hOpen" class="bigBtn go">OPEN GAME</button>
@@ -464,6 +474,7 @@ var MAGIC_COLS = ['#f878f8', '#78f8f8', '#f8f878', '#b078ff', '#fcfcfc'];
 var CHEERS = ['NICE SHOT!', 'SWEET!', 'NOICE!!', 'BALLER!!', 'BUCKETS!', 'SPLASH!', 'ON FIRE!', 'CASH!', 'MONEY!', 'SWISH!'];
 var CHEER_COLS = ['#f8d800', '#58f878', '#58d8f8', '#f878d8', '#f89838', '#c078f8', '#fcfcfc'];
 var IS_HOST = location.hash.toLowerCase() === '#host';
+var IS_SOLO = /^#solo=/i.test(location.hash);
 var PEER_URLS = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'];
 
 var SHIRTS = ['#d82800', '#f87800', '#f8d800', '#38b818', '#1fb8a0', '#2858f0', '#8030d0', '#f05898', '#fcfcfc', '#303030'];
@@ -1109,6 +1120,16 @@ function hostInit(){
       else { document.execCommand('copy'); done(); }
     } catch (e) { btn.textContent = 'Now press Copy'; }
   };
+  $('hSoloMake').onclick = makeSoloLink;
+  $('hSoloCopy').onclick = function(){
+    var box = $('hSoloLink'), btn = this;
+    box.focus(); box.select();
+    function done(){ btn.textContent = 'Copied!'; setTimeout(function(){ btn.textContent = 'Copy link'; }, 1500); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(box.value).then(done, function(){ document.execCommand('copy'); done(); });
+      else { document.execCommand('copy'); done(); }
+    } catch (e) { btn.textContent = 'Now press Copy'; }
+  };
   $('hResume').onclick = resumeHalf;
   $('hHalfEnd').onclick = function(){ if (confirm('End the game now?')) hostEndGame(); };
   $('hCopy').onclick = copyPrompt;
@@ -1295,6 +1316,50 @@ function gameNotes(){
     if (st && hst.cfg.picks.indexOf(list[i].name) >= 0 && parts.indexOf(st) < 0) parts.push(st);
   }
   return parts.join('\n\n');
+}
+
+/* ---------- solo practice link: the quiz rides inside the link itself ---------- */
+function b64url(bytes){
+  var bin = '', i;
+  for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function unb64url(t){
+  t = t.replace(/-/g, '+').replace(/_/g, '/');
+  while (t.length % 4) t += '=';
+  var bin = atob(t), out = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function packSolo(obj, cb){
+  var bytes = new TextEncoder().encode(JSON.stringify(obj));
+  if (!window.CompressionStream){ cb('j' + b64url(bytes)); return; }
+  new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer()
+    .then(function(buf){ cb('z' + b64url(new Uint8Array(buf))); }, function(){ cb('j' + b64url(bytes)); });
+}
+function unpackSolo(t, cb){
+  try {
+    var bytes = unb64url(t.slice(1));
+    if (t.charAt(0) === 'j'){ cb(JSON.parse(new TextDecoder().decode(bytes))); return; }
+    if (t.charAt(0) !== 'z' || !window.DecompressionStream){ cb(null); return; }
+    new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()
+      .then(function(txt){ try { cb(JSON.parse(txt)); } catch (e) { cb(null); } }, function(){ cb(null); });
+  } catch (e) { cb(null); }
+}
+function makeSoloLink(){
+  var r = checkBank(), msg = $('hSoloMsg'), notes = gameNotes();
+  $('hSoloLink').style.display = 'none'; $('hSoloCopy').style.display = 'none';
+  if (r.questions.length < 3){ msg.className = 'okMsg warn'; msg.textContent = 'Add at least 3 questions first.'; return; }
+  var obj = { v: 1, t: $('hQName').value.replace(/^\s+|\s+$/g, '').slice(0, 40), q: r.questions, n: notes,
+    m: clamp(parseInt($('hMins').value, 10) || 10, 1, 60), h: hst.cfg.half && notes ? 1 : 0 };
+  packSolo(obj, function(code){
+    var url = joinUrl() + '#solo=' + code, box = $('hSoloLink');
+    box.value = url; box.style.display = 'block'; $('hSoloCopy').style.display = '';
+    msg.className = 'okMsg' + (/^https?:/.test(location.protocol) ? '' : ' warn');
+    msg.textContent = /^https?:/.test(location.protocol) ?
+      'Link ready: ' + r.questions.length + ' questions, ' + obj.m + ' minute game' + (obj.h ? ' with a halftime study break' : '') + '. Copy it and post it for your students.' :
+      'This page is open from the device, so the link will not work for students. Open the game from your website first, then make the link.';
+  });
 }
 
 /* ---------- saved quiz bank (kept in this browser) ---------- */
@@ -1858,6 +1923,77 @@ function studentInit(){
   window.addEventListener('resize', stuResize);
   window.addEventListener('orientationchange', function(){ setTimeout(stuResize, 300); });
   showScreen('scrJoin');
+  if (IS_SOLO) soloInit();
+}
+/* ---------- solo practice: the phone keeps its own score and clock ---------- */
+var SOLO = null, SOLO_BEST = 'palmHoopsSoloBest_';
+function soloInit(){
+  $('jPw').style.display = 'none'; $('jPwLab').style.display = 'none';
+  $('jHostLink').parentNode.style.display = 'none';
+  $('qConn').style.display = 'none';
+  $('jSolo').style.display = ''; $('jSolo').textContent = 'SOLO PRACTICE';
+  $('jGo').textContent = 'LOADING QUIZ...'; $('jGo').disabled = true;
+  unpackSolo(location.hash.slice(6), function(d){
+    if (!d || !d.q || d.q.length < 1){
+      $('jGo').textContent = 'LINK NOT WORKING';
+      $('jErr').textContent = 'This practice link is broken or incomplete. Ask your teacher for a new link.';
+      return;
+    }
+    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n };
+    $('jSolo').innerHTML = 'SOLO PRACTICE' + (SOLO.t ? '<br>' + esc(SOLO.t.toUpperCase()) : '') + '<br>' + SOLO.q.length + ' QUESTIONS, ' + SOLO.m + ' MIN';
+    $('jGo').textContent = 'PLAY'; $('jGo').disabled = false;
+    $('jGo').onclick = soloStart;
+  });
+  $('hfGo').onclick = soloResume;
+  $('oAgain').onclick = function(){ soloStart(); };
+}
+function soloStart(){
+  ac();
+  var name = cleanName($('jName').value);
+  if (!name){ joinErr('Type a player name.'); return; }
+  me.name = name; $('jName').value = name; saveMe();
+  $('jErr').textContent = '';
+  stu.solo = { sc: 0, right: 0, wrong: 0, halfDone: !SOLO.h };
+  stu.conn = { open: true, send: soloMsg };
+  stu.bank = SOLO.q; stu.notes = SOLO.n;
+  resetRun();
+  stu.hero = null;
+  stu.G = { ph: 'play', l: SOLO.m * 60, sc: 0, rk: 1, n: 1 }; stu.lAt = performance.now(); stu.syncOff = 0;
+  goQuiz();
+}
+// stands in for the teacher's computer: scores baskets and answers on the phone itself
+function soloMsg(m){
+  var S = stu.solo;
+  if (!S) return;
+  if (m.t === 'bk'){
+    var h = m.h | 0, pts = h === 3 ? DUNK_PTS : HOOPS[clamp(h, 0, 2)].pts + (m.j ? 1 : 0);
+    S.sc += pts; stu.G.sc = S.sc; stuData({ t: 'ok', p: pts }); stuHud(true);
+  } else if (m.t === 'bn'){ S.sc += 1; stu.G.sc = S.sc; stuHud(true); }
+  else if (m.t === 'ans'){ if (m.r) S.right++; else S.wrong++; }
+}
+function soloTick(){
+  if (stu.mode !== 'quiz' && stu.mode !== 'play') return false;
+  if (!stu.solo.halfDone && timeLeft() <= SOLO.m * 30){
+    stu.solo.halfDone = true;
+    stu.G.l = timeLeft(); stu.lAt = performance.now(); stu.G.ph = 'half';
+    goHalf();
+    return true;
+  }
+  if (timeLeft() <= 0){ soloOver(); return true; }
+  return false;
+}
+function soloResume(){
+  stu.G.ph = 'play'; stu.lAt = performance.now();
+  leaveHalf();
+}
+function soloOver(){
+  var S = stu.solo, key = SOLO_BEST + location.hash.length + '_' + location.hash.slice(-24), best = load(key) || 0;
+  var newBest = S.sc > best;
+  if (newBest) store(key, S.sc);
+  stu.G.ph = 'over';
+  showOver({ top: [], sc: S.sc, rk: 1, n: 1 });
+  $('oMine').innerHTML = 'YOUR SCORE ' + S.sc + '<br>' + (newBest ? 'NEW PERSONAL BEST!' : 'BEST ' + best) +
+    '<br>QUESTIONS RIGHT ' + S.right + ' OF ' + (S.right + S.wrong);
 }
 function buildSwatches(id, cols, field){
   var box = $(id); box.innerHTML = '';
@@ -2010,7 +2146,9 @@ function goWait(){
 function goHalf(){
   stu.halfFrom = stu.mode; stu.mode = 'half'; stu.meter = null;
   stu.input.l = stu.input.r = stu.input.u = stu.input.d = stu.input.a = stu.input.b = false;
-  $('hfScore').innerHTML = 'YOUR SCORE ' + stu.G.sc + '<br>PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n;
+  $('hfScore').innerHTML = 'YOUR SCORE ' + stu.G.sc + (stu.solo ? '' : '<br>PLACE ' + (stu.G.rk || '-') + ' OF ' + stu.G.n);
+  $('hfMsg').textContent = stu.solo ? 'Read the study sheet, then start the second half when you are ready.' : 'Study up for the second half! It starts when your teacher is ready.';
+  $('hfGo').style.display = stu.solo ? '' : 'none';
   $('hfNotes').innerHTML = stu.notes ? studyHtml(stu.notes) : '<p>Take a breather! The second half starts soon.</p>';
   showScreen('scrHalf');
   $('scrHalf').scrollTop = 0;
@@ -2026,6 +2164,9 @@ function showOver(d){
   stu.mode = 'over';
   if (stu.local){ localShow('none'); return; }
   $('oNotes').style.display = stu.notes ? '' : 'none';
+  $('oMsg').textContent = stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.';
+  $('oAgain').style.display = stu.solo ? '' : 'none';
+  $('oTop').style.display = stu.solo ? 'none' : '';
   $('oNotesOut').style.display = 'none';
   $('oNotesBtn').style.display = '';
   $('oNotesBtn').onclick = function(){
@@ -2290,6 +2431,13 @@ function stepBall(b, h, gs){
   }
   b.rest = (b.vy === 0 && b.vx === 0) ? b.rest + h : 0;
 }
+// missed at a hoop that was not lit: lose one more ball
+function wrongHoopCheck(b, p){
+  if (b.touch[b.lit] || !(b.touch[0] || b.touch[1] || b.touch[2])) return;
+  if (stu.balls > 0) stu.balls--;
+  addPop(stu.pops, p.x, p.y - 32, 'WRONG HOOP! -1 BALL', '#f86060');
+  tone(220, 0.25, 'square', 0.05, -100);
+}
 function startMagic(){
   stu.magic = { left: MAGIC_SECS, dunk: null };
   stu.meter = null;
@@ -2367,19 +2515,17 @@ function stuUpdate(dt){
     var b = stu.flight;
     b.age += dt;
     for (i = 0; i < 3; i++) stepBall(b, dt / 3, gs);
-    if (b.scored && Math.abs(b.x - p.x) < 7 && b.y > p.y - 20 && b.y < p.y + 3){
-      // grab your own made basket on the way down to shoot again sooner
+    // rebound: grab your own ball once it is loose (falling, bounced, or through the net) to keep it
+    var loose = b.scored || !b.live || (b.vy > 0 && b.age > 0.4);
+    if (loose && Math.abs(b.x - p.x) < 7 && b.y > p.y - 20 && b.y < p.y + 3){
+      if (!b.scored){ wrongHoopCheck(b, p); stu.balls++; }  // a made basket already gave the ball back
       addPop(stu.pops, p.x, p.y - 24, 'REBOUND!', '#fcfcfc');
       sfx.dribble();
       stu.flight = null;
       stuHud(true);
-    } else if (b.rest > 0.25 || b.age > 6 || (b.scored && !b.live)){
-      if (!b.scored && !b.touch[b.lit] && (b.touch[0] || b.touch[1] || b.touch[2])){
-        // missed at a hoop that was not lit: lose one more ball
-        if (stu.balls > 0) stu.balls--;
-        addPop(stu.pops, p.x, p.y - 24, 'WRONG HOOP! -1 BALL', '#f86060');
-        tone(220, 0.25, 'square', 0.05, -100);
-      }
+    } else if ((b.landT = b.live ? 0 : (b.landT || 0) + dt) > 2.5 || b.rest > 1 || b.age > 7 || (b.scored && !b.live)){
+      // nobody got it: the missed ball is lost and the next one appears in your hands
+      if (!b.scored) wrongHoopCheck(b, p);
       burst(stu.parts, b.x, b.y, 6, ['#fcfcfc', '#f07818'], 30, 0, 0.3);
       stu.flight = null;
       stuHud(true);
@@ -2482,11 +2628,12 @@ function stuHud(force){
   $('pBalls').innerHTML = h;
   $('pHoop').textContent = stu.magic ? 'MAGIC ' + Math.ceil(stu.magic.left) : 'NEXT: ' + HOOPS[stu.seq].pts + ' PTS';
   $('pTime').textContent = fmt(timeLeft());
-  $('pScore').textContent = stu.G.sc + ' PTS #' + (stu.G.rk || '-');
-  $('qScore').textContent = stu.G.sc + ' PTS  #' + (stu.G.rk || '-');
+  $('pScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : ' #' + (stu.G.rk || '-'));
+  $('qScore').textContent = stu.G.sc + ' PTS' + (stu.solo ? '' : '  #' + (stu.G.rk || '-'));
   $('qTime').textContent = fmt(timeLeft());
 }
 function stuFrame(dt, now){
+  if (stu.solo && soloTick()) return;
   if (stu.mode === 'quiz' || stu.mode === 'half'){
     // still here: answering questions or studying sends nothing else, and the teacher screen drops quiet players
     if (!stu.local && now - stu.lastSend > 3000){ stu.lastSend = now; stuSendMsg({ t: 'st', q: 1, x: Math.round(stu.hero ? stu.hero.x : W / 2), y: FLOOR, f: 1 }); }
@@ -2552,9 +2699,9 @@ function aiThink(dt){
     return;
   }
   if (stu.flight){
-    // chase a made basket for the rebound
+    // chase the ball for the rebound once it is loose
     var b = stu.flight;
-    if (b.scored && Math.abs(b.x - p.x) > 2){ if (b.x < p.x) inp.l = true; else inp.r = true; }
+    if ((b.scored || !b.live || b.vy > 0) && Math.abs(b.x - p.x) > 2){ if (b.x < p.x) inp.l = true; else inp.r = true; }
     A.st = 'pick';
     return;
   }
