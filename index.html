@@ -624,7 +624,9 @@ var ES = {
   'HOME RUN!': '¡JONRÓN!', 'STRIKES': 'STRIKES', 'FOUL BALL!': '¡FOUL!', 'SWING AND A MISS!': '¡ABANICÓ!', 'STRIKE LOOKING!': '¡STRIKE CANTADO!', 'TOO EARLY!': '¡MUY TEMPRANO!',
   'TOO LATE!': '¡MUY TARDE!', 'CRACK! THE BAT BROKE!': '¡CRAC! ¡SE ROMPIÓ EL BATE!', "YOU'RE OUT!": '¡PONCHADO!', 'BASE HIT': 'HIT', 'OFF THE WALL!': '¡A LA PARED!',
   'MAGIC BAT!!': '¡¡BATE MÁGICO!!', 'DOUBLE POINTS! HIT THE SUN!': '¡PUNTOS DOBLES! ¡PÉGALE AL SOL!', 'DOUBLE POINTS! HIT THE MOON!': '¡PUNTOS DOBLES! ¡PÉGALE A LA LUNA!',
-  'MAGIC BAT FADED': 'SE ACABÓ EL BATE MÁGICO', '10 HOMERS!': '¡10 JONRONES!',
+  'MAGIC BAT FADED': 'SE ACABÓ EL BATE MÁGICO', 'DOUBLE POINTS! HIT THE EYEBALL!': '¡PUNTOS DOBLES! ¡PÉGALE AL OJO!',
+  'YOU SAVED THE FAN!': '¡SALVASTE AL FAN!', 'UFO! IT IS TAKING A FAN!': '¡UN OVNI! ¡SE LLEVA A UN FAN!', 'MAGIC BAT: AIM HIGH AT IT!': 'BATE MÁGICO: ¡APUNTA ALTO!',
+  'THE UFO GOT AWAY!': '¡EL OVNI SE ESCAPÓ!', 'MAGIC BAT: HIT THE EYEBALL!': 'BATE MÁGICO: ¡PÉGALE AL OJO!', '10 HOMERS!': '¡10 JONRONES!',
   'PICK YOUR BAT': 'ELIGE TU BATE', 'POWER BAT': 'BATE DE PODER', 'CONTACT BAT': 'BATE DE CONTACTO', 'POWER BAT!': '¡BATE DE PODER!', 'CONTACT BAT!': '¡BATE DE CONTACTO!',
   'Hits farther, but harder to time': 'Batea más lejos, pero es más difícil', 'Easier to time, shorter hits': 'Más fácil de pegar, batazos más cortos',
   '7TH INNING STRETCH': 'ESTIRÓN DE LA 7MA ENTRADA', 'START THE LAST INNINGS': 'EMPEZAR LAS ÚLTIMAS ENTRADAS', 'HOMERS': 'JONRONES',
@@ -642,7 +644,8 @@ var ES_PAT = [
   [/^NEXT: (\d+) PTS$/, 'SIGUE: $1 PTS'], [/^MAGIC (\d+)$/, 'MAGIA $1'], [/^PLACE (\d+) OF (\d+)$/, 'LUGAR $1 DE $2'],
   [/^STRIKE (\d)!$/, '¡STRIKE $1!'], [/^\+(\d+) {2}(\d+) FT$/, '+$1  $2 PIES'], [/^LIGHTS! \+(\d+)$/, '¡LUCES! +$1'],
   [/^SCOREBOARD! \+(\d+)$/, '¡MARCADOR! +$1'], [/^BLIMP! \+(\d+)$/, '¡DIRIGIBLE! +$1'], [/^SAILBOAT SUNK! \+(\d+)$/, '¡VELERO HUNDIDO! +$1'],
-  [/^NIGHT FALLS! \+(\d+)$/, '¡ANOCHECE! +$1'], [/^CRESCENT MOON! \+(\d+)$/, '¡LUNA CRECIENTE! +$1'], [/^SUNRISE! \+(\d+)$/, '¡AMANECE! +$1'],
+  [/^NIGHT FALLS! \+(\d+)$/, '¡ANOCHECE! +$1'], [/^THE MOON BLINKED! \+(\d+)$/, '¡LA LUNA PARPADEÓ! +$1'], [/^WITCH! \+(\d+)$/, '¡BRUJA! +$1'],
+  [/^UFO DOWN! \+(\d+)$/, '¡OVNI DERRIBADO! +$1'], [/^CRESCENT MOON! \+(\d+)$/, '¡LUNA CRECIENTE! +$1'], [/^SUNRISE! \+(\d+)$/, '¡AMANECE! +$1'],
   [/^AIM: (LOW|MID|HIGH)$/, function(m, a){ return 'APUNTA: ' + { LOW: 'BAJO', MID: 'MEDIO', HIGH: 'ALTO' }[a]; }]
 ];
 var CHEERS_ES = ['¡BUEN TIRO!', '¡GENIAL!', '¡QUÉ BIEN!', '¡CRACK!', '¡CANASTA!', '¡ADENTRO!', '¡EN LLAMAS!', '¡BRAVO!', '¡INCREÍBLE!', '¡ESO ES!'];
@@ -791,7 +794,34 @@ var sfx = {
   ump: function(){ tone(330, 0.12, 'sawtooth', 0.035, 60); tone(392, 0.22, 'sawtooth', 0.035, -80, 0.12); },
   glass: function(){ hiss(0.5, 0.08, 3000); tone(1600, 0.25, 'square', 0.04, -1300); },
   snap: function(){ hiss(0.18, 0.1, 700); tone(180, 0.15, 'square', 0.06, -100); },
-  roar: function(){ hiss(1.6, 0.05, 400); hiss(1.1, 0.03, 1500); },
+  // a cheering crowd: a swell of filtered noise with a few "woo" whistles on top
+  roar: function(){
+    var a = ac(); if (!a) return;
+    var d = 2.2, n = Math.floor(a.sampleRate * d), buf = a.createBuffer(1, n, a.sampleRate), data = buf.getChannelData(0), i;
+    for (i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+    var s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime;
+    s.buffer = buf; f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 0.6;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.1, t + 0.25); g.gain.setValueAtTime(0.1, t + 1.0); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+    for (i = 0; i < 5; i++) tone(rand(900, 1400), 0.35, 'sine', 0.018, rand(300, 700), rand(0.1, 1.1));
+  },
+  // ballpark organ riffs for a home run streak
+  organ: function(n){
+    var riffs = [
+      [[523, 1], [523, 1], [523, 1], [659, 1], [784, 3]],
+      [[262, 1], [294, 1], [330, 1], [349, 1], [392, 1], [440, 1], [494, 1], [523, 3]],
+      [[784, 1], [659, 1], [784, 1], [659, 1], [880, 1], [1047, 4]]
+    ], r = riffs[n % riffs.length], at = 0.5;
+    for (var i = 0; i < r.length; i++){
+      var f = r[i][0], d = r[i][1] * 0.13;
+      tone(f, d, 'square', 0.022, 0, at); tone(f * 2, d, 'sine', 0.03, 0, at); tone(f / 2, d, 'triangle', 0.035, 0, at);
+      at += d + 0.02;
+    }
+  },
+  cackle: function(){
+    for (var i = 0; i < 7; i++) tone(1100 - i * 70 + (i % 2) * 160, 0.08, 'square', 0.045, 250, i * 0.1);
+    tone(700, 0.5, 'sawtooth', 0.035, 500, 0.75);
+  },
   charge: function(){ var n = [392, 523, 659, 784, 659, 784], d = [0.12, 0.12, 0.12, 0.24, 0.12, 0.5], at = 0; for (var i = 0; i < n.length; i++){ tone(n[i], d[i], 'square', 0.05, 0, at); at += d[i]; } },
   // Take Me Out to the Ball Game (1908), for the 7th inning stretch
   ballgame: function(){
@@ -1366,7 +1396,7 @@ function sportSetup(){
   setSeg('hSport', hst.cfg.sport);
   sportTitles(hst.cfg.sport);
   $('hSportNote').textContent = d ?
-    'Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out. Misses, fouls and pitches you let go by are all strikes. Homers score 1 to 3 points by distance, and hitting the stadium lights (+5), scoreboard (+5), sailboat (+10) or blimp (+20) adds bonus points. 3 homers in a row or hitting the lights gives the magic bat for 20 seconds: double points, high homers that curve toward the blimp, and the power to hit the sun and moon (+15) to turn day into night and back.' :
+    'Answer 3 right to step up to bat, then swing at pitch after pitch until you strike out. Misses, fouls and pitches you let go by are all strikes. Homers score 1 to 3 points by distance, and hitting the stadium lights (+5), scoreboard (+5), sailboat (+10) or blimp (+20) adds bonus points. 3 homers in a row or hitting the lights gives the magic bat for 20 seconds: double points, high homers that curve toward the blimp, and the power to hit the sun and moon (+15). The night sky goes full moon, then crescent moon with a witch to hit (+15), then a giant eyeball and a UFO that tries to steal a fan (shoot it down with the magic bat for +20), and hitting the eyeball brings the sun back.' :
     'Shoot the lit hoop in order (2, 3, then 5 points) to open the magic round and slam dunk for 10.';
   $('hHalfLab').textContent = d ? '7th inning stretch study break' : 'Halftime study break';
   $('hHalfNote').textContent = (d ? 'About 7/9 of the way through, the game pauses for the 7th inning stretch' : 'At the halfway point the game pauses') +
@@ -1986,7 +2016,7 @@ function hostData(conn, d){
     if (hst.phase === 'play' && DB_TG[d.k]){
       var tp = dbyTgPts(d.k, d.g);
       p.score += tp;
-      var HS = hst.dby && hst.dby.S, sky = 'umc'.indexOf(d.k) >= 0;
+      var HS = hst.dby && hst.dby.S, sky = 'umce'.indexOf(d.k) >= 0;
       if (p.local){
         // the teacher's own sky is already showing; keep the big screen's sky in step with it
         if (sky && HS && stu.dby){ HS.sky = stu.dby.sky; HS.skyFrom = stu.dby.skyFrom; HS.skyT = stu.dby.skyT; }
@@ -1994,6 +2024,9 @@ function hostData(conn, d){
         addPop(hst.pops, sky ? W / 2 : 190, sky ? 70 : 60, '+' + tp + ' ' + p.name + ' ' + DB_TG[d.k].n, sky ? '#e0b0ff' : '#58f8d0', sky);
         if (d.k === 'b' && HS.blimp && !HS.blimp.pop) HS.blimp.pop = 0.01;
         if (d.k === 'w' && HS.boat && !HS.boat.sink){ HS.boat.sink = 0.01; HS.shake = 0.5; }
+        if (d.k === 'h'){ if (HS.witch && !HS.witch.hit) HS.witch.hit = 0.01; sfx.cackle(); }
+        if (d.k === 'o' && HS.ufo && HS.ufo.st !== 'boom'){ HS.ufo.st = 'boom'; HS.ufo.t = 0; HS.shake = 0.7; }
+        if (sky && HS.sky === 3 && !HS.ufoDone){ HS.ufo = null; HS.ufoDone = true; }  // a student got past their UFO first
         if (sky){ dbySkyNext(HS); sfx.bonus(); }
       }
       hostBroadcast();
@@ -2079,7 +2112,8 @@ function hostEndGame(){
     var sc = document.createElement('div'); sc.className = 'ps'; sc.textContent = arr[i].score; col.appendChild(sc);
     fin.appendChild(col);
   }
-  showScreen('scrHOver');
+  // the teacher who played sees the same score card the students do, then taps through to the results
+  showScreen(stu.local && !stu.ai && hst.players.teacher ? 'scrOver' : 'scrHOver');
   sfx.fanfare();
 }
 function showReport(){
@@ -2138,7 +2172,7 @@ function hostBoard(){
   var left = hostLeft();
   $('hTimer').textContent = fmt(left);
   $('hTimer').className = 'pix' + (left <= 30 ? ' low' : '');
-  $('hHoop').innerHTML = hostDerby() ? 'HOMERS 1-3, LIGHTS +5, BOARD +5, BOAT +10<br>BLIMP +20, MAGIC BAT: SUN AND MOON +15' : 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
+  $('hHoop').innerHTML = hostDerby() ? '' : 'LIT HOOP IN ORDER: 2, 3, 5<br>THEN MAGIC SLAM DUNK: 10';
   hst.lastBoard = performance.now();
 }
 function hostUpdate(dt, now){
@@ -2578,11 +2612,12 @@ function overCard(sc, place){
 }
 function showOver(d){
   stu.mode = 'over';
-  if (stu.local){ localShow('none'); return; }
+  if (stu.local){ localShow('none'); if (stu.ai) return; }
   overCard(d.sc, stu.solo ? '' : 'PLACE ' + d.rk + ' OF ' + d.n);
   $('oNotes').style.display = notesFor() ? '' : 'none';
-  $('oMsg').textContent = L(stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.');
-  $('oAgain').style.display = stu.solo ? '' : 'none';
+  $('oMsg').textContent = stu.local ? '' : L(stu.solo ? 'Play again to beat your best score!' : 'Wait for your teacher to start the next game.');
+  $('oAgain').style.display = stu.solo || stu.local ? '' : 'none';
+  if (stu.local){ $('oAgain').textContent = 'SEE RESULTS'; $('oAgain').onclick = function(){ showScreen('scrHOver'); }; }
   $('oTop').style.display = stu.solo ? 'none' : '';
   $('oNotesOut').style.display = 'none';
   $('oNotesBtn').style.display = '';
@@ -3317,7 +3352,8 @@ var DB_WIND = 0.75, DB_SW = 0.06, DB_FOUL = 0.07, DB_LOOK = 0.17, DB_GAP = 1.0, 
 var DB_LIGHTS = [{ x1: 204, x2: 220, y1: 40, y2: 53 }, { x1: 238, x2: 254, y1: 58, y2: 71 }];
 var DB_SB = { x1: 222, x2: 252, y1: 74, y2: 95 };
 var DB_TG = { l: { n: 'LIGHTS', p: 5 }, s: { n: 'SCOREBOARD', p: 5 }, b: { n: 'BLIMP', p: 20 }, w: { n: 'SANK THE SAILBOAT', p: 10 },
-  u: { n: 'HIT THE SUN', p: 15, flat: 1 }, m: { n: 'HIT THE MOON', p: 15, flat: 1 }, c: { n: 'HIT THE MOON', p: 15, flat: 1 } };
+  u: { n: 'HIT THE SUN', p: 15, flat: 1 }, m: { n: 'HIT THE MOON', p: 15, flat: 1 }, c: { n: 'HIT THE MOON', p: 15, flat: 1 },
+  e: { n: 'HIT THE EYEBALL', p: 15, flat: 1 }, h: { n: 'HIT THE WITCH', p: 15, flat: 1 }, o: { n: 'STOPPED THE UFO', p: 20, flat: 1 } };
 var PITCHER = { shirt: 8, skin: 1, hat: 1, hc: 4 };
 var CATCHER = makeSpriteP([
   '..kkk...', '.kkkkk..', '.kgsgk..', '..kgk...', '.NNNNN..', 'NNNNNNmm', 'NNNNNNmm', '.PPPP...', 'PP..PP..', 'FF..FF..'
@@ -3400,15 +3436,118 @@ function dbyBgMake(night){
 
 /* the stadium's moving parts: lights that shatter, the scoreboard, the crowd and the blimp */
 function dbyScene(){
-  return { lights: [0, 0], sbT: 0, crowdT: 0, blimp: null, blimpT: rand(8, 14), sky: 0, skyFrom: 0, skyT: 1, shake: 0, boat: null, boatT: rand(3, 8) };
+  return { lights: [0, 0], sbT: 0, crowdT: 0, blimp: null, blimpT: rand(8, 14), sky: 0, skyFrom: 0, skyT: 1, shake: 0, boat: null, boatT: rand(3, 8),
+    witch: null, witchT: 0, ufo: null, ufoDone: false, gone: -1, note: '' };
 }
-// the sky goes day -> night with a full moon -> crescent moon -> the sun comes back up
-function dbySkyNext(S){ S.skyFrom = S.sky; S.sky = (S.sky + 1) % 3; S.skyT = 0; S.shake = 0.9; }
+// the sky goes day -> night with a full moon -> crescent moon (a witch flies around it) -> the moon blinks into a
+// giant eyeball while a UFO tries to take a fan -> the sun comes back up
+function dbySkyNext(S){
+  S.skyFrom = S.sky; S.sky = (S.sky + 1) % 4; S.skyT = 0; S.shake = 0.9;
+  if (S.sky === 3){ S.ufo = null; S.ufoDone = false; }
+  if (S.sky === 0) S.gone = -1;  // the sun brings back any fan the UFO took
+}
+// the eyeball can only be hit once the UFO is gone
+function dbySkyReady(S){ return S.skyT >= 1 && (S.sky !== 3 || S.ufoDone); }
+var WITCH = (function(){
+  var a = makeSpriteP([
+    '......k.......', '.....kk.......', '....kkkk......', '..kkkkkkkk....', '....gggg......', '....grgg......',
+    '...kkkkkk.....', '..kkkkkkkk....', 'yyybbbbbbbbbbb', 'yyy.kk..kk....'
+  ], { k: '#202028', g: '#58c030', r: '#e83020', b: '#8a5a2a', y: '#e8c060' });
+  return { r: a, l: flipC(a) };
+})();
+function dbyStepWitch(S, dt){
+  var w = S.witch;
+  S.witchT = Math.max(0, S.witchT - dt);
+  if (!w){
+    if (S.sky === 2 && S.skyT >= 1 && S.witchT <= 0) S.witch = { a: rand(0, 6), hit: 0, x: MOON.x, y: MOON.y, f: 1 };
+    return;
+  }
+  if (w.hit > 0 || S.sky !== 2){
+    // knocked off her broom (or the moon changed): she spins away
+    if (!w.hit) w.hit = 0.01;
+    w.hit += dt; w.x += w.vx * dt; w.y += w.vy * dt; w.vy -= 20 * dt;
+    if (w.hit > 2.5){ S.witch = null; if (S.sky === 2) S.witchT = 8; }
+    return;
+  }
+  w.a += dt * 1.1; w.x = MOON.x + Math.cos(w.a) * 36; w.y = MOON.y + Math.sin(w.a) * 22; w.f = -Math.sin(w.a) > 0 ? 1 : -1;
+  w.vx = w.f * 60; w.vy = -50;
+}
+function dbyStepUfo(S, dt){
+  if (S.sky !== 3 || S.skyT < 1 || S.ufoDone) return;
+  var u = S.ufo, i;
+  if (!u){
+    // pick a fan near the front of the bleachers to beam up
+    var best = 0;
+    for (i = 0; i < CROWD.length; i++) if (Math.abs(CROWD[i].x - 216) < Math.abs(CROWD[best].x - 216)) best = i;
+    S.ufo = { st: 'in', t: 0, x: W + 20, y: 4, fan: best, fy: CROWD[best].y, spin: 0 };
+    S.note = 'ufo';
+    return;
+  }
+  var fan = CROWD[u.fan], hx = fan.x + 1, hy = 30;
+  u.t += dt;
+  if (u.st === 'in'){
+    var k = Math.min(1, u.t / 2);
+    u.x = W + 20 + (hx - W - 20) * k; u.y = 4 + (hy - 4) * k + Math.sin(u.t * 3) * 2;
+    if (u.t >= 2){ u.st = 'beam'; u.t = 0; S.gone = u.fan; }
+  } else if (u.st === 'beam'){
+    u.x = hx + Math.sin(u.t * 2) * 1.5; u.y = hy + Math.sin(u.t * 3) * 1.5;
+    u.fy = fan.y + (hy + 6 - fan.y) * Math.min(1, u.t / 5);
+    if (u.t >= 6){ u.st = 'away'; u.t = 0; }
+  } else if (u.st === 'away'){
+    u.x += 70 * dt; u.y -= 45 * dt; u.fy = u.y + 6;
+    if (u.y < -20){ S.ufo = null; S.ufoDone = true; S.note = 'ufoGone'; }
+  } else if (u.st === 'boom'){
+    // shot down: it spins away and the fan drops safely back to their seat
+    u.spin += dt; u.x += 40 * dt; u.y += 50 * dt;
+    if (S.gone === u.fan){ u.fy += 70 * dt; if (u.fy >= fan.y){ u.fy = fan.y; S.gone = -1; } }
+    if (u.t >= 1.6){ S.ufo = null; S.ufoDone = true; S.gone = -1; }
+  }
+}
+function drawUfo(c, S, t){
+  var u = S.ufo, x = Math.round(u.x), y = Math.round(u.y), k;
+  if (u.st === 'beam' || (u.st === 'away' && S.gone === u.fan)){
+    var fan = CROWD[u.fan];
+    c.fillStyle = 'rgba(120,255,160,' + (0.18 + 0.08 * Math.sin(t * 10)).toFixed(2) + ')';
+    c.beginPath(); c.moveTo(x - 3, y + 3); c.lineTo(x + 3, y + 3); c.lineTo(fan.x + 7, fan.y + 4); c.lineTo(fan.x - 5, fan.y + 4); c.closePath(); c.fill();
+  }
+  if (S.gone === u.fan && u.st !== 'in'){
+    var fn = CROWD[u.fan], fx = u.st === 'away' ? x - 1 : fn.x, fy = Math.round(u.fy);
+    c.fillStyle = fn.h; c.fillRect(fx, fy, 2, 1); c.fillStyle = fn.c; c.fillRect(fx, fy + 1, 2, 2);
+    c.fillStyle = fn.h; c.fillRect(fx - 1, fy - 1, 1, 2); c.fillRect(fx + 2, fy - 1, 1, 2);
+  }
+  if (u.st === 'boom' && Math.floor(t * 14) % 2) return;
+  c.fillStyle = '#000'; c.fillRect(x - 9, y - 1, 19, 4); c.fillRect(x - 4, y - 5, 9, 5);
+  c.fillStyle = '#9cf0f8'; c.fillRect(x - 3, y - 4, 7, 3);
+  c.fillStyle = '#a0a0b8'; c.fillRect(x - 8, y, 17, 2);
+  c.fillStyle = '#606078'; c.fillRect(x - 6, y + 2, 13, 1);
+  for (k = 0; k < 4; k++){ c.fillStyle = (k + Math.floor(t * 8)) % 2 ? '#f8d800' : '#f83800'; c.fillRect(x - 7 + k * 5, y, 1, 1); }
+}
+// the moon closes and opens as a giant cat eye, its slit pupil looking side to side
+function drawEye(c, my, t, lid){
+  var r = MOON.r, px = MOON.x + Math.sin(t * 0.9) * 7, k;
+  c.save(); c.beginPath(); c.arc(MOON.x, my, r, 0, Math.PI * 2); c.clip();
+  c.fillStyle = '#f8f0f0'; c.fillRect(MOON.x - r, my - r, r * 2, r * 2);
+  c.strokeStyle = '#e04848'; c.lineWidth = 1; c.beginPath();
+  [[-1, -0.3], [1, 0.4], [-0.8, 0.7], [0.9, -0.6]].forEach(function(d){ c.moveTo(MOON.x + d[0] * r, my + d[1] * r); c.lineTo(MOON.x + d[0] * r * 0.55, my + d[1] * r * 0.5); });
+  c.stroke();
+  c.fillStyle = '#5a7a10'; c.beginPath(); c.arc(px, my, 12, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#c8d828'; c.beginPath(); c.arc(px, my, 11, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#e8f060'; c.beginPath(); c.arc(px - 2, my - 3, 5, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#000'; c.beginPath(); c.ellipse(px, my, 2.2, 10, 0, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#fcfcfc'; c.fillRect(Math.round(px) + 3, my - 6, 2, 2);
+  if (lid > 0){
+    c.fillStyle = '#3a1a4a'; c.fillRect(MOON.x - r, my - r, r * 2, Math.round(r * 2 * lid));
+    c.fillStyle = '#000'; c.fillRect(MOON.x - r, my - r + Math.round(r * 2 * lid), r * 2, 1);
+    for (k = -16; k <= 16; k += 4) c.fillRect(MOON.x + k, my - r + Math.round(r * 2 * lid) + 1, 1, 2);
+  }
+  c.restore();
+}
 function dbyNight(S){ var a = S.skyFrom > 0 ? 1 : 0, b = S.sky > 0 ? 1 : 0; return a + (b - a) * S.skyT; }
 function dbyStepScene(S, dt, magic){
   for (var k = 0; k < 2; k++) if (S.lights[k] > 0) S.lights[k] = Math.max(0, S.lights[k] - dt);
   S.sbT = Math.max(0, S.sbT - dt); S.crowdT = Math.max(0, S.crowdT - dt);
   S.skyT = Math.min(1, S.skyT + dt / 1.6); S.shake = Math.max(0, S.shake - dt);
+  dbyStepWitch(S, dt); dbyStepUfo(S, dt);
   var bt = S.boat;
   if (!bt){
     S.boatT -= dt;
@@ -3458,7 +3597,7 @@ function drawBoat(c, bt){
   c.fillStyle = '#e83020'; c.fillRect(x - 3, y - 17, 2, 2);
   c.restore();
 }
-function dbyDrawSky(c, S){
+function dbyDrawSky(c, S, t){
   var p = S.skyT, fr = S.skyFrom, to = S.sky, sy = null, i;
   // the sun sets into the ocean when night comes, and rises back out of it
   if (fr === 0 && to === 0) sy = SUN.y; else if (fr === 0) sy = SUN.y + 34 * p; else if (to === 0) sy = SUN.y + 34 * (1 - p);
@@ -3470,17 +3609,24 @@ function dbyDrawSky(c, S){
     for (i = 0; i < 4; i++) c.fillRect(SUN.x - 20, sy - 12 + i * 3, 40, i < 2 ? 1 : 2);
     c.restore();
   }
-  // the giant full moon comes up with the night; a hit bites it down to a crescent; at sunrise it fades
+  // the giant full moon comes up with the night; a hit bites it down to a crescent; the crescent blinks into an eye
   var ma = to > 0 ? (fr > 0 ? 1 : p) : (fr > 0 ? 1 - p : 0);
   if (ma <= 0) return;
   var cr = to === 2 ? (fr === 2 ? 1 : p) : (fr === 2 ? 1 : 0), my = MOON.y + (fr === 0 && to === 1 ? (1 - p) * 30 : 0);
+  var blink = fr === 2 && to === 3 && p < 1, eye = (to === 3 && (fr === 3 || p >= 0.5)) || (fr === 3 && to === 0);
   c.globalAlpha = ma;
-  c.fillStyle = 'rgba(240,240,210,0.12)'; c.beginPath(); c.arc(MOON.x, my, MOON.r + 7, 0, Math.PI * 2); c.fill();
+  c.fillStyle = eye ? 'rgba(200,240,80,0.12)' : 'rgba(240,240,210,0.12)'; c.beginPath(); c.arc(MOON.x, my, MOON.r + 7, 0, Math.PI * 2); c.fill();
+  if (eye){
+    drawEye(c, my, t, blink ? 1 - (p - 0.5) * 2 : (t % 4.5 < 0.18 ? 1 : 0));
+    c.globalAlpha = 1;
+    return;
+  }
   c.save(); c.beginPath(); c.arc(MOON.x, my, MOON.r, 0, Math.PI * 2); c.clip();
   c.fillStyle = '#f4f0d8'; c.fillRect(MOON.x - MOON.r, my - MOON.r, MOON.r * 2, MOON.r * 2);
   c.fillStyle = '#dcd6b8';
   [[-6, -5, 4], [7, 4, 5], [-2, 10, 3], [9, -9, 2]].forEach(function(k){ c.beginPath(); c.arc(MOON.x + k[0], my + k[1], k[2], 0, Math.PI * 2); c.fill(); });
   if (cr > 0){ c.fillStyle = NIGHT_SKY[Math.floor(MOON.y / (104 / NIGHT_SKY.length))]; c.beginPath(); c.arc(MOON.x - 8 - (1 - cr) * 32, my - 3, MOON.r, 0, Math.PI * 2); c.fill(); }
+  if (blink){ c.fillStyle = '#3a1a4a'; c.fillRect(MOON.x - MOON.r, my - MOON.r, MOON.r * 2, Math.round(MOON.r * 2 * Math.min(1, p * 2))); }
   c.restore();
   c.globalAlpha = 1;
 }
@@ -3496,7 +3642,8 @@ function dbyDrawScene(v, S, t, sb){
   dbyShake(v, S);
   c.drawImage(bgs[0], 0, 0);
   if (nf > 0){ c.globalAlpha = nf; c.drawImage(bgs[1], 0, 0); c.globalAlpha = 1; }
-  dbyDrawSky(c, S);
+  dbyDrawSky(c, S, t);
+  if (S.witch){ var wi = S.witch; c.save(); c.translate(Math.round(wi.x), Math.round(wi.y)); if (wi.hit) c.rotate(wi.hit * 9); c.drawImage(wi.f > 0 ? WITCH.r : WITCH.l, -7, -5); c.restore(); }
   if (S.boat) drawBoat(c, S.boat);
   for (k = 0; k < 2; k++){
     b = DB_LIGHTS[k];
@@ -3520,6 +3667,7 @@ function dbyDrawScene(v, S, t, sb){
   // the crowd stands up and bounces when someone goes deep
   var cheer = S.crowdT > 0;
   for (i = 0; i < CROWD.length; i++){
+    if (i === S.gone) continue;
     var p = CROWD[i], up = cheer && Math.sin(t * 16 + p.ph) > 0 ? 1 : 0;
     c.fillStyle = p.c; c.fillRect(p.x, p.y + 1 - up, 2, 2);
     c.fillStyle = p.h; c.fillRect(p.x, p.y - up, 2, 1);
@@ -3533,6 +3681,7 @@ function dbyDrawScene(v, S, t, sb){
   c.fillStyle = '#0c1430'; c.fillRect(b.x1 + 1, b.y1 + 1, sw - 2, shh - 2);
   if (fl) for (i = 0; i < 10; i++){ c.fillStyle = CHEER_COLS[(i + Math.floor(t * 12)) % CHEER_COLS.length]; c.fillRect(b.x1 + 2 + Math.floor(rand(0, sw - 4)), b.y1 + 2 + Math.floor(rand(0, shh - 4)), 1, 1); }
   if (S.blimp) drawBlimp(c, S.blimp, t);
+  if (S.ufo) drawUfo(c, S, t);
   var cx = (b.x1 + b.x2) / 2, small = Math.max(6, Math.round(v.S * 2.1));
   vText(v, fl ? 'WOW!' : L(sb[0]), cx, b.y1 + 6, fl ? '#fcfcfc' : '#f8d878', small);
   vText(v, sb[1], cx, b.y1 + 15, fl ? CHEER_COLS[Math.floor(t * 10) % CHEER_COLS.length] : '#fcfcfc', Math.round(small * 1.4));
@@ -3621,15 +3770,20 @@ function dbyLaunch(v, a){
 function dbyStepFly(S, f, dt, on){
   var n = 4, h = dt / n, k, b;
   for (var i = 0; i < n && !f.done; i++){
-    var px = f.x, bp = S.blimp, bo = S.boat;
-    // magic bat, aimed high: once past the sun and moon, the ball bends toward the blimp
-    if (f.home && f.x > 150 && bp && !bp.pop && !f.hit.b && bp.x > f.x + 6 && f.vx > 20){
-      var tt = (bp.x - f.x) / f.vx, need = (bp.y - f.y - DB.G * tt * tt / 2) / tt;
+    var px = f.x, bp = S.blimp, bo = S.boat, uf = S.ufo, wi = S.witch;
+    var ufoLive = uf && uf.st !== 'boom', aimAt = ufoLive && !f.replay ? uf : (bp && !bp.pop && !f.hit.b ? bp : null);
+    // magic bat, aimed high: once past the sun and moon, the ball bends toward the UFO or the blimp
+    if (f.home && f.x > 150 && aimAt && aimAt.x > f.x + 6 && f.vx > 20){
+      var tt = (aimAt.x - f.x) / f.vx, need = (aimAt.y - f.y - DB.G * tt * tt / 2) / tt;
       f.vy += (need - f.vy) * Math.min(1, h * 5);
     }
     f.vy += DB.G * h; f.x += f.vx * h; f.y += f.vy * h; f.t += h;
     if (!f.replay && bo && !bo.sink && !f.hit.w && Math.abs(f.x - bo.x) < (f.gold ? 12 : 8) && f.y > 95 && f.y < 112){ f.hit.w = 1; bo.sink = 0.01; S.shake = 0.5; on('boat', f); }
-    if (f.gold && !f.replay && !f.hit.sky && S.skyT >= 1 &&
+    if (!f.replay && wi && !wi.hit && Math.abs(f.x - wi.x) < 10 && Math.abs(f.y - wi.y) < 8){
+      wi.hit = 0.01; wi.vx = f.vx * 0.5; wi.vy = -70; S.witchT = 8; S.shake = 0.5; on('witch', f);
+    }
+    if (f.gold && !f.replay && ufoLive && Math.abs(f.x - uf.x) < 11 && Math.abs(f.y - uf.y) < 6){ uf.st = 'boom'; uf.t = 0; S.shake = 0.7; on('ufo', f); }
+    if (f.gold && !f.replay && !f.hit.sky && dbySkyReady(S) &&
         (S.sky === 0 ? (hyp(f.x - SUN.x, f.y - SUN.y) < SUN.r + 3 && f.y < 104) : hyp(f.x - MOON.x, f.y - MOON.y) < MOON.r + 3)){
       f.hit.sky = 1; var was = S.sky; dbySkyNext(S); on('sky', f, was);
     }
@@ -3745,7 +3899,7 @@ function dbyGold(){
   var D = stu.dby;
   D.gold = GOLD_SECS;
   addCheer(stu.pops, W / 2, 72, 'MAGIC BAT!!');
-  addPop(stu.pops, W / 2, 86, D.sky === 0 ? 'DOUBLE POINTS! HIT THE SUN!' : 'DOUBLE POINTS! HIT THE MOON!', '#e0b0ff');
+  addPop(stu.pops, W / 2, 86, ['DOUBLE POINTS! HIT THE SUN!', 'DOUBLE POINTS! HIT THE MOON!', 'DOUBLE POINTS! HIT THE MOON!', 'DOUBLE POINTS! HIT THE EYEBALL!'][D.sky], '#e0b0ff');
   sfx.charge();
   stuHud(true);
 }
@@ -3795,6 +3949,7 @@ function dbyEv(kind, f, k){
     D.crowdT = 2.5;
     dbyFireworks(stu.parts, 3);
     sfx.roar(); sfx.swish();
+    if (D.streak >= 2 && !(D.streak === 3 && D.gold <= 0)) sfx.organ(D.streak - 2);
     if (D.streak >= 3 && D.gold <= 0) dbyGold();
     stuHud(true);
   } else if (kind === 'wall'){
@@ -3802,7 +3957,7 @@ function dbyEv(kind, f, k){
   } else if (kind === 'land'){
     D.streak = 0; addPop(stu.pops, W / 2, 40, 'BASE HIT', '#fcfcfc');
   } else {
-    var tg = { light: 'l', sb: 's', blimp: 'b', boat: 'w' }[kind] || ['u', 'm', 'c'][k], pts = dbyTgPts(tg, f.gold);
+    var tg = { light: 'l', sb: 's', blimp: 'b', boat: 'w', witch: 'h', ufo: 'o' }[kind] || ['u', 'm', 'c', 'e'][k], pts = dbyTgPts(tg, f.gold);
     stuSendMsg({ t: 'tg', k: tg, g: f.gold ? 1 : 0 });
     if (kind === 'light'){
       p = DB_LIGHTS[k];
@@ -3819,10 +3974,19 @@ function dbyEv(kind, f, k){
       burst(stu.parts, f.x, 110, 26, ['#fcfcfc', '#9cd8fc', '#3a3c94'], 50, 90, 1);
       hiss(0.5, 0.07, 700); tone(160, 0.4, 'square', 0.05, -100);
     } else if (kind === 'sky'){
-      addCheer(stu.pops, W / 2, 60, (k === 0 ? 'NIGHT FALLS! +' : (k === 1 ? 'CRESCENT MOON! +' : 'SUNRISE! +')) + pts);
+      addCheer(stu.pops, W / 2, 60, ['NIGHT FALLS! +', 'CRESCENT MOON! +', 'THE MOON BLINKED! +', 'SUNRISE! +'][k] + pts);
       if (k === 0) burst(stu.parts, SUN.x, SUN.y - 8, 40, ['#fcd060', '#f8a040', '#fcfcfc'], 70, 30, 1.4);
       else burst(stu.parts, MOON.x, MOON.y, 40, ['#f4f0d8', '#fcfcfc', '#b078ff'], 70, 30, 1.4);
       tone(70, 0.7, 'square', 0.07, -30); hiss(0.8, 0.06, 300); sfx.bonus();
+    } else if (kind === 'witch'){
+      addPop(stu.pops, clamp(f.x, 60, W - 60), f.y + 14, 'WITCH! +' + pts, '#a8f878', true);
+      burst(stu.parts, f.x, f.y, 24, ['#58c030', '#202028', '#e8c060', '#b078ff'], 60, 40, 1);
+      sfx.cackle();
+    } else if (kind === 'ufo'){
+      addCheer(stu.pops, W / 2, 60, 'UFO DOWN! +' + pts);
+      addPop(stu.pops, W / 2, 76, 'YOU SAVED THE FAN!', '#78f8a0');
+      burst(stu.parts, f.x, f.y, 34, ['#9cf0f8', '#a0a0b8', '#f8d800', '#78f8a0'], 80, 60, 1.2);
+      hiss(0.6, 0.08, 1200); tone(1200, 0.6, 'square', 0.04, -1000); sfx.roar();
     } else {
       addPop(stu.pops, clamp(f.x, 60, W - 60), f.y + 14, 'BLIMP! +' + pts, '#f878d8', true);
       burst(stu.parts, f.x, f.y, 30, ['#c8c8dc', '#d82800', '#fcfcfc', '#f8d878'], 70, 60, 1.2);
@@ -3834,6 +3998,9 @@ function dbyUpdate(dt){
   var D = stu.dby;
   if (!D) return;
   dbyStepScene(D, dt, D.gold > 0);
+  if (D.note === 'ufo'){ addPop(stu.pops, W / 2, 30, 'UFO! IT IS TAKING A FAN!', '#78f8a0', true); addPop(stu.pops, W / 2, 46, 'MAGIC BAT: AIM HIGH AT IT!', '#e0b0ff'); tone(300, 0.8, 'sine', 0.04, 600); }
+  else if (D.note === 'ufoGone'){ addPop(stu.pops, W / 2, 30, 'THE UFO GOT AWAY!', '#f8a040', true); addPop(stu.pops, W / 2, 46, 'MAGIC BAT: HIT THE EYEBALL!', '#e0b0ff'); }
+  D.note = '';
   if (D.gold > 0){ D.gold -= dt; if (D.gold <= 0){ D.gold = 0; addPop(stu.pops, W / 2, 40, 'MAGIC BAT FADED', '#e0b0ff'); } }
   if (D.swing){ D.swing.t += dt; if (D.swing.t > 0.55) D.swing = null; }
   if (D.brokeT > 0) D.brokeT -= dt;
