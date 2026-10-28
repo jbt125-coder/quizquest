@@ -228,6 +228,16 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
   font-family: inherit; font-size: 15px; font-weight: 700; box-shadow: inset -4px -4px 0 #8a1800; cursor: pointer; }
 .bpBtn.go { background: #1f9a50; box-shadow: inset -4px -4px 0 #0e5a2a; }
 .bpBtn b { display: block; font-size: 13px; font-weight: 400; margin-bottom: 7px; }
+.tRow { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #3d2a80; }
+.tRow:last-child { border-bottom: none; }
+.tSt { flex: 0 0 78px; font-family: "Press Start 2P", monospace; font-size: 8px; padding: 6px 4px; border-radius: 6px; text-align: center; background: #3a2a70; color: #fff; }
+.tSt.ok { background: #1f9a50; }
+.tSt.bad { background: #d82800; }
+.tSt.warn { background: #f87800; }
+.tSt.run { background: #2858f0; }
+.tName { font-weight: 700; font-size: 15px; }
+.tMsg { font-size: 13px; color: #c9b8ff; margin-top: 3px; line-height: 1.45; }
+.tSum { background: #fff8ea; color: #1b1040; border: 3px solid #000; border-radius: 12px; padding: 12px 14px; font-size: 15px; line-height: 1.5; margin-bottom: 12px; display: none; }
 .topList { text-align: left; font-family: "Press Start 2P", monospace; font-size: 11px; line-height: 2.3; color: #fff; display: inline-block; margin: 10px auto; padding-left: 28px; }
 </style>
 </head>
@@ -264,7 +274,7 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
     </div>
     <div id="jErr" class="err"></div>
     <button type="button" id="jGo" class="bigBtn go" data-l>JOIN GAME</button>
-    <div class="foot"><a href="#host" id="jHostLink" data-l>Teacher? Host a game</a></div>
+    <div class="foot"><a href="#host" id="jHostLink" data-l>Teacher? Host a game</a><br><a href="#test" id="jTestLink" data-l>Connection trouble? Test this device</a></div>
   </div>
 </div>
 
@@ -342,6 +352,18 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
   </div>
 </div>
 
+<!-- ================= connection test (teacher setup, or any device at #test) ================= -->
+<div class="scr" id="scrTest">
+  <div class="wrap">
+    <h1 class="logo sm">CONNECTION TEST</h1>
+    <p class="note center">Checks whether this website and this network can run the game on this device.</p>
+    <div class="card" id="tList"></div>
+    <div class="tSum" id="tSum"></div>
+    <div class="btnRow"><button type="button" id="tBack" class="ghostBtn">Back to setup</button><button type="button" id="tRun" class="bigBtn go">RUN THE TEST AGAIN</button></div>
+    <p class="note" id="tTip"></p>
+  </div>
+</div>
+
 <!-- ================= HOST: setup ================= -->
 <div class="scr" id="scrHSetup">
   <div class="wrap wide">
@@ -407,6 +429,11 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
       <div class="btnRow" style="margin-top:8px"><button type="button" id="hSoloMake" class="ghostBtn">Make solo link</button><button type="button" id="hSoloCopy" class="ghostBtn" style="display:none">Copy link</button></div>
       <textarea id="hSoloLink" class="inp ta" rows="3" readonly style="display:none;margin-top:8px"></textarea>
       <div id="hSoloMsg" class="okMsg"></div>
+    </div>
+    <div class="card">
+      <span class="lab first">Connection test</span>
+      <div class="note">Not connecting at school? This checks whether the website and the network allow the game, and says what to ask your IT department for. To check a student device, open <b id="hTestUrl"></b> on it.</div>
+      <div class="btnRow" style="margin-top:8px"><button type="button" id="hTest" class="ghostBtn">Test connection</button></div>
     </div>
     <div id="hErr" class="err"></div>
     <button type="button" id="hOpen" class="bigBtn go">OPEN GAME</button>
@@ -516,6 +543,7 @@ var CHEERS = ['NICE SHOT!', 'SWEET!', 'NOICE!!', 'BALLER!!', 'BUCKETS!', 'SPLASH
 var CHEER_COLS = ['#f8d800', '#58f878', '#58d8f8', '#f878d8', '#f89838', '#c078f8', '#fcfcfc'];
 var IS_HOST = location.hash.toLowerCase() === '#host';
 var IS_SOLO = /^#solo=/i.test(location.hash);
+var IS_TEST = location.hash.toLowerCase() === '#test';
 var PEER_URLS = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'];
 
 var SHIRTS = ['#d82800', '#f87800', '#f8d800', '#38b818', '#1fb8a0', '#2858f0', '#8030d0', '#f05898', '#fcfcfc', '#303030'];
@@ -618,7 +646,7 @@ var ES = {
   'UNLIMITED JUMPS! SLAM DUNK IT!': '¡SALTOS SIN LÍMITE! ¡CLÁVALA!', 'MAGIC FADED': 'SE ACABÓ LA MAGIA', 'WHAT A DUNK!': '¡QUÉ CLAVADA!',
   'BACK TO THE LOW HOOP': 'DE VUELTA AL ARO BAJO', 'REBOUND!': '¡REBOTE!', 'OUT OF BALLS!': '¡SIN BALONES!', '10 BUCKETS!': '¡10 CANASTAS!',
   'WATER BREAK: ANSWER 3 QUESTIONS': 'DESCANSO: CONTESTA 3 PREGUNTAS', 'STOMP! +1': '¡PISOTÓN! +1', 'SPLAT!': '¡PLAF!', 'OUCH!': '¡AY!',
-  'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'STUDY NOTES': 'NOTAS DE ESTUDIO',
+  'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'Connection trouble? Test this device': '¿Problemas de conexión? Prueba este aparato', 'STUDY NOTES': 'NOTAS DE ESTUDIO',
   'Answer 3 right<br>to step up to bat': 'Contesta 3 bien<br>para pasar al bate', 'PLAY BALL!': '¡A JUGAR!', 'BACK TO THE PLATE': 'VOLVER AL PLATO',
   'Correct! Batter up!': '¡Correcto! ¡Al bate!', 'SWING': 'BATEAR', 'BATTER UP!': '¡AL BATE!', 'BACK IN THE BOX!': '¡DE VUELTA AL BATE!',
   'HOME RUN!': '¡JONRÓN!', 'STRIKES': 'STRIKES', 'FOUL BALL!': '¡FOUL!', 'SWING AND A MISS!': '¡ABANICÓ!', 'STRIKE LOOKING!': '¡STRIKE CANTADO!', 'TOO EARLY!': '¡MUY TEMPRANO!',
@@ -1358,6 +1386,8 @@ function hostInit(){
   };
   fillSaved('');
   $('hOpen').onclick = hostOpen;
+  $('hTest').onclick = function(){ testShow(true); };
+  $('hTestUrl').textContent = joinUrl().replace(/^https?:\/\//, '') + '#test';
   $('hBack').onclick = function(){ hst.phase = 'setup'; showScreen('scrHSetup'); };
   $('hStart').onclick = hostStartGame;
   $('hEnd').onclick = function(){
@@ -1842,7 +1872,7 @@ function hostOpen(){
         $('hErr').textContent = 'That password is already being used for another game. Pick a different one.';
         showScreen('scrHSetup'); try { peer.destroy(); } catch (e) {} hst.peer = null;
       } else if (ty === 'network' || ty === 'server-error' || ty === 'socket-error' || ty === 'socket-closed'){
-        $('hErr').textContent = 'Lost the connection server. Check the internet connection.';
+        $('hErr').textContent = 'Could not reach the connection server. Click Test connection above to find out why.';
       }
     });
   });
@@ -2324,6 +2354,7 @@ function studentInit(){
   $('jName').oninput = function(){ var v = cleanName(this.value); if (v !== this.value.toUpperCase()) this.value = v; };
   $('jGo').onclick = studentJoin;
   $('jHostLink').onclick = function(e){ e.preventDefault(); location.hash = '#host'; location.reload(); };
+  $('jTestLink').onclick = function(e){ e.preventDefault(); location.hash = '#test'; location.reload(); };
   $('wEdit').onclick = function(){ stu.lastMode = stu.mode === 'join' ? stu.lastMode : stu.mode; stu.mode = 'join'; showScreen('scrJoin'); };
   $('qNext').onclick = quizNext;
   refreshLook();
@@ -4120,6 +4151,139 @@ function dbyAi(dt){
 }
 
 /* ============================================================
+   CONNECTION TEST: the web address, the browser, the PeerJS meeting server,
+   a direct connection, and the backup relay, each in turn
+============================================================ */
+var TEST_STEPS = [
+  { k: 'addr', n: 'Web address' },
+  { k: 'lib', n: 'Connection tools in this browser' },
+  { k: 'srv', n: 'Meeting server (0.peerjs.com)' },
+  { k: 'p2p', n: 'Direct connection' },
+  { k: 'relay', n: 'Backup relay (turn.peerjs.com)' }
+];
+// the same relay servers PeerJS uses by default, forced on so they can be tested by themselves
+var RELAY_CFG = { iceServers: [{ urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'], username: 'peerjs', credential: 'peerjsp' }], iceTransportPolicy: 'relay' };
+var testRun = 0, testPeers = [];
+function testShow(fromHost){
+  $('tBack').style.display = fromHost ? '' : 'none';
+  $('tBack').onclick = function(){ testStop(); showScreen('scrHSetup'); };
+  $('tRun').onclick = runTest;
+  showScreen('scrTest');
+  runTest();
+}
+function testStop(){
+  testRun++;
+  for (var i = 0; i < testPeers.length; i++){ try { testPeers[i].destroy(); } catch (e) {} }
+  testPeers = [];
+}
+function testSet(k, st, msg){
+  var row = $('tr_' + k), label = { ok: 'OK', bad: 'BLOCKED', warn: 'CHECK', run: 'TESTING', skip: 'SKIPPED', wait: 'WAITING' }[st];
+  row.querySelector('.tSt').className = 'tSt ' + st;
+  row.querySelector('.tSt').textContent = label;
+  row.querySelector('.tMsg').textContent = msg || '';
+}
+// a PeerJS peer that reports back once it reaches the meeting server (or fails, or takes too long)
+function testPeer(opts, cb){
+  var p, fired = false, tm;
+  function fin(ok, err){ if (fired) return; fired = true; clearTimeout(tm); cb(ok ? p : null, err); }
+  try { p = new window.Peer(opts); testPeers.push(p); } catch (e) { fin(false, 'error'); return; }
+  p.on('open', function(){ fin(true); });
+  p.on('error', function(e){ fin(false, e && e.type); });
+  tm = setTimeout(function(){ fin(false, 'timeout'); }, 12000);
+}
+// peer a connects to peer b and sends a ping; b answers pong
+function testLink(a, b, cb){
+  var fired = false, tm = setTimeout(function(){ fin(false); }, 15000);
+  function fin(ok){ if (fired) return; fired = true; clearTimeout(tm); cb(ok); }
+  b.on('connection', function(cn){ cn.on('data', function(d){ if (d === 'ping') cn.send('pong'); }); });
+  var c = a.connect(b.id, { reliable: true });
+  c.on('open', function(){ c.send('ping'); });
+  c.on('data', function(d){ if (d === 'pong') fin(true); });
+  c.on('error', function(){ fin(false); });
+}
+function runTest(){
+  testStop();
+  var run = testRun, res = {}, i;
+  $('tList').innerHTML = TEST_STEPS.map(function(s){
+    return '<div class="tRow" id="tr_' + s.k + '"><span class="tSt">WAITING</span><div><div class="tName">' + s.n + '</div><div class="tMsg"></div></div></div>';
+  }).join('');
+  $('tSum').style.display = 'none';
+  $('tRun').disabled = true;
+  $('tTip').textContent = '';
+  function live(){ return run === testRun; }
+  function step(k, st, msg){ res[k] = st; testSet(k, st, msg); }
+  // 1. where the page is opened from
+  var pr = location.protocol, framed = false;
+  try { framed = window.top !== window.self; } catch (e) { framed = true; }
+  if (pr === 'file:') step('addr', 'bad', 'This page is opened from a file on this device, so students cannot reach it. Upload it to a website and open it from that address.');
+  else if (framed) step('addr', 'warn', 'The game is running inside another page (an embed). Embeds can block connections: link to the game page instead of embedding it.');
+  else if (pr === 'http:') step('addr', 'warn', 'This address starts with http:// instead of https://. Some phones and apps refuse http:// pages. Use the https:// address if the site has one.');
+  else step('addr', 'ok', 'Opened from ' + location.hostname + ' over a secure connection.');
+  // 2. the browser can make the connections at all
+  if (!window.Peer || !window.RTCPeerConnection){
+    step('lib', 'bad', 'This browser cannot make the peer-to-peer connections the game uses. Try an up-to-date Chrome, Safari, Edge or Firefox.');
+    for (i = 2; i < TEST_STEPS.length; i++) step(TEST_STEPS[i].k, 'skip', '');
+    testDone(res);
+    return;
+  }
+  step('lib', 'ok', 'This browser supports the connections the game needs.');
+  // 3. both test peers check in with the meeting server
+  step('srv', 'run', 'Contacting the meeting server...');
+  testPeer({ debug: 0 }, function(a, err){
+    if (!live()) return;
+    if (!a){ srvFail(err); return; }
+    testPeer({ debug: 0 }, function(b, err2){
+      if (!live()) return;
+      if (!b){ srvFail(err2); return; }
+      step('srv', 'ok', 'Reached the meeting server. This is how phones find the teacher\'s game from the password.');
+      // 4. a direct connection between the two
+      step('p2p', 'run', 'Connecting directly...');
+      testLink(a, b, function(ok){
+        if (!live()) return;
+        step('p2p', ok ? 'ok' : 'bad', ok ? 'Sent a message and got an answer over a direct connection.' :
+          'The meeting server works, but the direct connection did not. The network may be blocking peer-to-peer (WebRTC) traffic.');
+        // 5. the same through the backup relay only
+        step('relay', 'run', 'Connecting through the backup relay...');
+        testPeer({ debug: 0, config: RELAY_CFG }, function(r1){
+          if (!live()) return;
+          testPeer({ debug: 0, config: RELAY_CFG }, function(r2){
+            if (!live()) return;
+            if (!r1 || !r2){ step('relay', 'bad', 'Could not reach the meeting server for the relay test.'); testDone(res); return; }
+            testLink(r1, r2, function(ok2){
+              if (!live()) return;
+              step('relay', ok2 ? 'ok' : 'bad', ok2 ? 'Connected through the backup relay, which is used when devices cannot connect directly.' :
+                'The backup relay is blocked. That only matters on Wi-Fi that keeps devices apart.');
+              testDone(res);
+            });
+          });
+        });
+      });
+    });
+  });
+  function srvFail(err){
+    step('srv', 'bad', 'Could not reach the meeting server' + (err === 'timeout' ? ' (no answer after 12 seconds)' : (err ? ' (' + err + ')' : '')) + '. The network or a web filter is probably blocking peerjs.com.');
+    step('p2p', 'skip', 'Needs the meeting server first.'); step('relay', 'skip', 'Needs the meeting server first.');
+    testDone(res);
+  }
+}
+function testDone(r){
+  testStop();
+  $('tRun').disabled = false;
+  var msg;
+  if (r.lib === 'bad') msg = 'This browser cannot run the game. Try an up-to-date Chrome, Safari, Edge or Firefox.';
+  else if (r.srv === 'bad') msg = '<b>The meeting server is blocked.</b> Ask your IT department to allow <b>0.peerjs.com</b> (secure web traffic on port 443) and peer-to-peer (WebRTC) connections for this website. ' +
+    'To confirm it is the network, run this test on a phone using cellular data instead of Wi-Fi.';
+  else if (r.p2p === 'ok' && r.relay === 'ok') msg = '<b>Everything works on this device.</b> If students still cannot join, run this test on a student device too' + (IS_TEST ? '.' : ': open <b>' + esc($('hTestUrl').textContent) + '</b> on it.');
+  else if (r.p2p === 'ok') msg = '<b>The game should work.</b> Direct connections work. Only the backup relay is blocked, which matters only if the school Wi-Fi keeps devices from reaching each other. If students still cannot join, ask IT to allow <b>turn.peerjs.com</b> on port 3478.';
+  else if (r.relay === 'ok') msg = '<b>The game should work through the backup relay.</b> Direct connections are blocked, so messages take the long way around, which can feel a little slower.';
+  else msg = '<b>Devices cannot connect to each other on this network.</b> Ask your IT department to allow peer-to-peer (WebRTC) connections, including <b>turn.peerjs.com</b> on port 3478 (UDP and TCP).';
+  if (r.addr === 'bad') msg = '<b>Upload the game to a website first.</b> ' + msg;
+  else if (r.addr === 'warn') msg += ' Also see the note on the web address above.';
+  $('tSum').innerHTML = msg; $('tSum').style.display = 'block';
+  $('tTip').textContent = 'This tests this one device on this network. A student device on the same network should pass too.';
+}
+
+/* ============================================================
    MAIN LOOP + START
 ============================================================ */
 var lastNow = 0;
@@ -4131,7 +4295,8 @@ function frame(now){
   } catch (e) { if (window.console) console.error(e); }
   requestAnimationFrame(frame);
 }
-if (IS_HOST) hostInit(); else studentInit();
+if (IS_TEST){ studentInit(); testShow(false); }
+else if (IS_HOST) hostInit(); else studentInit();
 requestAnimationFrame(frame);
 
 })();
