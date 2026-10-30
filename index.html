@@ -261,6 +261,17 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
   <div class="wrap">
     <h1 class="logo" id="jLogo">PALM COURT<br>HOOPS</h1>
     <div id="jSolo" class="sub pix" style="display:none;line-height:1.8"></div>
+    <div class="card" id="jTry" style="display:none">
+      <span class="lab first">Teacher test game</span>
+      <div class="seg" id="jTrySport"><button type="button" data-v="hoops">BASKETBALL</button><button type="button" data-v="derby">HOME RUN DERBY</button></div>
+      <div id="jTryCourtWrap"><span class="lab">Court</span>
+        <div class="seg" id="jTryCourt"><button type="button" data-v="beach">BEACH</button><button type="button" data-v="sky">CLOUDS</button></div></div>
+      <div class="picks" style="margin-top:12px">
+        <label class="pick on"><input type="checkbox" id="jTrySkip" checked>Skip the questions</label>
+        <label class="pick on"><input type="checkbox" id="jTryShoes" checked>Wear Air Jordann's</label>
+      </div>
+      <div class="note" style="margin-top:8px">Every powerup is on: during the game, tap MAGIC at the top (or press M) to start the magic round in basketball or the magic bat in the derby. Test games do not earn coins.</div>
+    </div>
     <div class="card">
       <div class="seg" id="jLang" style="margin-bottom:14px"><button type="button" data-v="en">ENGLISH</button><button type="button" data-v="es">ESPA&Ntilde;OL</button></div>
       <label class="lab first" for="jPw" id="jPwLab" data-l>Class password</label>
@@ -320,7 +331,7 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
 
 <!-- ================= STUDENT: shooting ================= -->
 <div class="scr" id="scrPlay" data-disp="flex">
-  <div id="pHud"><span id="pBalls"></span><span id="pHoop" class="pix"></span><span id="pTime" class="pix"></span><span id="pScore" class="pix"></span></div>
+  <div id="pHud"><span id="pBalls"></span><span id="pHoop" class="pix"></span><span id="pTime" class="pix"></span><span id="pScore" class="pix"></span><button type="button" id="pMagic" class="tinyBtn warn" style="display:none">MAGIC</button></div>
   <div id="pStage"><canvas id="pCanvas"></canvas></div>
   <div id="pad">
     <div id="dpad"><div class="dpH"></div><div class="dpV"></div>
@@ -463,6 +474,11 @@ body.dby .ballDot.on { background: #fcfcfc; box-shadow: inset -4px -4px 0 #c8c0b
       <div id="hStudyEsMsg" class="okMsg"></div>
       <div class="btnRow"><button type="button" id="hStudyEsCopy" class="ghostBtn">Copy translation prompt</button><button type="button" id="hStudyEsClear" class="ghostBtn">Clear box</button></div>
       <div id="hStudyEsPrev" class="studySheet studyPrev" style="display:none"></div>
+    </div>
+    <div class="card">
+      <span class="lab first">Try it as a student</span>
+      <div class="note">Opens a test game in a new tab with these questions, so you can play it the way students do. You pick the game and court there, can skip the questions, and have every powerup. Test games do not earn coins.</div>
+      <div class="btnRow" style="margin-top:8px"><button type="button" id="hTry" class="ghostBtn">Play as a student</button></div>
     </div>
     <div class="card">
       <span class="lab first">Solo practice link (play at home)</span>
@@ -689,7 +705,7 @@ var ES = {
   'UNLIMITED JUMPS! SLAM DUNK IT!': '¡SALTOS SIN LÍMITE! ¡CLÁVALA!', 'MAGIC FADED': 'SE ACABÓ LA MAGIA', 'WHAT A DUNK!': '¡QUÉ CLAVADA!',
   'BACK TO THE LOW HOOP': 'DE VUELTA AL ARO BAJO', 'REBOUND!': '¡REBOTE!', 'OUT OF BALLS!': '¡SIN BALONES!', '10 BUCKETS!': '¡10 CANASTAS!',
   'WATER BREAK: ANSWER 3 QUESTIONS': 'DESCANSO: CONTESTA 3 PREGUNTAS', 'STOMP! +1': '¡PISOTÓN! +1', 'SPLAT!': '¡PLAF!', 'OUCH!': '¡AY!',
-  'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'ZAPPED!': '¡ZAS!', 'LIGHTNING! YOU LOST HALF YOUR POINTS!': '¡UN RAYO! ¡PERDISTE LA MITAD DE TUS PUNTOS!', 'MY REWARDS': 'MIS PREMIOS', 'FREE PLAY': 'JUEGO GRATIS', 'FREE PLAY: USE 1 GOLD COIN': 'JUEGO GRATIS: USA 1 MONEDA DE ORO',
+  'SLAM DUNK!!!': '¡¡¡CLAVADA!!!', 'TEACHER TEST GAME: NO COINS': 'JUEGO DE PRUEBA DEL MAESTRO: SIN MONEDAS', 'ZAPPED!': '¡ZAS!', 'LIGHTNING! YOU LOST HALF YOUR POINTS!': '¡UN RAYO! ¡PERDISTE LA MITAD DE TUS PUNTOS!', 'MY REWARDS': 'MIS PREMIOS', 'FREE PLAY': 'JUEGO GRATIS', 'FREE PLAY: USE 1 GOLD COIN': 'JUEGO GRATIS: USA 1 MONEDA DE ORO',
   'GOLD': 'ORO', 'SILVER': 'PLATA', 'BRONZE': 'BRONCE', 'How to earn coins': 'Cómo ganar monedas', 'Back': 'Volver',
   'YOU EARNED A GOLD COIN!': '¡GANASTE UNA MONEDA DE ORO!', 'YOU EARNED A SILVER COIN!': '¡GANASTE UNA MONEDA DE PLATA!', 'YOU EARNED A BRONZE COIN!': '¡GANASTE UNA MONEDA DE BRONCE!',
   '3 BRONZE = 1 SILVER!': '¡3 DE BRONCE = 1 DE PLATA!', '2 SILVER = 1 GOLD!': '¡2 DE PLATA = 1 DE ORO!',
@@ -1418,6 +1434,7 @@ function hostInit(){
     } catch (e) { btn.textContent = 'Now press Copy'; }
   };
   $('hSoloMake').onclick = makeSoloLink;
+  $('hTry').onclick = openTry;
   $('hSoloCopy').onclick = function(){
     var box = $('hSoloLink'), btn = this;
     box.focus(); box.select();
@@ -1783,6 +1800,18 @@ function unpackSolo(t, cb){
     new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text()
       .then(function(txt){ try { cb(JSON.parse(txt)); } catch (e) { cb(null); } }, function(){ cb(null); });
   } catch (e) { cb(null); }
+}
+// a teacher test game: a solo link with the test flag, opened in a new tab
+function openTry(){
+  var r = checkBank(), notes = gameNotes();
+  var q = r.questions.length >= 3 ? r.questions : parseQuestions(SAMPLE_BANK).questions;
+  var obj = { v: 1, t: 'TEACHER TEST', q: q, n: notes, ne: gameNotesEs(), m: clamp(parseInt($('hMins').value, 10) || 10, 1, 60),
+    h: hst.cfg.half && notes ? 1 : 0, s: hst.cfg.sport, c: hst.cfg.court, x: 1 };
+  var w = window.open('', '_blank');  // opened right away so pop-up blockers allow it
+  packSolo(obj, function(code){
+    var url = joinUrl() + '#solo=' + code;
+    if (w) w.location.href = url; else location.href = url;
+  });
 }
 function makeSoloLink(){
   var r = checkBank(), msg = $('hSoloMsg'), notes = gameNotes();
@@ -2494,8 +2523,10 @@ function soloInit(){
       $('jErr').textContent = L('This practice link is broken or incomplete. Ask your teacher for a new link.');
       return;
     }
-    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), ne: String(d.ne || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n, s: d.s === 'derby' ? 'derby' : 'hoops' };
+    SOLO = { t: String(d.t || ''), q: d.q, n: String(d.n || ''), ne: String(d.ne || ''), m: clamp(d.m | 0 || 10, 1, 60), h: !!d.h && !!d.n, s: d.s === 'derby' ? 'derby' : 'hoops',
+      x: !!d.x, c: d.c === 'sky' ? 'sky' : 'beach' };
     setStuSport(SOLO.s);
+    if (SOLO.x) tryInit();
     soloTitle();
     $('jGo').textContent = L('PLAY'); $('jGo').disabled = false;
     $('jGo').onclick = function(){ soloStart(); };
@@ -2527,6 +2558,13 @@ function soloStart(free){
     cc.g--; coinsSave(cc); stu.free = true;
   }
   setCourt(SOLO.s === 'hoops' && coins().wear ? 'sky' : 'beach');
+  if (SOLO.x){
+    // teacher test game: the chosen game and court, questions skipped if asked, shoes on if asked
+    stu.test = true; stu.free = $('jTrySkip').checked;
+    setCourt(SOLO.s === 'hoops' ? SOLO.c : 'beach');
+    me.look.shoe = $('jTryShoes').checked ? 1 : 0;
+  }
+  $('pMagic').style.display = SOLO.x ? '' : 'none';
   stu.hero = null;
   stu.G = { ph: 'play', l: SOLO.m * 60, sc: 0, rk: 1, n: 1 }; stu.lAt = performance.now(); stu.syncOff = 0;
   goQuiz();
@@ -2718,7 +2756,7 @@ function timeLeft(){ return Math.max(0, stu.G.l - (performance.now() - stu.lAt) 
 function resetRun(){
   stu.balls = 0; stu.ballK = 0; stu.correct = 0; stu.deck = []; stu.lastQ = -1;
   stu.seq = 0; stu.magic = null; stu.dunkBall = null; stu.aiS = null;
-  stu.made = 0; stu.water = null; stu.waterT = 0; stu.qRight = 0; stu.qTotal = 0; stu.free = false; stu.awarded = false; stu.coinHtml = '';
+  stu.made = 0; stu.water = null; stu.waterT = 0; stu.qRight = 0; stu.qTotal = 0; stu.free = false; stu.test = false; stu.awarded = false; stu.coinHtml = '';
   stu.hero = null; stu.flight = null; stu.meter = null; stu.dby = null;
   stu.birds = []; stu.poops = []; stu.splats = []; stu.parts = []; stu.pops = []; stu.mballs = []; stu.shake = 0; stu.zap = null;
 }
@@ -3595,6 +3633,7 @@ function bindPad(){
     el.addEventListener('mousedown', function(){ on(); var u = function(){ document.removeEventListener('mouseup', u); off(); }; document.addEventListener('mouseup', u); });
   }
   bindBtn('btnA', function(){ stu.input.a = true; stuPress('jump'); }, function(){ stu.input.a = false; });
+  $('pMagic').onclick = testMagic;
   // derby: tap the field to swing, and the bat picker's two buttons
   function stageTap(e){ if (!isDerby() || stu.mode !== 'play' || stu.ai || (IS_HOST && !stu.local)) return; e.preventDefault(); ac(); stuPress('shoot'); }
   ['pStage', 'hStage'].forEach(function(id){
@@ -3619,6 +3658,7 @@ function bindPad(){
       return;
     }
     if (stu.mode !== 'play' || e.repeat) return;
+    if (stu.test && (e.key === 'm' || e.key === 'M')){ e.preventDefault(); testMagic(); return; }
     if (isDerby() && stu.dby && stu.dby.st === 'pick' && !stu.ai){
       if (e.key === '1' || e.key === 'ArrowLeft'){ e.preventDefault(); dbyPickBat('power'); }
       else if (e.key === '2' || e.key === 'ArrowRight'){ e.preventDefault(); dbyPickBat('contact'); }
@@ -4552,6 +4592,35 @@ function drawSkyScene(c, t, netH, netT, lit){
   for (i = 0; i < rcs.length; i++) drawRainCloud(c, rcs[i], t);
 }
 
+/* ---------- teacher test game: pick the game and court, skip questions, every powerup ---------- */
+function tryInit(){
+  $('jTry').style.display = '';
+  if (!$('jName').value) $('jName').value = 'TEACHER';
+  if (!$('jPer').value) $('jPer').value = 'TEST';
+  $('jFree').style.display = 'none';
+  function sync(){
+    setSeg('jTrySport', SOLO.s); setSeg('jTryCourt', SOLO.c);
+    $('jTryCourtWrap').style.display = SOLO.s === 'hoops' ? '' : 'none';
+    setStuSport(SOLO.s);
+    $('jGo').textContent = L('PLAY');
+  }
+  [['jTrySport', 's'], ['jTryCourt', 'c']].forEach(function(sg){
+    var bs = $(sg[0]).getElementsByTagName('button');
+    for (var i = 0; i < bs.length; i++) bs[i].onclick = function(){ SOLO[sg[1]] = this.getAttribute('data-v'); sync(); };
+  });
+  ['jTrySkip', 'jTryShoes'].forEach(function(id){ $(id).onchange = function(){ this.parentNode.className = 'pick' + (this.checked ? ' on' : ''); }; });
+  sync();
+}
+// the MAGIC test button: the magic round in basketball, the magic bat in the derby
+function testMagic(){
+  if (!stu.test || stu.mode !== 'play') return;
+  if (isDerby()){ if (stu.dby) dbyGold(); return; }
+  if (!stu.hero || stu.magic) return;
+  stu.balls = Math.max(stu.balls, 1); stu.flight = null;
+  startMagic();
+  stuHud(true);
+}
+
 /* ============================================================
    REWARDS: coins saved on this device, and what they buy
 ============================================================ */
@@ -4573,6 +4642,7 @@ function coinFor(right, total){
 }
 // the coin line on the game over card (and the coin itself, saved on this device)
 function awardCoin(){
+  if (stu.test) return '<div class="ocCoin no">' + L('TEACHER TEST GAME: NO COINS') + '</div>';
   if (stu.local || stu.free) return '';
   var k = coinFor(stu.qRight, stu.qTotal);
   if (!k) return '<div class="ocCoin no">' + L(stu.qTotal < COIN_MIN_Q ? 'ANSWER 20 QUESTIONS IN A GAME TO EARN A COIN' : 'GET 70% OR MORE TO EARN A COIN') + '</div>';
